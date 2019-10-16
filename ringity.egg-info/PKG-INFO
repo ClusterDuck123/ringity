@@ -1,0 +1,23 @@
+Metadata-Version: 2.1
+Name: ringity
+Version: 0.0a1
+Summary: ringity package
+Home-page: https://github.com/kiri93/ringity
+Author: Markus K. Youssef
+Author-email: mk.youssef@hotmail.com
+License: UNKNOWN
+Description: # ringity
+        rignity module and notebooks
+        
+        <aside class="warning">
+        This code is still under construction!
+        </aside>
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: Unix
+Classifier: Topic :: Communications :: Email
+Classifier: Development Status :: 2 - Pre-Alpha
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
