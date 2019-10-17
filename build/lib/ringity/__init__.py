@@ -8,7 +8,7 @@ Created on Thu Jul  5 17:28:12 2018
 
 name = "ringity"
 __author__ = "Markus Kirolos Youssef"
-__version__ = "alpha 0.112358 pseudostable version"
+__version__ = "0.0a1"
 
 from ringity.methods   import *
 from ringity.classes   import *
