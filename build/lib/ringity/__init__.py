@@ -6,9 +6,10 @@ Created on Thu Jul  5 17:28:12 2018
 @author: myoussef
 """
 
+
 name = "ringity"
 __author__ = "Markus Kirolos Youssef"
-__version__ = "0.0a1"
+__version__ = "0.0a3"
 
 from ringity.methods   import *
 from ringity.classes   import *
@@ -24,21 +25,16 @@ import subprocess
 import numpy as np
 
 
-def download_ripser():
-    try:
-        command = ['git', 'clone', 'https://github.com/Ripser/ripser.git',
-                   f'{path}/ripser',]
-        subprocess.run(command)
-        print('Ripser successfully downloaded!')
-    except:
-        print('An unnkown error occured while trying to downloadd ripser'
-              'with:\n' + ' '.join(command), sys.exc_info()[0])
-        raise
+RINGITY_PATH = os.path.dirname(__file__)
 
+# Check for proper Python version
+if sys.version_info[:2] < (3, 6):
+    m = "Python 3.6 or later is required for ringity (%d.%d detected)."
+    raise ImportError(m % sys.version_info[:2])
 
 def install_ripser():
     try:
-        command = f'cd {path}/ripser && make'
+        command = f'cd {RINGITY_PATH}/ripser && make'
         subprocess.run(command, shell=True)
     except:
         print('An unnkown error occured while trying to install ripser with:\n'
@@ -47,8 +43,8 @@ def install_ripser():
 
     # Built-in testrun
     try:
-        command = [f'{path}/ripser/ripser',
-                   f'{path}/ripser/examples/sphere_3_192.lower_distance_matrix',]
+        command = [f'{RINGITY_PATH}/ripser/ripser',
+                   f'{RINGITY_PATH}/ripser/examples/sphere_3_192.lower_distance_matrix',]
         subprocess.run(command)
         print('Ripser successfully installed!')
     except:
@@ -59,13 +55,14 @@ def install_ripser():
 
 
 def test_ripser(verbose=False):
-    if os.path.isdir(f'{path}/ripser'):
-
+    if not os.path.isfile(f"{RINGITY_PATH}/ripser/ripser"):
+        install_ripser()
+    else:
         # create dummy .csv file
-        np.savetxt(f'{path}/ripser/foo.csv', np.zeros(1), fmt='%0.0f')
+        np.savetxt(f'{RINGITY_PATH}/ripser/foo.csv', np.zeros(1), fmt='%0.0f')
 
         # run ripser
-        command = [f'{path}/ripser/ripser', f'{path}/ripser/foo.csv']
+        command = [f'{RINGITY_PATH}/ripser/ripser', f'{RINGITY_PATH}/ripser/foo.csv']
         try:
             completed_process = subprocess.run(command, stdout=subprocess.PIPE)
             output = completed_process.stdout.decode("utf-8")
@@ -85,18 +82,12 @@ def test_ripser(verbose=False):
                 answer = yes_or_no(answer)
 
 
-    else:
-        print('Ripser not found. Ringity is trying to install it now.')
-        download_ripser()
-        install_ripser()
-
-
 def yes_or_no(answer):
     while answer not in ['y','n',]:
         answer = input("Please only type in 'y' or 'n'! ")
 
     if answer == 'y':
-        shutil.rmtree(f'{path}/ripser')
+        shutil.rmtree(f'{RINGITY_PATH}/ripser')
         download_ripser()
         install_ripser()
     elif answer == 'n':
@@ -106,5 +97,4 @@ def yes_or_no(answer):
 
 
 # ------------------------  script starts here  -------------------------------
-path = os.path.dirname(__file__)
 test_ripser()

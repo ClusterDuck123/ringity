@@ -9,7 +9,7 @@ Created on Thu Jul  5 17:28:12 2018
 
 name = "ringity"
 __author__ = "Markus Kirolos Youssef"
-__version__ = "0.0a1"
+__version__ = "0.0a3"
 
 from ringity.methods   import *
 from ringity.classes   import *
