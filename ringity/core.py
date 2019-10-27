@@ -4,7 +4,6 @@ from ringity.centralities import current_distance
 from ringity.routines import dict2numpy, _yes_or_no
 from ringity.constants import _assertion_statement
 from ringity.exceptions import DigraphError, UnknownGraphType, RipserOutputError
-from ringity.new_centralities import current_distance as new_current_distance
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -14,7 +13,7 @@ import time
 import os
 
 
-def get_distance_matrix(G, toa, verbose=False, spl_method=None, split = 0):
+def get_distance_matrix(G, toa, verbose=False, spl_method=None):
 
     if spl_method is None:
         if nx.density(G) >= 0.01:
@@ -43,7 +42,7 @@ def get_distance_matrix(G, toa, verbose=False, spl_method=None, split = 0):
             if verbose:
                 print('No weights detected, current-distance will be induced.')
             toa = 'current-distance'
-            induce_toa(G, name=toa, verbose=verbose, split = split)
+            induce_toa(G, name=toa, verbose=verbose)
 
         elif toa is None:
             toa = next(iter(attributes))
@@ -96,9 +95,7 @@ def diagram(graph      = None ,
             verbose    = False,
             induce     = False,
             p          = 1    ,
-            spl_method = None ,
-            c          = False,
-            split      = 0):
+            spl_method = None ):
     """Return the p-persistence diagram of an index- or distance-matrix."""
 
     if induce:
@@ -118,8 +115,7 @@ def diagram(graph      = None ,
         D = get_distance_matrix(G          = G,
                                 toa        = toa,
                                 verbose    = verbose,
-                                spl_method = spl_method,
-                                split      = split)
+                                spl_method = spl_method)
 
     elif input_type == nx.classes.digraph.DiGraph:
         raise DigraphError('Graph is a digraph, please provide an undirected '
@@ -140,7 +136,7 @@ def diagram(graph      = None ,
 
 
 
-def induce_toa(G, name = 'toa', verbose=False, split = 0):
+def induce_toa(G, name = 'toa', verbose=False):
     if verbose:
         v,w = next(iter(G.edges))
         attributes = G[v][w]
@@ -159,11 +155,7 @@ def induce_toa(G, name = 'toa', verbose=False, split = 0):
                 print('Self loops in graph detected. They will be removed!')
             G.remove_edges_from(nx.selfloop_edges(G))
 
-    if split is not None:
-        A  = nx.adjacency_matrix(G)
-        bb = new_current_distance(A, verbose=verbose, split=split)
-    else:
-        bb = current_distance(G, verbose=verbose)
+    bb = current_distance(G, verbose=verbose)
     nx.set_edge_attributes(G, values=bb, name=name)
 
 

@@ -51,7 +51,7 @@ class TestNewmanMeasure(unittest.TestCase):
         self.assertEqual(sample, set([0.194, 0.267, 0.316, 0.321, 0.361, 0.417, 0.471]))
 
 
-class TestCentralityPreps(unittest.TestCase):
+class TestCentralityMeasures(unittest.TestCase):
 
     def test_different_current_flow_calculations(self):
         G = nx.erdos_renyi_graph(100,0.3)
@@ -63,7 +63,18 @@ class TestCentralityPreps(unittest.TestCase):
         equal = np.allclose(F1,F2)
         self.assertTrue(equal)
 
-    def test_current_distances(self):
+    def test_net_flow(self):
+        G = nx.erdos_renyi_graph(75,0.3)
+        bb1 = rng.current_distance(G)
+        bb2 = rng.net_flow(G)
+
+        self.assertEqual(set(bb1),set(bb2))
+        self.assertEqual(set(bb2),set(G.edges))
+
+        precision = 1e-10
+        self.assertTrue(all([abs(bb1[key]-bb2[key]) < precision for key in bb1.keys()]))
+
+    def test_different_current_distance_calculations(self):
         G = nx.erdos_renyi_graph(75,0.3)
         bb1 = rng.stupid_current_distance(G)
         bb2 = rng.slow_current_distance(G)

@@ -11,6 +11,40 @@ import scipy.stats
 import numpy as np
 import networkx as nx
 
+# Newest version
+def net_flow(G, verbose = False):
+    if nx.number_of_selfloops(G) > 0:
+            if verbose:
+                print('Self loops in graph detected. They will be removed!')
+            G.remove_edges_from(nx.selfloop_edges(G))
+
+    L = nx.laplacian_matrix(G).toarray()
+
+    C = np.zeros(L.shape)
+    C[1:,1:] = np.linalg.inv(L[1:,1:])
+
+    A = nx.adjacency_matrix(G)
+
+    N = G.number_of_nodes()
+    E = G.number_of_edges()
+    B = scipy.sparse.lil_matrix((E, N))
+
+    for ei, (u,v) in enumerate(G.edges):
+        B[ei, u] = -1
+        B[ei, v] = 1
+
+    F = B@C
+
+    ranks = map(scipy.stats.rankdata, F)
+    vectors = iter(F)
+    edge_dict  = {}
+    for e in G.edges:
+        edge_dict[e] = np.sum((2*next(ranks)-1-N)*next(vectors))
+
+    return edge_dict
+
+
+
 
 def edge_extractor(A):
     N = A.shape[0]
