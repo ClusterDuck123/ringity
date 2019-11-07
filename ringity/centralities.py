@@ -45,6 +45,8 @@ def net_flow(G, verbose = False):
 
 
 
+# ----------------------------- ONLY FOR TESTING -----------------------------
+
 
 def edge_extractor(A):
     N = A.shape[0]
@@ -58,13 +60,11 @@ def edge_extractor(A):
                 continue
             yield i,j
 
-
 def laplace(A):
     n, m = A.shape
     diags = A.sum(axis=1)
     D = scipy.sparse.spdiags(diags.flatten(), [0], m, n)
     return D - A
-
 
 def oriented_incidence_matrix(A):
     assert type(A) == scipy.sparse.csr.csr_matrix
@@ -79,7 +79,6 @@ def oriented_incidence_matrix(A):
         B[ei, v] = 1
     return B
 
-
 def current_flow_matrix(A):
     N = A.shape[0]
     L = laplace(A)
@@ -93,44 +92,6 @@ def current_flow_matrix(A):
 
     return B@C
 
-
-def current_distance(G, verbose=False):
-
-    if nx.number_of_selfloops(G) > 0:
-            if verbose:
-                print('Self loops in graph detected. They will be removed!')
-            G.remove_edges_from(nx.selfloop_edges(G))
-
-
-    N = G.number_of_nodes()
-    A = nx.adjacency_matrix(G)
-
-    t1 = time.time()
-    F = current_flow_matrix(A)
-    t2 = time.time()
-
-    if verbose:
-        print(f'Time for current_flow_matrix calculation: {t2-t1}sec')
-
-    edges      = edge_extractor(A)
-    edge_dict  = {}
-
-    t1 = time.time()
-    for ei, e in enumerate(edges):
-        F_ei = F[ei,:]
-        rank = scipy.stats.rankdata(F_ei)
-        edge_dict[e] = sum([(2*rank[j]-1-N)*F[ei,j] for j in range(N)])
-    t2 = time.time()
-
-    if verbose:
-        print(f'Time for current_distance loop: {t2-t1}sec')
-
-    return edge_dict
-
-
-
-# ----------------------------- ONLY FOR TESTING -----------------------------
-
 def prepotential(G):
     """
     Returns a sparse csc matrix that multiplied by a supply yields the corresponding
@@ -142,7 +103,6 @@ def prepotential(G):
     T = np.zeros(L.shape)
     T[1:,1:] = T_tild
     return T
-
 
 def slow_current_distance(G):
     N = G.number_of_nodes()
@@ -157,7 +117,6 @@ def slow_current_distance(G):
 
     edge_dict = {e:edge_array[ei] for (ei,e) in enumerate(G.edges)}
     return edge_dict
-
 
 def stupid_current_distance(G):
     """
@@ -175,7 +134,6 @@ def stupid_current_distance(G):
             for (v,w) in edge_dict:
                 edge_dict[(v,w)] += abs(p[v]-p[w])
     return edge_dict
-
 
 def newman_measure(G):
     N = len(G)

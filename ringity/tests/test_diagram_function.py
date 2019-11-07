@@ -15,7 +15,7 @@ import networkx as nx
 
 RINGITY_PATH = os.path.dirname(ringity.__file__)
 
-class TestDiagram(unittest.TestCase):
+class TestDiagramFunction(unittest.TestCase):
 
     def test_lipid_network(self):
         G = nx.read_edgelist(f"{RINGITY_PATH}/test_data/lipid_coexp_network.txt",
@@ -27,6 +27,11 @@ class TestDiagram(unittest.TestCase):
             self.assertAlmostEqual(pt1.birth,pt2.birth, places=5)
             self.assertAlmostEqual(pt1.death,pt2.death, places=5)
 
+    def test_default_weighting(self):
+        pass
+
+    def test_pathological_cases(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()

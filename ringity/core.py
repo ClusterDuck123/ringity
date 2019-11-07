@@ -1,7 +1,7 @@
 from ripser import ripser
 from ringity.classes import Dgm, DgmPt
 from ringity.centralities import net_flow
-from ringity.routines import dict2numpy, _yes_or_no
+from ringity.methods import dict2numpy, _yes_or_no
 from ringity.constants import _assertion_statement
 from ringity.exceptions import DigraphError, UnknownGraphType, RipserOutputError
 
@@ -13,8 +13,7 @@ import time
 import os
 
 
-def get_distance_matrix(G, toa, verbose=False, spl_method=None):
-
+def get_distance_matrix(G, distance, verbose=False, spl_method=None):
     if spl_method is None:
         if nx.density(G) >= 0.01:
             spl_method = 'floyd_warshall'
@@ -28,42 +27,42 @@ def get_distance_matrix(G, toa, verbose=False, spl_method=None):
     if verbose:
         print(f"'{spl_method}' will be used for SPL calculation.")
 
-    if toa == 'induce':
+    if distance == 'induce':
         if verbose:
-            print('Current-distance will be induced.')
-        toa = 'current-distance'
-        induce_toa(G, name=toa, verbose=verbose)
+            print('net-flow distance will be induced.')
+        distance = 'net-flow'
+        induce_distance(G, name=distance, verbose=verbose)
 
     else:
         v,w = next(iter(G.edges))
         attributes = set(G[v][w])
 
-        if not (toa or attributes):
+        if not (distance or attributes):
             if verbose:
-                print('No weights detected, current-distance will be induced.')
-            toa = 'current-distance'
-            induce_toa(G, name=toa, verbose=verbose)
+                print('No weights detected, net-flow distance will be induced.')
+            distance = 'net-flow'
+            induce_distance(G, name=distance, verbose=verbose)
 
-        elif toa is None:
-            toa = next(iter(attributes))
-        elif toa in attributes:
+        elif distance is None:
+            distance = next(iter(attributes))
+        elif distance in attributes:
             pass
         else:
-            raise KeyError(f"No edge attribute called '{toa}' found!")
+            raise KeyError(f"No edge attribute called '{distance}' found!")
 
     if verbose:
-            print(f"Using edge attribute '{toa}' as toa.")
+            print(f"Using edge attribute '{distance}' as distance.")
 
     if spl_method == 'floyd_warshall':
         t1 = time.time()
-        D  = nx.floyd_warshall_numpy(G, weight=toa)
+        D  = nx.floyd_warshall_numpy(G, weight=distance)
         t2 = time.time()
 
         if verbose:
             print(f'Time for Floyd-Warshall calculation: {t2-t1}sec')
     elif spl_method == 'dijkstra':
         t1 = time.time()
-        D  = dict2numpy(dict(nx.all_pairs_dijkstra_path_length(G, weight=toa)))
+        D  = dict2numpy(dict(nx.all_pairs_dijkstra_path_length(G, weight=distance)))
         t2 = time.time()
 
         if verbose:
@@ -74,7 +73,7 @@ def get_distance_matrix(G, toa, verbose=False, spl_method=None):
     return D
 
 
-def _pathological_cases(G, toa, verbose):
+def _pathological_cases(G, distance, verbose):
     E = G.number_of_edges()
     N = G.number_of_nodes()
 
@@ -82,7 +81,7 @@ def _pathological_cases(G, toa, verbose):
         if verbose:
             print('Graph with only one node was given.')
         return True, Dgm()
-    elif E == round(N*(N-1)/2) and not toa:
+    elif E == round(N*(N-1)/2) and not distance:
         if verbose:
             print('Complete graph with no edge attribute was given.')
         return True, Dgm()
@@ -91,15 +90,16 @@ def _pathological_cases(G, toa, verbose):
 
 
 def diagram(graph      = None ,
-            toa    = None ,
+            distance   = None ,
             verbose    = False,
             induce     = False,
             p          = 1    ,
-            spl_method = None ):
+            spl_method = None ,
+            inplace    = True ):
     """Return the p-persistence diagram of an index- or distance-matrix."""
 
     if induce:
-        toa = 'induce'
+        distance = 'induce'
 
     input_type = type(graph)
 
@@ -108,12 +108,12 @@ def diagram(graph      = None ,
 
     elif input_type == nx.classes.graph.Graph:
         G = graph
-        pathology, dgm  = _pathological_cases(G=G, toa=toa, verbose=verbose)
+        pathology, dgm  = _pathological_cases(G=G, distance=distance, verbose=verbose)
         if pathology:
             return dgm
 
         D = get_distance_matrix(G          = G,
-                                toa        = toa,
+                                distance   = distance,
                                 verbose    = verbose,
                                 spl_method = spl_method)
 
@@ -136,7 +136,7 @@ def diagram(graph      = None ,
 
 
 
-def induce_toa(G, name = 'toa', verbose=False):
+def induce_distance(G, name = 'distance', verbose=False):
     if verbose:
         v,w = next(iter(G.edges))
         attributes = G[v][w]
