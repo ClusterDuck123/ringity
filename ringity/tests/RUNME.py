@@ -1,15 +1,9 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul  9 17:58:55 2018
-
-@author: myoussef
-"""
-
 from test_conversions import *
 from test_centralities import *
-from test_diagram import *
+from test_diagram_function import *
+from test_classes import *
+from test_score import *
+from test_methods import *
 
 if __name__ == '__main__':
     unittest.main()
-        

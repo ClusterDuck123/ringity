@@ -7,24 +7,38 @@ import warnings
 import numpy as np
 
 
-
 """
- __       __             __      __                        __
-|  \     /  \           |  \    |  \                      |  \
-| $$\   /  $$  ______  _| $$_   | $$____    ______    ____| $$  _______
-| $$$\ /  $$$ /      \|   $$ \  | $$    \  /      \  /      $$ /       \
-| $$$$\  $$$$|  $$$$$$\\$$$$$$  | $$$$$$$\|  $$$$$$\|  $$$$$$$|  $$$$$$$
-| $$\$$ $$ $$| $$    $$ | $$ __ | $$  | $$| $$  | $$| $$  | $$ \$$    \
-| $$ \$$$| $$| $$$$$$$$ | $$|  \| $$  | $$| $$__/ $$| $$__| $$ _\$$$$$$\
-| $$  \$ | $$ \$$     \  \$$  $$| $$  | $$ \$$    $$ \$$    $$|       $$
- \$$      \$$  \$$$$$$$   \$$$$  \$$   \$$  \$$$$$$   \$$$$$$$ \$$$$$$$
-
+===============================================================================
+ _______  _______ _________          _______  ______   _______
+(       )(  ____ \\__   __/|\     /|(  ___  )(  __  \ (  ____ \
+| () () || (    \/   ) (   | )   ( || (   ) || (  \  )| (    \/
+| || || || (__       | |   | (___) || |   | || |   ) || (_____
+| |(_)| ||  __)      | |   |  ___  || |   | || |   | |(_____  )
+| |   | || (         | |   | (   ) || |   | || |   ) |      ) |
+| )   ( || (____/\   | |   | )   ( || (___) || (__/  )/\____) |
+|/     \|(_______/   )_(   |/     \|(_______)(______/ \_______)
+===============================================================================
 """
 
+def score(iterable, sort=True, **kwargs):
+    if sort:
+        iterable = sorted(iterable, **kwargs, reverse=True)
+    iterator = iter(iterable)
+    try:
+        signal = next(iterator)
+        return 1-sum((noise/signal) / 2**i for i,noise in enumerate(iterator,1))
+    except StopIteration:
+        return 0
 
+def random_DgmPt(lb=0, ub=1):
+    a, b = np.random.uniform(lb,ub,size=2)
+    return DgmPt(min(a,b), max(b,a))
 
-def save_dgm(dgm, fname=None, **kwargs):
-    array = np.array([[k.birth, k.death] for k in dgm])
+def random_Dgm(lb=0, ub=1, length=1):
+    return Dgm([random_DgmPt(lb,ub) for _ in range(length)])
+
+def save_dgm(dgm, fname, **kwargs):
+    array = np.array([(k.birth, k.death) for k in dgm])
     np.savetxt(fname, array, **kwargs)
 
 
@@ -50,29 +64,27 @@ def indexify_dgm(dgm, inplace=False):
 
 
 """
-  ______   __
- /      \ |  \
-|  $$$$$$\| $$  ______    _______   _______   ______    _______
-| $$   \$$| $$ |      \  /       \ /       \ /      \  /       \
-| $$      | $$  \$$$$$$\|  $$$$$$$|  $$$$$$$|  $$$$$$\|  $$$$$$$
-| $$   __ | $$ /      $$ \$$    \  \$$    \ | $$    $$ \$$    \
-| $$__/  \| $$|  $$$$$$$ _\$$$$$$\ _\$$$$$$\| $$$$$$$$ _\$$$$$$\
- \$$    $$| $$ \$$    $$|       $$|       $$ \$$     \|       $$
-  \$$$$$$  \$$  \$$$$$$$ \$$$$$$$  \$$$$$$$   \$$$$$$$ \$$$$$$$
-
+===============================================================================
+ _______  _        _______  _______  _______  _______  _______
+(  ____ \( \      (  ___  )(  ____ \(  ____ \(  ____ \(  ____ \
+| (    \/| (      | (   ) || (    \/| (    \/| (    \/| (    \/
+| |      | |      | (___) || (_____ | (_____ | (__    | (_____
+| |      | |      |  ___  |(_____  )(_____  )|  __)   (_____  )
+| |      | |      | (   ) |      ) |      ) || (            ) |
+| (____/\| (____/\| )   ( |/\____) |/\____) || (____/\/\____) |
+(_______/(_______/|/     \|\_______)\_______)(_______/\_______)
+===============================================================================
 """
-
-
 
 class DgmPt():
     def __init__(self, birth=0, death=np.inf):
         self._birth = birth
         self._death = death
         if birth > death:
-            raise TimeParadoxError('Hole cannot die before it was born! '
+            raise TimeParadoxError('Homology class cannot die before it was born! '
                               f'({birth}, {death})')
         if birth < 0:
-            raise BeginningOfTimeError('Hole must be born after the '
+            raise BeginningOfTimeError('Hole must be born after '
                                        f'beginning of time! {birth}')
     def __getitem__(self, key):
         if   key == 0:
@@ -127,7 +139,9 @@ class Dgm():
             if n != 2:
                 pts = pts.T
 
-        self._values = sorted(starmap(DgmPt,pts), key=lambda pt:pt.persistence, reverse=True)
+        self._values = sorted(starmap(DgmPt,pts),
+                              key=lambda pt:pt.persistence,
+                              reverse=True)
 
     def __getitem__(self, item):
         return self.values[item]
@@ -173,15 +187,15 @@ class Dgm():
             return 1-sum(pers/2**i for i,pers in iter_sequence)
 
 
-    def save(self, fname=None):
-        save_dgm(self._pts, fname=fname)
-
-    def load(self, name=None, location = '.'):
-        return load_dgm(location=location, name=name)
+    def save(self, fname, **kwargs):
+        save_dgm(self.values, fname, **kwargs)
 
     def append(self, pt):
-        dgmPt = DgmPt(*pt)
-        self._pts.append(dgmPt)
+        dgm_pt = DgmPt(*pt)
+        self._values.append(dgm_pt)
+        self._values = sorted(self._values,
+                              key=lambda pt:pt.persistence,
+                              reverse=True)
 
     def cap(self, n, inplace=False):
         if inplace:

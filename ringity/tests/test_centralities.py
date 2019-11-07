@@ -52,37 +52,26 @@ class TestNewmanMeasure(unittest.TestCase):
 
 
 class TestCentralityMeasures(unittest.TestCase):
+    def setUp(self):
+        self.G = nx.erdos_renyi_graph(50,0.3)
 
-    def test_different_current_flow_calculations(self):
-        G = nx.erdos_renyi_graph(100,0.3)
-        A = nx.adjacency_matrix(G)
-        C = rng.prepotential(G)
+    def test_different_current_flow_matrix_calculations(self):
+        A = nx.adjacency_matrix(self.G)
+        C = rng.prepotential(self.G)
         B = rng.oriented_incidence_matrix(A).toarray()
         F2 = B@C
         F1 = rng.current_flow_matrix(A)
         equal = np.allclose(F1,F2)
         self.assertTrue(equal)
 
-    def test_net_flow(self):
-        G = nx.erdos_renyi_graph(75,0.3)
-        bb1 = rng.current_distance(G)
-        bb2 = rng.net_flow(G)
-
-        self.assertEqual(set(bb1),set(bb2))
-        self.assertEqual(set(bb2),set(G.edges))
-
-        precision = 1e-10
-        self.assertTrue(all([abs(bb1[key]-bb2[key]) < precision for key in bb1.keys()]))
-
-    def test_different_current_distance_calculations(self):
-        G = nx.erdos_renyi_graph(75,0.3)
-        bb1 = rng.stupid_current_distance(G)
-        bb2 = rng.slow_current_distance(G)
-        bb3 = rng.current_distance(G)
+    def test_different_net_flow_calculations(self):
+        bb1 = rng.stupid_current_distance(self.G)
+        bb2 = rng.slow_current_distance(self.G)
+        bb3 = rng.net_flow(self.G)
 
         self.assertEqual(set(bb1),set(bb2))
         self.assertEqual(set(bb2),set(bb3))
-        self.assertEqual(set(bb3),set(G.edges))
+        self.assertEqual(set(bb3),set(self.G.edges))
 
         precision = 1e-10
         self.assertTrue(all([abs(bb1[key]-bb2[key]) < precision for key in bb1.keys()]))

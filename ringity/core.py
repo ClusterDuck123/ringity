@@ -1,6 +1,6 @@
 from ripser import ripser
 from ringity.classes import Dgm, DgmPt
-from ringity.centralities import current_distance
+from ringity.centralities import net_flow
 from ringity.routines import dict2numpy, _yes_or_no
 from ringity.constants import _assertion_statement
 from ringity.exceptions import DigraphError, UnknownGraphType, RipserOutputError
@@ -91,7 +91,7 @@ def _pathological_cases(G, toa, verbose):
 
 
 def diagram(graph      = None ,
-            toa        = None ,
+            toa    = None ,
             verbose    = False,
             induce     = False,
             p          = 1    ,
@@ -155,7 +155,7 @@ def induce_toa(G, name = 'toa', verbose=False):
                 print('Self loops in graph detected. They will be removed!')
             G.remove_edges_from(nx.selfloop_edges(G))
 
-    bb = current_distance(G, verbose=verbose)
+    bb = net_flow(G, verbose=verbose)
     nx.set_edge_attributes(G, values=bb, name=name)
 
 
