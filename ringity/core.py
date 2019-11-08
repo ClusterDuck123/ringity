@@ -3,9 +3,9 @@ from ringity.classes import Dgm, DgmPt
 from ringity.centralities import net_flow
 from ringity.methods import dict2numpy, _yes_or_no
 from ringity.constants import _assertion_statement
-from ringity.exceptions import DigraphError, UnknownGraphType, RipserOutputError
+from ringity.exceptions import DigraphError, UnknownGraphType
 
-import matplotlib.pyplot as plt
+import matplotlib
 import networkx as nx
 import numpy as np
 import subprocess
@@ -13,20 +13,7 @@ import time
 import os
 
 
-def get_distance_matrix(G, distance, verbose=False, spl_method=None):
-    if spl_method is None:
-        if nx.density(G) >= 0.01:
-            spl_method = 'floyd_warshall'
-        else:
-            spl_method = 'dijkstra'
-
-    if spl_method not in {'floyd_warshall', 'dijkstra'}:
-        print(spl_method)
-        assert False, _assertion_statement
-
-    if verbose:
-        print(f"'{spl_method}' will be used for SPL calculation.")
-
+def get_distance_matrix(G, distance, verbose=False, spl_method='floyd_warshall'):
     if distance == 'induce':
         if verbose:
             print('net-flow distance will be induced.')
@@ -60,14 +47,8 @@ def get_distance_matrix(G, distance, verbose=False, spl_method=None):
 
         if verbose:
             print(f'Time for Floyd-Warshall calculation: {t2-t1}sec')
-    elif spl_method == 'dijkstra':
-        t1 = time.time()
-        D  = dict2numpy(dict(nx.all_pairs_dijkstra_path_length(G, weight=distance)))
-        t2 = time.time()
-
-        if verbose:
-            print(f'Time for Dijkstra calculation: {t2-t1}sec')
     else:
+        # UNFINISHED !!!!
         raise Exception # GENERIC EXCEPTION RAISED HERE !!!!
 
     return D
@@ -94,7 +75,7 @@ def diagram(graph      = None ,
             verbose    = False,
             induce     = False,
             p          = 1    ,
-            spl_method = None ,
+            spl_method = 'floyd_warshall' ,
             inplace    = True ):
     """Return the p-persistence diagram of an index- or distance-matrix."""
 
