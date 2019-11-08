@@ -6,37 +6,31 @@ Created on Thu Jul 19 13:42:53 2018
 @author: myoussef
 """
 
+# Base class
 class RingityException(Exception):
     pass
 
-# ---------------------- Ripser Exceptions ----------------------------
 
-class RipserOutputError(Exception):
-    pass 
-
-
-# ---------------------- Diagram Exceptions ----------------------------
-class DiagramException(RingityException):
-    pass
-
+# ----------------------------- Dgm Exceptions -----------------------------
 class SchroedingersException(IndexError):
-    pass 
-
-class TimeParadoxError(DiagramException):
+    # Don't know yet how to combine two exception classes
+    pass
+class DgmException(RingityException):
+    pass
+class TimeParadoxError(DgmException):
+    pass
+class BeginningOfTimeError(DgmException):
     pass
 
-class BeginningOfTimeError(DiagramException):
+# ----------------------- NetworkX related Exceptions -----------------------
+# Don't know yet how to combine two exception classes
+class GraphTypeError(RingityException):
     pass
-
-# ---------------------- Graph Type Exceptions -----------------------------
-
-class GraphTypeError(Exception):
-    pass
-
-    
 class DigraphError(GraphTypeError):
     pass
 class UnknownGraphType(GraphTypeError):
     pass
 class MultigraphError(GraphTypeError):
+    pass
+class DisconnectedGraphError(RingityException):
     pass

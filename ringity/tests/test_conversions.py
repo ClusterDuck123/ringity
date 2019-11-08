@@ -6,12 +6,6 @@ Created on Thu Jul  5 19:05:19 2018
 @author: myoussef
 """
 
-import os
-import sys
-
-path = os.path.dirname(os.path.abspath(__file__)) + '/..'
-sys.path.append(path)
-
 import ringity
 import unittest
 import numpy as np
