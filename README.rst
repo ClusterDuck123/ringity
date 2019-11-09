@@ -1,7 +1,3 @@
-.. warning:: 
-
-    This package is still under construction.
-
 ringity
 =======
 
@@ -12,6 +8,8 @@ with respect to their global ring structur.
 - **Source:** https://github.com/kiri93/ringity
 - **Bug reports:** https://github.com/kiri93/ringity/issues
 - **Contact Person:** mk.youssef@hotmail.com
+
+.. warning:: This package is still under construction.
 
 Simple example
 --------------
