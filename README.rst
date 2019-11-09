@@ -12,9 +12,7 @@ with respect to their global ring structur.
 Notes
 -----
 
-.. note:: 
-    
-    This package is still under construction.
+This package is still under construction.
 
 Simple example
 --------------
