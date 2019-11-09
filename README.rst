@@ -1,4 +1,4 @@
-.. Warning:: 
+.. warning:: 
 
     This package is still under construction.
 
