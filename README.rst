@@ -22,6 +22,8 @@ Calculate ring score as described in
 
 .. code:: python
 
+    >>> import ringity as rng
+    >>> import networkx as nx
     >>> G = nx.Graph()
     >>> G.add_edges_from([(i%100,(i+1)%100) for i in range(100)])
     >>> dgm = rng.diagram(G)
