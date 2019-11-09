@@ -21,10 +21,10 @@ Calculate ring score are described in
 
 .. code:: python
 
-    >>>G = nx.Graph()
-    >>>G.add_edges_from([(i%100,(i+1)%100) for i in range(100)])
-    >>>dgm = rng.diagram(G)
-    >>>dgm.score
+    >>> G = nx.Graph()
+    >>> G.add_edges_from([(i%100,(i+1)%100) for i in range(100)])
+    >>> dgm = rng.diagram(G)
+    >>> dgm.score
     1
 
 [1]: Paper not available yet.
