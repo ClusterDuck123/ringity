@@ -9,7 +9,12 @@ with respect to their global ring structur.
 - **Bug reports:** https://github.com/kiri93/ringity/issues
 - **Contact Person:** mk.youssef@hotmail.com
 
-.. note:: This package is still under construction.
+Notes
+-----
+
+.. note:: 
+    
+    This package is still under construction.
 
 Simple example
 --------------
