@@ -1,19 +1,10 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jul  5 17:28:12 2018
-
-@author: myoussef
-"""
-
-
 name = "ringity"
 __author__ = "Markus Kirolos Youssef"
-__version__ = "0.0a3"
+__version__ = "0.0a4"
 
-from ringity.methods   import *
-from ringity.classes   import *
-from ringity.core      import *
+from ringity.methods      import *
+from ringity.classes      import *
+from ringity.core         import *
 from ringity.centralities import *
 
 import sys

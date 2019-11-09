@@ -1,17 +1,63 @@
 Metadata-Version: 2.1
 Name: ringity
-Version: 0.0a3
+Version: 0.0a4
 Summary: ringity package
 Home-page: https://github.com/kiri93/ringity
 Author: Markus K. Youssef
 Author-email: mk.youssef@hotmail.com
 License: UNKNOWN
-Description: # ringity
-        rignity module and notebooks
+Description: ringity
+        =======
         
-        <aside class="warning">
-        This code is still under construction!
-        </aside>
+        ringity is a Python package for the analysis of complex networks 
+        with respect to their global ring structur.
+        
+        - **Website (including documentation):** Not available yet.
+        - **Source:** https://github.com/kiri93/ringity
+        - **Bug reports:** https://github.com/kiri93/ringity/issues
+        - **Contact Person:** mk.youssef@hotmail.com
+        
+        Notes
+        -----
+        
+        This package is still under construction.
+        
+        Simple example
+        --------------
+        
+        Calculate ring score as described in 
+        "*The Emergence of Ring Structures in Biological Networks*" [1]:
+        
+        .. code:: python
+        
+            >>> G = nx.Graph()
+            >>> G.add_edges_from([(i%100,(i+1)%100) for i in range(100)])
+            >>> dgm = rng.diagram(G)
+            >>> dgm.score
+            1
+        
+        [1]: Paper not available yet.
+        
+        Install
+        -------
+        
+        Install the latest version of ringity::
+        
+            $ pip install ringity
+        
+        Bugs
+        ----
+        
+        Please report any bugs that you find `here <https://github.com/kiri93/ringity/issues>`_.
+        Or, even better, fork the repository on `GitHub <https://github.com/kiri93/ringity/>`_
+        and create a pull request. All input and changes are very welcome!
+        
+        License
+        -------
+        
+        Released under the MIT License (see `LICENSE.txt`)::
+        
+           Copyright (c) 2019 Markus K. Youssef <mk.youssef@hotmail.com>
         
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
@@ -20,4 +66,4 @@ Classifier: Operating System :: Unix
 Classifier: Topic :: Communications :: Email
 Classifier: Development Status :: 2 - Pre-Alpha
 Requires-Python: >=3.6
-Description-Content-Type: text/markdown
+Description-Content-Type: text/x-rst

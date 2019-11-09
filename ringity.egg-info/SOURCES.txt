@@ -1,6 +1,5 @@
-README.md
+README.rst
 setup.py
-ringity/MY_model.py
 ringity/__init__.py
 ringity/animation.py
 ringity/centralities.py
@@ -9,8 +8,6 @@ ringity/constants.py
 ringity/core.py
 ringity/exceptions.py
 ringity/methods.py
-ringity/new_centralities.py
-ringity/routines.py
 ringity.egg-info/PKG-INFO
 ringity.egg-info/SOURCES.txt
 ringity.egg-info/dependency_links.txt
