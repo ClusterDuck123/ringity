@@ -1,4 +1,6 @@
-.. Warning:: This package is stil under construction.
+.. Warning:: 
+
+    This package is still under construction.
 
 ringity
 =======
