@@ -1,3 +1,5 @@
+.. Warning:: This package is stil under construction.
+
 ringity
 =======
 
@@ -9,15 +11,11 @@ with respect to their global ring structur.
 - **Bug reports:** https://github.com/kiri93/ringity/issues
 - **Contact Person:** mk.youssef@hotmail.com
 
-<aside class="warning">
-This code is still under construction!
-</aside>
-
 Simple example
 --------------
 
-Calculate ring score are described in 
-<cite>[The Emergence of Ring Structures in Biological Networks][1]</cite>:
+Calculate ring score as described in 
+"*The Emergence of Ring Structures in Biological Networks*"[1]:
 
 .. code:: python
 
