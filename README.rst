@@ -17,8 +17,7 @@ This package is still under construction.
 Simple example
 --------------
 
-Calculate ring score as described in 
-"*The Emergence of Ring Structures in Biological Networks*" [1]:
+Calculate ring score as described in [1]:
 
 .. code:: python
 
@@ -44,7 +43,7 @@ Bugs
 
 Please report any bugs that you find `here <https://github.com/kiri93/ringity/issues>`_.
 Or, even better, fork the repository on `GitHub <https://github.com/kiri93/ringity/>`_
-and create a pull request. All input and changes are very welcome!
+and create a pull request. All inputs, suggestions and changes are more than welcome!
 
 License
 -------
