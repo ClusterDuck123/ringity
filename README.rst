@@ -4,10 +4,10 @@ ringity
 ringity is a Python package for the analysis of complex networks 
 with respect to their global ring structur.
 
-- **Website (including documentation):** Not available yet.
 - **Source:** https://github.com/kiri93/ringity
 - **Bug reports:** https://github.com/kiri93/ringity/issues
 - **Contact Person:** mk.youssef@hotmail.com
+- **Documentation:** Not available yet.
 
 Notes
 -----
