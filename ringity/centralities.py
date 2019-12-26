@@ -7,7 +7,7 @@ import numpy as np
 import networkx as nx
 
 # Newest version
-def net_flow(G, verbose = False):
+def net_flow(G, verbose=False):
     if not nx.is_connected(G):
         raise DisconnectedGraphError
 
@@ -27,6 +27,12 @@ def net_flow(G, verbose = False):
         edge_dict[e] = np.sum((2*next(ranks)-1-N)*next(vectors))
     return edge_dict
 
+
+def resistance_distance(G, verbose=False):
+    L = nx.laplacian_matrix(G)
+    Gamm = np.linalg.pinv(L.A)
+    diag = np.diag(Gamm)
+    return (-2*Gamm + diag).T + diag
 
 # ----------------------------- ONLY FOR TESTING -----------------------------
 
