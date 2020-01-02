@@ -1,9 +1,9 @@
 from ripser import ripser
-from ringity.classes import Dgm, DgmPt
+from ringity.classes import Dgm
 from ringity.centralities import net_flow
-from ringity.methods import dict2numpy, _yes_or_no
+from ringity.methods import _yes_or_no
 from ringity.constants import _assertion_statement
-from ringity.exceptions import DigraphError, UnknownGraphType
+from ringity.exceptions import UnknownGraphType
 
 import matplotlib
 import networkx as nx
@@ -11,47 +11,6 @@ import numpy as np
 import subprocess
 import time
 import os
-
-
-def get_distance_matrix(G, distance, verbose=False, spl_method='floyd_warshall'):
-    if distance == 'induce':
-        if verbose:
-            print('net-flow distance will be induced.')
-        distance = 'net-flow'
-        induce_distance(G, name=distance, verbose=verbose)
-
-    else:
-        v,w = next(iter(G.edges))
-        attributes = set(G[v][w])
-
-        if not (distance or attributes):
-            if verbose:
-                print('No weights detected, net-flow distance will be induced.')
-            distance = 'net-flow'
-            induce_distance(G, name=distance, verbose=verbose)
-
-        elif distance is None:
-            distance = next(iter(attributes))
-        elif distance in attributes:
-            pass
-        else:
-            raise KeyError(f"No edge attribute called '{distance}' found!")
-
-    if verbose:
-            print(f"Using edge attribute '{distance}' as distance.")
-
-    if spl_method == 'floyd_warshall':
-        t1 = time.time()
-        D  = nx.floyd_warshall_numpy(G, weight=distance)
-        t2 = time.time()
-
-        if verbose:
-            print(f'Time for Floyd-Warshall calculation: {t2-t1}sec')
-    else:
-        # UNFINISHED !!!!
-        raise Exception # GENERIC EXCEPTION RAISED HERE !!!!
-
-    return D
 
 
 def _pathological_cases(G, distance, verbose):
@@ -70,41 +29,40 @@ def _pathological_cases(G, distance, verbose):
         return False, None
 
 
-def diagram(graph      = None ,
-            distance   = None ,
+def diagram(graph      = None,
             verbose    = False,
-            induce     = False,
-            p          = 1    ,
-            spl_method = 'floyd_warshall' ,
-            inplace    = True ):
-    """Return the p-persistence diagram of an index- or distance-matrix."""
-
-    if induce:
-        distance = 'induce'
+            use_weight = 'net_flow',
+            p          = 1):
+    """
+    Return the p-persistence diagram of an index- or distance-matrix.
+    enforce_weights
+    """
 
     input_type = type(graph)
 
     if input_type == np.ndarray:
-        D = graph
-
+        G = nx.from_numpy_array(graph)
+        if use_weight is True:
+            use_weight = 'weight'
     elif input_type == nx.classes.graph.Graph:
         G = graph
-        pathology, dgm  = _pathological_cases(G=G, distance=distance, verbose=verbose)
-        if pathology:
-            return dgm
-
-        D = get_distance_matrix(G          = G,
-                                distance   = distance,
-                                verbose    = verbose,
-                                spl_method = spl_method)
-
-    elif input_type == nx.classes.digraph.DiGraph:
-        raise DigraphError('Graph is a digraph, please provide an undirected '
-                           'graph!')
     else:
-        raise UnknownGraphType(f'Unknown graph type {input_type}!')
+        raise UnknownGraphType(f"Unknown graph type {input_type}!")
 
-    assert D is not None, _assertion_statement
+    if not nx.get_edge_attributes(G, use_weight):
+        induce_weight(G, weight=use_weight, verbose=verbose)
+
+    if nx.number_of_selfloops(G) > 0:
+        if verbose:
+            print('Self loops in graph detected. They will be removed!')
+        G.remove_edges_from(nx.selfloop_edges(G))
+
+    t1 = time.time()
+    D  = nx.floyd_warshall_numpy(G, weight=use_weight).A
+    t2 = time.time()
+
+    if verbose:
+        print(f'Time for SPL calculation: {t2-t1}sec')
 
     t1 = time.time()
     ripser_output = ripser(np.array(D), maxdim=p, distance_matrix=True)
@@ -113,31 +71,32 @@ def diagram(graph      = None ,
 
     if verbose:
         print(f'Time for ripser calculation: {t2-t1}sec')
+
     return dgm
 
 
+def existing_edge_attribute_warning(weight):
+    answer = input(
+            f"Graph has already an edge attribute called '{weight}'! "
+            f"Do you want to overwrite this edge attribute? ")
+    proceed = _yes_or_no(answer)
+    if not proceed:
+        print('Process terminated!')
+        return 'TERMINATED'
+    else:
+        return 0
 
-def induce_distance(G, name = 'distance', verbose=False):
-    if verbose:
-        v,w = next(iter(G.edges))
-        attributes = G[v][w]
 
-        if name in attributes:
-            answer = input(
-                    f"Graph has already an edge attribute called '{name}'! "
-                    f"Do you want to overwrite this edge attribute? ")
-            proceed = _yes_or_no(answer)
-            if not proceed:
-                print('Process terminated!')
-                return
+def induce_weight(G, weight = 'net_flow', verbose=False):
+    if verbose and nx.get_edge_attributes(G, weight):
+        exit_status = existing_edge_attribute_warning(weight)
+        if exit_status: return exit_status
 
-    if nx.number_of_selfloops(G) > 0:
-            if verbose:
-                print('Self loops in graph detected. They will be removed!')
-            G.remove_edges_from(nx.selfloop_edges(G))
-
-    bb = net_flow(G, verbose=verbose)
-    nx.set_edge_attributes(G, values=bb, name=name)
+    if weight == 'net_flow':
+        bb = net_flow(G)
+        nx.set_edge_attributes(G, values=bb, name=weight)
+    else:
+        raise Exception(f"Weight '{weight}' unknown!")
 
 
 
