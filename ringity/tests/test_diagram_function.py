@@ -17,10 +17,13 @@ class TestDiagramFunction(unittest.TestCase):
             self.assertAlmostEqual(pt1.birth,pt2.birth, places=5)
             self.assertAlmostEqual(pt1.death,pt2.death, places=5)
 
-    def test_inplace_keyword(self):
+    def test_pathological_cases(self):
         pass
 
-    def test_pathological_cases(self):
+    def test_distance_matrix_flag_use_weight_compability(self):
+        pass
+
+    def test_distance_matrix_flag_vs_use_weight_with_zero_entries(self):
         pass
 
     def test_disconnection_error(self):

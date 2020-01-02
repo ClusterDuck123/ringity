@@ -32,37 +32,40 @@ def _pathological_cases(G, distance, verbose):
 def diagram(graph      = None,
             verbose    = False,
             use_weight = 'net_flow',
+            distance_matrix = False,
             p          = 1):
     """
     Return the p-persistence diagram of an index- or distance-matrix.
     enforce_weights
     """
 
-    input_type = type(graph)
-
-    if input_type == np.ndarray:
-        G = nx.from_numpy_array(graph)
-        if use_weight is True:
-            use_weight = 'weight'
-    elif input_type == nx.classes.graph.Graph:
-        G = graph
+    if distance_matrix:
+        D = graph
     else:
-        raise UnknownGraphType(f"Unknown graph type {input_type}!")
+        input_type = type(graph)
+        if input_type == np.ndarray:
+            G = nx.from_numpy_array(graph)
+            if use_weight is True:
+                use_weight = 'weight'
+        elif input_type == nx.classes.graph.Graph:
+            G = graph
+        else:
+            raise UnknownGraphType(f"Unknown graph type {input_type}!")
 
-    if not nx.get_edge_attributes(G, use_weight):
-        induce_weight(G, weight=use_weight, verbose=verbose)
+        if not nx.get_edge_attributes(G, use_weight):
+            induce_weight(G, weight=use_weight, verbose=verbose)
 
-    if nx.number_of_selfloops(G) > 0:
+        if nx.number_of_selfloops(G) > 0:
+            if verbose:
+                print('Self loops in graph detected. They will be removed!')
+            G.remove_edges_from(nx.selfloop_edges(G))
+
+        t1 = time.time()
+        D  = nx.floyd_warshall_numpy(G, weight=use_weight).A
+        t2 = time.time()
+
         if verbose:
-            print('Self loops in graph detected. They will be removed!')
-        G.remove_edges_from(nx.selfloop_edges(G))
-
-    t1 = time.time()
-    D  = nx.floyd_warshall_numpy(G, weight=use_weight).A
-    t2 = time.time()
-
-    if verbose:
-        print(f'Time for SPL calculation: {t2-t1}sec')
+            print(f'Time for SPL calculation: {t2-t1}sec')
 
     t1 = time.time()
     ripser_output = ripser(np.array(D), maxdim=p, distance_matrix=True)
