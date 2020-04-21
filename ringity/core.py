@@ -5,7 +5,6 @@ from ringity.methods import _yes_or_no
 from ringity.constants import _assertion_statement
 from ringity.exceptions import UnknownGraphType
 
-import matplotlib
 import networkx as nx
 import numpy as np
 import subprocess

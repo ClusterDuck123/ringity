@@ -124,7 +124,7 @@ def stupid_current_distance(G):
                 edge_dict[(v,w)] += abs(p[v]-p[w])
     return edge_dict
 
-def current_flow_betweenness(G):
+def newman_measure(G):
     N = len(G)
     T = prepotential(G)
     I = np.zeros(N)

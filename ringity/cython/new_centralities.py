@@ -16,14 +16,11 @@ def net_flow(G):
     C[1:,1:] = np.linalg.inv(L[1:,1:])
 
     N = G.number_of_nodes()
-    E = G.number_of_edges()
-    B = nx.incidence_matrix(G, oriented=True) #shape=(edges,nodes)
-    F = (C@B).T
+    edge_incidences = iter(nx.incidence_matrix(G, oriented=True).T)
 
-    rows = iter(F)
     edge_dict  = {}
     for e in G.edges:
-        row = next(rows)
+        row  = next(edge_incidences)@C
         rank = scipy.stats.rankdata(row)
         edge_dict[e] = np.sum((2*rank-1-N)*row)
     return edge_dict
@@ -124,7 +121,7 @@ def stupid_current_distance(G):
                 edge_dict[(v,w)] += abs(p[v]-p[w])
     return edge_dict
 
-def current_flow_betweenness(G):
+def newman_measure(G):
     N = len(G)
     T = prepotential(G)
     I = np.zeros(N)
