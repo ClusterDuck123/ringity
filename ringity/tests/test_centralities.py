@@ -12,9 +12,10 @@ import numpy as np
 import ringity as rng
 import networkx as nx
 
-class TestNewmanMeasure(unittest.TestCase):
-
+class TestCurrentFlowCentrality(unittest.TestCase):
     def test_network_1(self):
+        """Test implementation against reported values from network 1 in
+        Newman's paper Fig.3."""
         G_left = nx.complete_graph(range(1,6))
         G_right = nx.complete_graph(range(-5,0))
 
@@ -25,12 +26,14 @@ class TestNewmanMeasure(unittest.TestCase):
 
         G = nx.convert_node_labels_to_integers(G)
 
-        I = rng.newman_measure(G)
+        I = rng.current_flow_betweenness(G)
         sample = set(np.round(I,3))
 
         self.assertEqual(sample, set([0.269, 0.333, 0.67]))
 
     def test_network_2(self):
+        """Test implementation against reported values from network 2 in
+        Newman's paper Fig.3."""
         G_up = nx.path_graph([1,'A','B','C',-1])
         G_down = nx.path_graph([5,'a','b','c',-5])
         G_left = nx.complete_graph(range(1,6))
@@ -45,13 +48,13 @@ class TestNewmanMeasure(unittest.TestCase):
 
         G = nx.convert_node_labels_to_integers(G)
 
-        I = rng.newman_measure(G)
+        I = rng.current_flow_betweenness(G)
         sample = set(np.round(I,3))
 
         self.assertEqual(sample, set([0.194, 0.267, 0.316, 0.321, 0.361, 0.417, 0.471]))
 
 
-class TestCentralityMeasures(unittest.TestCase):
+class TestNetFlowCentrality(unittest.TestCase):
     def setUp(self):
         self.G = nx.erdos_renyi_graph(50,0.3)
 
