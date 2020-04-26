@@ -29,7 +29,7 @@ def net_flow(G):
     return edge_dict
 
 
-def resistance_distance(G, verbose=False):
+def resistance(G):
     L = nx.laplacian_matrix(G)
     Gamm = np.linalg.pinv(L.A)
     diag = np.diag(Gamm)
