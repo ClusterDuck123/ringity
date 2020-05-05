@@ -15,6 +15,7 @@ def diagram(graph = None,
             verbose = False,
             metric = 'net_flow',
             distance_matrix = False,
+            efficiency='speed',
             p = 1):
     """
     Returns the p-persistence diagram of a graph or a distance matrix. The graph
@@ -42,7 +43,10 @@ def diagram(graph = None,
                 print('Self loops in graph detected. They will be removed!')
             G.remove_edges_from(nx.selfloop_edges(G))
 
-        D = get_distance_matrix(G, metric=metric, verbose=verbose)
+        D = get_distance_matrix(G,
+                                metric=metric,
+                                efficiency=efficiency,
+                                verbose=verbose)
 
     t1 = time.time()
     ripser_output = ripser(np.array(D), maxdim=p, distance_matrix=True)
@@ -55,14 +59,17 @@ def diagram(graph = None,
     return dgm
 
 
-def get_distance_matrix(G, metric, verbose=False):
+def get_distance_matrix(G, metric, efficiency='memory', verbose=False):
     if   metric == 'resistance':
         return resistance(G)
     elif metric == 'SPL':
         return nx.floyd_warshall_numpy(G, weight=None).A
     else:
         if not nx.get_edge_attributes(G, metric):
-            induce_weight(G=G, weight=metric, verbose=verbose)
+            induce_weight(G=G,
+                          weight=metric,
+                          efficiency=efficiency,
+                          verbose=verbose)
 
         t1 = time.time()
         D  = nx.floyd_warshall_numpy(G, weight=metric).A
@@ -86,13 +93,13 @@ def existing_edge_attribute_warning(weight):
         return 0
 
 
-def induce_weight(G, weight = 'net_flow', verbose=False):
+def induce_weight(G, weight = 'net_flow', efficiency='memory', verbose=False):
     if verbose and nx.get_edge_attributes(G, weight):
         exit_status = existing_edge_attribute_warning(weight)
         if exit_status: return exit_status
 
     if   weight == 'net_flow':
-        bb = net_flow(G)
+        bb = net_flow(G, efficiency=efficiency)
     elif weight == 'betweenness':
         bb = nx.edge_betweenness_centrality(G)
     elif weight == 'current_flow':
