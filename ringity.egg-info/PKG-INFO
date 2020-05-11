@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: ringity
-Version: 0.0a7
+Version: 0.0a9
 Summary: ringity package
 Home-page: https://github.com/kiri93/ringity
 Author: Markus K. Youssef
@@ -9,8 +9,7 @@ License: UNKNOWN
 Description: ringity
         =======
         
-        ringity is a Python package for the analysis of complex networks 
-        with respect to their global ring structur.
+        ringity is a Python package to analyze networks in their global ring structure.
         
         - **Source:** https://github.com/kiri93/ringity
         - **Bug reports:** https://github.com/kiri93/ringity/issues

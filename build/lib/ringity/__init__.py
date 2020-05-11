@@ -1,16 +1,15 @@
 name = "ringity"
-__author__ = "Markus Kirolos Youssef"
-__version__ = "0.0a7"
+#__author__ = "Markus Kirolos Youssef"
+#__version__ = "0.0a9"
 
-from ringity.methods      import *
-from ringity.classes      import *
-from ringity.core         import *
-from ringity.centralities import *
+from ringity.methods       import *
+from ringity.classes       import *
+from ringity.core          import *
+from ringity.centralities  import *
+from ringity.plots         import *
+from ringity.ringity_model import *
 
 import sys
-
-
-RINGITY_PATH = os.path.dirname(__file__)
 
 # Check for proper Python version
 if sys.version_info[:2] < (3, 6):
