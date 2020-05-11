@@ -8,6 +8,8 @@ ringity/constants.py
 ringity/core.py
 ringity/exceptions.py
 ringity/methods.py
+ringity/plots.py
+ringity/ringity_model.py
 ringity.egg-info/PKG-INFO
 ringity.egg-info/SOURCES.txt
 ringity.egg-info/dependency_links.txt

@@ -19,12 +19,12 @@ def diagram(graph = None,
             p = 1):
     """
     Returns the p-persistence diagram of a graph or a distance matrix. The graph
-    is either given as a networx graph or as a numpy array adjacency matrix. If
+    is either given as a networkx graph or as a numpy array adjacency matrix. If
     a distance matrix is given, the flag distance_matrix=True has to be passed
     manually.
-    The function is looking for an edge attribute specified by metric, if
-    no edge attribute with this name is found, the function get_distance_matrix
-    is invoked.
+    The function is looking for an edge attribute specified by the keyword
+    'metric'. If no edge attribute with this name is found, the function
+    'get_distance_matrix' is invoked.
     """
 
     if distance_matrix:
@@ -59,7 +59,11 @@ def diagram(graph = None,
     return dgm
 
 
-def get_distance_matrix(G, metric, efficiency='memory', verbose=False):
+def get_distance_matrix(G, metric, efficiency='speed', verbose=False):
+    """
+    Returns numpy array of distances for each pair of nodes in the given graph.
+    Distances are specified by the keyword 'metric'.
+    """
     if   metric == 'resistance':
         return resistance(G)
     elif metric == 'SPL':
@@ -93,7 +97,7 @@ def existing_edge_attribute_warning(weight):
         return 0
 
 
-def induce_weight(G, weight = 'net_flow', efficiency='memory', verbose=False):
+def induce_weight(G, weight = 'net_flow', efficiency='speed', verbose=False):
     if verbose and nx.get_edge_attributes(G, weight):
         exit_status = existing_edge_attribute_warning(weight)
         if exit_status: return exit_status

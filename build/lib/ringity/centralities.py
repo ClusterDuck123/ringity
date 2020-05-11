@@ -1,4 +1,5 @@
 from ringity.exceptions import DisconnectedGraphError
+from scipy.stats import rankdata
 
 import time
 import scipy.sparse
@@ -7,35 +8,42 @@ import numpy as np
 import networkx as nx
 
 # Newest version
-def net_flow(G, verbose=False):
+def net_flow(G, efficiency='memory'):
     if not nx.is_connected(G):
         raise DisconnectedGraphError
 
-    L = nx.laplacian_matrix(G).toarray()
+    L = nx.laplacian_matrix(G, weight=None).toarray()
     C = np.zeros(L.shape)
     C[1:,1:] = np.linalg.inv(L[1:,1:])
 
     N = G.number_of_nodes()
     E = G.number_of_edges()
-    B = nx.incidence_matrix(G, oriented=True)
-    F = (C@B).T
+    B = nx.incidence_matrix(G, oriented=True).T #shape=(nodes,edges)
 
-    ranks = map(scipy.stats.rankdata, F)
-    vectors = iter(F)
-    edge_dict  = {}
-    for e in G.edges:
-        edge_dict[e] = np.sum((2*next(ranks)-1-N)*next(vectors))
+    if   efficiency == 'memory':
+        values = np.zeros(G.number_of_edges())
+        for idx, B_row in enumerate(B):
+            F_row = B_row@C
+            rank = rankdata(F_row)
+            values[idx] = np.sum((2*rank-1-N)*F_row)
+    elif efficiency == 'speed':
+        F = B@C
+        F_ranks = np.apply_along_axis(rankdata, arr = F, axis = 1)
+        values = np.sum((2*F_ranks-1-N)*F, axis=1)
+    else:
+        raise Exception("Efficiency unknown.")
+
+    edge_dict  = dict(zip(G.edges, values))
     return edge_dict
 
 
-def resistance_distance(G, verbose=False):
+def resistance(G):
     L = nx.laplacian_matrix(G)
     Gamm = np.linalg.pinv(L.A)
     diag = np.diag(Gamm)
     return (-2*Gamm + diag).T + diag
 
 # ----------------------------- ONLY FOR TESTING -----------------------------
-
 
 def edge_extractor(A):
     N = A.shape[0]
@@ -124,7 +132,7 @@ def stupid_current_distance(G):
                 edge_dict[(v,w)] += abs(p[v]-p[w])
     return edge_dict
 
-def newman_measure(G):
+def current_flow_betweenness(G):
     N = len(G)
     T = prepotential(G)
     I = np.zeros(N)

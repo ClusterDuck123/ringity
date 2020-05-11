@@ -8,11 +8,11 @@ import numpy as np
 import networkx as nx
 
 # Newest version
-def net_flow(G, efficiency='memory'):
+def net_flow(G, efficiency='speed'):
     if not nx.is_connected(G):
         raise DisconnectedGraphError
 
-    L = nx.laplacian_matrix(G).toarray()
+    L = nx.laplacian_matrix(G, weight=None).toarray()
     C = np.zeros(L.shape)
     C[1:,1:] = np.linalg.inv(L[1:,1:])
 

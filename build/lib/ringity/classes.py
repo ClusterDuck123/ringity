@@ -203,6 +203,16 @@ class Dgm():
         else:
             return Dgm(self.values[:n])
 
+    def crop(self, n, inplace=False):
+        if inplace:
+            dgm = self
+        else:
+            dgm = self.copy()
+        for i in range(n):
+            dgm.append((0,0))
+        return dgm.cap(n, inplace=False)
+
+
     def copy(self, index=False):
         dgm = eval(repr(self))
         if index:
