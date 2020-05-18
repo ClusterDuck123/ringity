@@ -8,7 +8,7 @@ import numpy as np
 import networkx as nx
 
 # Newest version
-def net_flow(G, efficiency='memory'):
+def net_flow(G, efficiency='speed'):
     if not nx.is_connected(G):
         raise DisconnectedGraphError
 

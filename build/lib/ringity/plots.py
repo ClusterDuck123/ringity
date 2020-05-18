@@ -1,17 +1,16 @@
-import seaborn as sns
 import networkx as nx
 import matplotlib.pyplot as plt
 
-CEMM_COL1 = [  0/255,  85/255, 100/255]
-CEMM_COL2 = [  0/255, 140/255, 160/255]
-CEMM_COL3 = [ 64/255, 185/255, 212/255]
-CEMM_COL4 = [212/255, 236/255, 242/255]
+CEMM_COL1 = (  0/255,  85/255, 100/255)
+CEMM_COL2 = (  0/255, 140/255, 160/255)
+CEMM_COL3 = ( 64/255, 185/255, 212/255)
+CEMM_COL4 = (212/255, 236/255, 242/255)
 
-DARK_CEMM_COL1 = [0/255, 43/255, 50/255]
-BAR_COL = sns.color_palette('bright')[7]
+DARK_CEMM_COL1 = (0/255, 43/255, 50/255)
+BAR_COL = (0.639, 0.639, 0.639)
 
 def set():
-    sns.set()
+    #sns.set()  <--- costumize rc!
     plt.rc('axes', labelsize=24, titlesize=28)
     plt.rc('xtick', labelsize=24)
     plt.rc('ytick', labelsize=24)
