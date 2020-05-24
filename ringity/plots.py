@@ -28,16 +28,18 @@ def ax_setup(ax):
     ax.spines['bottom'].set_color('k')
 
 # -------------------------------- ACTUAL PLOTS --------------------------------
-
-def plot_bar(dgm, ax=None, cap=None, **kwargs):
+def plot_seq(dgm, crop=None, ax=None, **kwargs):
     if ax is None:
         fig, ax = plt.subplots()
         fig.patch.set_alpha(0)
-    if cap is not None:
-        for i in range(cap): dgm.append((0,0))
+
+    if crop is None:
+        dgm_plot = dgm.copy()
+    else:
+        dgm_plot = dgm.crop(crop)
 
     ax_setup(ax)
-    bar = list(dgm.sequence)[:cap]
+    bar = list(dgm_plot.sequence)
     ax.bar(range(len(bar)), bar, color=BAR_COL);
 
 
