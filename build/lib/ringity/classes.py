@@ -7,18 +7,9 @@ import warnings
 import numpy as np
 
 
-"""
-===============================================================================
- _______  _______ _________          _______  ______   _______
-(       )(  ____ \\__   __/|\     /|(  ___  )(  __  \ (  ____ \
-| () () || (    \/   ) (   | )   ( || (   ) || (  \  )| (    \/
-| || || || (__       | |   | (___) || |   | || |   ) || (_____
-| |(_)| ||  __)      | |   |  ___  || |   | || |   | |(_____  )
-| |   | || (         | |   | (   ) || |   | || |   ) |      ) |
-| )   ( || (____/\   | |   | )   ( || (___) || (__/  )/\____) |
-|/     \|(_______/   )_(   |/     \|(_______)(______/ \_______)
-===============================================================================
-"""
+# =============================================================================
+#  -------------------------------- Dgm METHODS ------------------------------
+# =============================================================================
 
 def score(iterable, sort=True, **kwargs):
     if sort:
@@ -63,29 +54,22 @@ def indexify_dgm(dgm, inplace=False):
         return Dgm(DgmPt(*map(value2index.get,pt)) for pt in dgm)
 
 
-"""
-===============================================================================
- _______  _        _______  _______  _______  _______  _______
-(  ____ \( \      (  ___  )(  ____ \(  ____ \(  ____ \(  ____ \
-| (    \/| (      | (   ) || (    \/| (    \/| (    \/| (    \/
-| |      | |      | (___) || (_____ | (_____ | (__    | (_____
-| |      | |      |  ___  |(_____  )(_____  )|  __)   (_____  )
-| |      | |      | (   ) |      ) |      ) || (            ) |
-| (____/\| (____/\| )   ( |/\____) |/\____) || (____/\/\____) |
-(_______/(_______/|/     \|\_______)\_______)(_______/\_______)
-===============================================================================
-"""
+# =============================================================================
+#  ------------------------------- DgmPt CLASS -------------------------------
+# =============================================================================
 
 class DgmPt():
-    def __init__(self, birth=0, death=np.inf):
+    def __init__(self, birth=0, death=0):
         self._birth = birth
         self._death = death
         if birth > death:
-            raise TimeParadoxError('Homology class cannot die before it was born! '
-                              f'({birth}, {death})')
+            raise TimeParadoxError(
+                        'Homology class cannot die before it was born! '
+                       f'DgmPt = ({birth}, {death})')
         if birth < 0:
-            raise BeginningOfTimeError('Hole must be born after '
-                                       f'beginning of time! {birth}')
+            raise BeginningOfTimeError(
+                        'Hole must be born after the beginning of time! '
+                       f'DgmPt.birth = {birth}')
     def __getitem__(self, key):
         if   key == 0:
             return self.birth
@@ -111,7 +95,7 @@ class DgmPt():
     def __truediv__(self, other):
         return DgmPt(self._birth/other, self._death/other)
 
-
+# -------------------------------- Proerties ---------------------------------
     @property
     def birth(self):
         return self._birth
@@ -129,9 +113,14 @@ class DgmPt():
     def y(self):
         return self._death
 
-
-
+# =============================================================================
+#  -------------------------------- Dgm CLASS --------------------------------
+# =============================================================================
 class Dgm():
+    """
+    Immutable collection of DgmPt's sorted (in decending order) by their
+    persistences.
+    """
     def __init__(self, pts=[]):
         if isinstance(pts,np.ndarray):
             m, n = pts.shape
@@ -139,9 +128,9 @@ class Dgm():
             if n != 2:
                 pts = pts.T
 
-        self._values = sorted(starmap(DgmPt,pts),
-                              key=lambda pt:pt.persistence,
-                              reverse=True)
+        self._values = tuple(sorted(starmap(DgmPt,pts),
+                                    key=lambda pt:pt.persistence,
+                                    reverse=True))
 
     def __getitem__(self, item):
         return self.values[item]
@@ -158,7 +147,7 @@ class Dgm():
     def __truediv__(self, other):
         return Dgm(pt/other for pt in self)
 
-
+# -------------------------------- Proerties ---------------------------------
     @property
     def values(self):
         return self._values
@@ -174,7 +163,7 @@ class Dgm():
         return self[0].persistence
     @property
     def sequence(self):
-        return (pt.persistence/self.signal for pt in self)
+        return tuple(pt.persistence/self.signal for pt in self)
     @property
     def gap(self):
         return self.signal - self[1].persistence
@@ -186,31 +175,21 @@ class Dgm():
             iter_sequence = islice(enumerate(self.sequence), 1, max_len)
             return 1-sum(pers/2**i for i,pers in iter_sequence)
 
-
+# --------------------------------- Methods ----------------------------------
     def save(self, fname, **kwargs):
         save_dgm(self.values, fname, **kwargs)
 
-    def append(self, pt):
-        dgm_pt = DgmPt(*pt)
-        self._values.append(dgm_pt)
-        self._values = sorted(self._values,
-                              key=lambda pt:pt.persistence,
-                              reverse=True)
+    def add(self, pt):
+        return Dgm(self._values + (tuple(pt),))
 
-    def cap(self, n, inplace=False):
-        if inplace:
-            self._values = self.values[:n]
-        else:
-            return Dgm(self.values[:n])
+    def cap(self, n):
+        return Dgm(self.values[:n])
 
-    def crop(self, n, inplace=False):
-        if inplace:
-            dgm = self
-        else:
-            dgm = self.copy()
+    def crop(self, n):   # needs to be improved!
+        dgm_new = self.copy()
         for i in range(n):
-            dgm.append((0,0))
-        return dgm.cap(n, inplace=False)
+            dgm_new = dgm_new.add((0,0))
+        return Dgm(dgm_new.values[:n])
 
 
     def copy(self, index=False):

@@ -35,7 +35,7 @@ class TestDgm(unittest.TestCase):
 
     def test_score2(self):
         dgm = ringity.classes.Dgm(self.noise for _ in range(100))
-        dgm.append(self.signal)
+        dgm = dgm.add(self.signal)
         self.assertAlmostEqual(dgm.score, 1,
                                places=8)
 
