@@ -5,7 +5,7 @@ with open("README.rst", "r") as f:
 
 setuptools.setup(
     name="ringity",
-    version="0.0a11",
+    version="0.0a13",
     author="Markus K. Youssef",
     author_email="mk.youssef@hotmail.com",
     description="ringity package",
@@ -13,12 +13,12 @@ setuptools.setup(
     long_description_content_type="text/x-rst",
     url="https://github.com/kiri93/ringity",
     packages=['ringity'],
+    install_requires=['matplotlib', 'ripser', 'networkx', 'numpy', 'scipy'],
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: Unix",
         "Topic :: Communications :: Email",
-        "Development Status :: 2 - Pre-Alpha"
+        "Development Status :: 3 - Alpha"
     ],
     python_requires='>=3.6',
 )

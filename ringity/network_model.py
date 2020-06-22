@@ -35,10 +35,10 @@ def connection_function(rho, eta, a, kappa):
 #  ------------------------------  NETWORK MODEL ----------------------------
 # =============================================================================
 
-def network_model_distributions(N, rho, eta=0, a=0.5, kappa=0):
+def network_model_samples(N, rho, eta=0, a=0.5, kappa=0):
     """
-    Returns the distribution of the Network model as described in [1]
-    The output is the (empirical) distributions of the
+    Returns samples of the Network model as described in [1]
+    The outputs are samples of the
      - positions of the nodes placed on the circle according to a von
        Mises distribution,
      - their pairwise distances
@@ -71,7 +71,7 @@ def network_model(N, rho, eta=0, kappa=0, a=0.5):
     followed by a tripple consisting of the (empirical) distribution of the
     pairwise distances, similarities and connection probabilities respectively.
     """
-    positions, NDM, NSM, NPM = network_model_distributions(N = N,
+    positions, NDM, NSM, NPM = network_model_samples(N = N,
                                                            rho = rho,
                                                            eta = eta,
                                                            kappa = kappa,
