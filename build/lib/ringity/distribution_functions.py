@@ -148,13 +148,20 @@ def get_mu(rho, eta, a, kappa, maxiter=100):
         return 1-rho/(2*a)
 
 # For eta = 0, the Beta distribution becomes a Delta distribution centered at
-# mu. This simplifis some calculations. [INTUITION MISSING!]
+# mu. The simpified equation is now F_{similarity}(mu) = 1-rho.
+# This is equivalent to F_{distance}(2*a*PI*(1-mu)) = rho.
     elif eta == 0:
         return scipy.optimize.newton(
             func = lambda mu: cdf_distance(2*a*PI*(1-mu), kappa=kappa) - rho,
             x0 = 1-rho/(2*a),
             fprime = lambda mu: -2*a*PI*pdf_distance(2*a*PI*(1-mu), kappa=kappa),
             maxiter = maxiter)
+
+# For eta = 1, the Beta distribution becomes a Bernoulli distribution with
+#expected value being mu. This simplifis some calculations. [INTUITION MISSING!]
+    elif eta == 1:
+        F0 = cdf_similarity(0, a=a, kappa=kappa)
+        return (1-rho-F0)/(1-F0)
 
 # General case, a.k.a. I didn't bother anymore to simplify the integral.
 # [CLEAN-UP, fprime IS MISSING FOR SPEED-UP]

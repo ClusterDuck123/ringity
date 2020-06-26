@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: ringity
-Version: 0.0a13
+Version: 0.0a14
 Summary: ringity package
 Home-page: https://github.com/kiri93/ringity
 Author: Markus K. Youssef
@@ -60,10 +60,9 @@ Description: ringity
            Copyright (c) 2019 Markus K. Youssef <mk.youssef@hotmail.com>
         
 Platform: UNKNOWN
-Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
 Classifier: License :: OSI Approved :: MIT License
-Classifier: Operating System :: Unix
 Classifier: Topic :: Communications :: Email
-Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Development Status :: 3 - Alpha
 Requires-Python: >=3.6
 Description-Content-Type: text/x-rst
