@@ -1,5 +1,5 @@
 from ringity.distribution_functions import get_mu, mueta_to_alphabeta
-from scipy.spatial.distance import squareform
+from scipy.spatial.distance import pdist, squareform
 from numpy import pi as PI
 
 import scipy
@@ -9,6 +9,10 @@ import networkx as nx
 # =============================================================================
 #  -------------------------------  PREPARATION -----------------------------
 # =============================================================================
+def geodesic_distances(thetas):
+    abs_dist = pdist(thetas.reshape(-1,1))
+    return np.where(abs_dist<PI, abs_dist, 2*PI-abs_dist)
+
 
 def overlap(dist, a):
     """
@@ -72,10 +76,10 @@ def network_model(N, rho, eta=0, kappa=0, a=0.5):
     pairwise distances, similarities and connection probabilities respectively.
     """
     positions, NDM, NSM, NPM = network_model_samples(N = N,
-                                                           rho = rho,
-                                                           eta = eta,
-                                                           kappa = kappa,
-                                                           a = a)
+                                                     rho = rho,
+                                                     eta = eta,
+                                                     kappa = kappa,
+                                                     a = a)
     R = squareform(np.random.uniform(size=round(N*(N-1)/2)))
     A = np.where(NPM>R, 1, 0)
     G = nx.from_numpy_array(A)

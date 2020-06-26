@@ -5,7 +5,7 @@ with open("README.rst", "r") as f:
 
 setuptools.setup(
     name="ringity",
-    version="0.0a13",
+    version="0.0a14",
     author="Markus K. Youssef",
     author_email="mk.youssef@hotmail.com",
     description="ringity package",

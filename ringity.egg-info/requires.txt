@@ -1,0 +1,5 @@
+matplotlib
+ripser
+networkx
+numpy
+scipy
