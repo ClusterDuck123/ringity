@@ -3,23 +3,22 @@ from numpy import pi as PI
 import scipy
 import numpy as np
 
-
 # =============================================================================
 #  ---------------- (DIS-)SIMILARITY DISTRIBUTION FUNCTIONS ------------------
 # =============================================================================
 def pdf_distance(t, kappa):
     """
     Cumulative distribution function of (circular) distance of two wrapped
-    exponentialy distributed random variables with "concentration parameter"
-    kappa. Support is on [0,pi].
+    exponentialy distributed random variables with scale parameter kappa.
+    Support is on [0,pi].
     """
     support = np.where((0<t) & (t<PI), 1., 0.)
     return support * kappa/np.sinh(PI*kappa) * np.cosh((PI-t)*kappa)
 
 def cdf_distance(t, kappa):
     """
-    Cumulative distribution function of (circular) distance of two von Mises
-    distributed random variables with concentration parameter kappa.
+    Cumulative distribution function of (circular) distance of two wrapped
+    exponentialy distributed random variables with scale parameter kappa.
     F(t)=0 for t<0 and F(t)=1 for t>pi.
     """
     support = np.where(0<=t, 1., 0.)
