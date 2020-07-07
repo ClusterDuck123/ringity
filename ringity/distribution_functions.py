@@ -10,7 +10,7 @@ def pdf_distance(t, kappa):
     """
     Cumulative distribution function of (circular) distance of two wrapped
     exponentialy distributed random variables with scale parameter kappa.
-    Support is on [0,pi].
+    Support is on [0,1].
     """
     support = np.where((0<t) & (t<PI), 1., 0.)
     return support * kappa/np.sinh(PI*kappa) * np.cosh((PI-t)*kappa)
@@ -22,23 +22,22 @@ def cdf_distance(t, kappa):
     F(t)=0 for t<0 and F(t)=1 for t>pi.
     """
     support = np.where(0<=t, 1., 0.)
-    term = 1 - np.sinh((PI-t)*kappa) / np.sinh(PI*kappa)
-    return support * np.where(t>=PI,1,term)
+    values = 1 - np.sinh((PI-t)*kappa) / np.sinh(PI*kappa)
+    return support * np.where(t>=PI,1,values)
 
 def pdf_similarity(t, kappa, a):
     """
-    Probability density function of s_a ∘ d(X,Y), where X,Y are two wrapped
-    exponentially distributed random variables with scale parameter 1/kappa,
-    d(-,-) denotes the distance on the circle and s_a(-) is the area of the
-    (normalized) overlap of two boxes of length 2*pi*a on the circle for a
-    given distance (measured from center to center). Normalization is taken
-    to be the area of one box, 2*pi*a, to ensure the support being on [0,1].
-
-    Function not implemented yet for a>0.5!
+    (Continuous part of the) probability density function of s_a ∘ d(X,Y),
+    where X,Y are two wrapped exponentially distributed random variables
+    with scale parameter 1/kappa, d(-,-) denotes the distance on the circle
+    and s_a(-) is the area of the (normalized) overlap of two boxes of length
+    2*pi*a on the circle for a given distance (measured from edge to edge,
+    or equivalently from center to center).
+    Normalization is taken to be the area of one box, 2*pi*a. Hence, the
+    support is on [s_min,pi], where s_min=|2-1/a|^+.
     """
-    assert 0 <= a <= 0.5, f'Function not implemented yet for a>0.5! a={a}'
-
-    support = np.where((0<=t) & (t<=1), 1., 0.)
+    s_min = np.clip(2-1/a,0,1)
+    support = np.where((s_min<=t) & (t<=1), 1., 0.)
     return support * 2*a*PI*pdf_distance(2*a*PI*(1-t), kappa)
 
 def cdf_similarity(t, kappa, a):
@@ -47,16 +46,15 @@ def cdf_similarity(t, kappa, a):
     exponentially distributed random variables with scale parameter 1/kappa,
     d(-,-) denotes the distance on the circle and s_a(-) is the area of the
     (normalized) overlap of two boxes of length 2*pi*a on the circle for a
-    given distance (measured from center to center). Normalization is taken
-    to be the area of one box, 2*pi*a, to ensure the support being on [0,1].
-
-    Function not implemented yet for a>0.5!
+    given distance (measured from edge to edge, or equivalently from center
+    to center).
+    Normalization is taken to be the area of one box, 2*pi*a. Hence, the
+    support is on [s_min,pi], where s_min=|2-1/a|^+.
     """
-    assert 0 <= a <= 0.5, f'Function not implemented yet for a>0.5! a={a}'
-
-    support = np.where(0<=t, 1., 0.)
-    term = 1 - cdf_distance(2*a*PI*(1-t), kappa=kappa)
-    return support * np.where(t>=1, 1., term)
+    s_min = np.clip(2-1/a,0,1)
+    support = np.where(s_min<=t, 1., 0.)
+    values = 1 - cdf_distance(2*a*PI*(1-t), kappa=kappa)
+    return support * np.where(t>=1, 1., values)
 
 def mean_similarity(kappa, a):
     numer = 2*np.sinh(PI*kappa)*np.sinh((1-a)*PI*kappa)*np.sinh(a*PI*kappa)

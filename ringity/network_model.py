@@ -9,6 +9,15 @@ import networkx as nx
 # =============================================================================
 #  -------------------------------  PREPARATION -----------------------------
 # =============================================================================
+def get_positions(N, beta):
+    if   beta == 0:
+        return np.zeros(N)
+    elif beta == 1:
+        return np.random.uniform(0,2*PI, size=N)
+    else:
+        return np.random.exponential(scale=1/np.tan(PI*(1-beta)/2), size=N) % (2*PI)
+
+
 def geodesic_distances(thetas):
     abs_dists = pdist(thetas.reshape(-1,1))
     return np.where(abs_dists<PI, abs_dists, 2*PI-abs_dists)
@@ -60,12 +69,13 @@ def weighted_network_model(N, rho, beta, a=0.5, return_positions=False):
     # just maiking sure no one tries to be funny...
 
     assert 0 <= beta <= 1
-    assert 0 <   a   <= 0.5
+    assert 0 <   a   <= 1
     assert 0 <= rho  <= 1
 
-    if beta == 0:
+    if beta == 0 or a == 1:
         posis = np.zeros(N)
-        probs = rho*np.ones(int(N*(N-1)/2))
+        simis = np.ones(int(N*(N-1)/2))
+        k = rho
     elif beta == 1:
         assert rho < 2*a, "Please increase `a` or decrease `rho`!"
         posis = np.random.uniform(0,2*PI, size=N)
@@ -76,15 +86,15 @@ def weighted_network_model(N, rho, beta, a=0.5, return_positions=False):
             k = rho/a
         else:
             k = a/(2*a-rho)
-        probs = (simis*k).clip(0,1)
     else:
         kappa = np.tan(PI*(1-beta)/2)
         assert rho < 1-np.sinh((PI-2*a*PI)*kappa) / np.sinh(PI*kappa), "Please increase `a` or decrease `rho`!"
         posis = np.random.exponential(scale=1/kappa, size=N) % (2*PI)
         dists = geodesic_distances(posis)
         simis = overlap(dists, a)/(2*PI*a)
-        probs = (simis*slope(rho, kappa, a)).clip(0,1)
+        k = slope(rho, kappa, a)
 
+    probs = (simis*k).clip(0,1)
     if return_positions:
         return posis, probs
     else:
