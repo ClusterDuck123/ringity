@@ -53,7 +53,7 @@ def slope(rho, kappa, a):
 
 def get_a_min(rho, beta):
     if   beta == 0:
-        return 1
+        return 0.
     elif beta == 1:
         return rho/2
     else:
@@ -84,7 +84,7 @@ def weighted_network_model(N, rho, beta, a=None, return_positions=False):
     if a is None:
         a = a_min
 
-    assert 0 < a <= 1
+    assert 0 <= a <= 1
 
     if beta == 0 or a == 1:
         posis = np.zeros(N)
