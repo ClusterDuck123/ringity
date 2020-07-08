@@ -51,11 +51,20 @@ def slope(rho, kappa, a):
             func = lambda k: const*integral(k) + (1-cdf_similarity(1/k, kappa, a)) - rho,
             x0 = rho/mu_S)
 
+def get_a_min(rho, beta):
+    if   beta == 0:
+        return 1
+    elif beta == 1:
+        return rho/2
+    else:
+        kappa = np.tan(PI*(1-beta)/2)
+        x = np.sinh(PI*kappa)*(1-rho)
+        return 1/2-np.log(np.sqrt(x**2+1)+x)/(2*PI*kappa)
 # =============================================================================
 #  ------------------------------  NETWORK MODEL ----------------------------
 # =============================================================================
 
-def weighted_network_model(N, rho, beta, a=0.5, return_positions=False):
+def weighted_network_model(N, rho, beta, a=None, return_positions=False):
     """
     Returns samples of the Network model as described in [1]
     The outputs are samples of the
@@ -67,34 +76,51 @@ def weighted_network_model(N, rho, beta, a=0.5, return_positions=False):
     """
 
     # just maiking sure no one tries to be funny...
-
     assert 0 <= beta <= 1
-    assert 0 <   a   <= 1
     assert 0 <= rho  <= 1
+
+    a_min   = get_a_min(rho, beta)
+
+    if a is None:
+        a = a_min
+
+    assert 0 < a <= 1
 
     if beta == 0 or a == 1:
         posis = np.zeros(N)
         simis = np.ones(int(N*(N-1)/2))
         k = rho
+        probs = (simis*k).clip(0,1)
     elif beta == 1:
-        assert rho < 2*a, "Please increase `a` or decrease `rho`!"
         posis = np.random.uniform(0,2*PI, size=N)
         dists = geodesic_distances(posis)
         simis = overlap(dists, a)/(2*PI*a)
 
-        if rho <= a:
+        if np.isclose(a,a_min):
+            probs = np.sign(simis)
+        elif rho <= a:
             k = rho/a
-        else:
+            probs = (simis*k).clip(0,1)
+        elif rho < 2*a:
             k = a/(2*a-rho)
+            probs = (simis*k).clip(0,1)
+        else:
+            assert rho <= 2*a, "Please increase `a` or decrease `rho`!"
     else:
         kappa = np.tan(PI*(1-beta)/2)
-        assert rho < 1-np.sinh((PI-2*a*PI)*kappa) / np.sinh(PI*kappa), "Please increase `a` or decrease `rho`!"
         posis = np.random.exponential(scale=1/kappa, size=N) % (2*PI)
         dists = geodesic_distances(posis)
         simis = overlap(dists, a)/(2*PI*a)
-        k = slope(rho, kappa, a)
 
-    probs = (simis*k).clip(0,1)
+        rho_max = 1-np.sinh((PI-2*a*PI)*kappa)/np.sinh(PI*kappa)
+        if np.isclose(rho,rho_max):
+            probs = np.sign(simis)
+        elif rho < 1-np.sinh((PI-2*a*PI)*kappa)/np.sinh(PI*kappa):
+            k = slope(rho, kappa, a)
+            probs = (simis*k).clip(0,1)
+        else:
+            assert rho <= rho_max, "Please increase `a` or decrease `rho`!"
+
     if return_positions:
         return posis, probs
     else:
