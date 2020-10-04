@@ -32,7 +32,7 @@ def overlap(dist, a):
     x1 = (2*PI*a-dist).clip(0)
     if a <= 0.5:
         return x1
-    # for box sizesw with a>0 there is a second overlap
+    # for box sizes with a>0 there is a second overlap
     else:
         x2 = (dist-2*PI*(1-a)).clip(0)
         return x1 + x2
@@ -60,6 +60,8 @@ def get_a_min(rho, beta):
         kappa = np.tan(PI*(1-beta)/2)
         x = np.sinh(PI*kappa)*(1-rho)
         return 1/2-np.log(np.sqrt(x**2+1)+x)/(2*PI*kappa)
+
+
 # =============================================================================
 #  ------------------------------  NETWORK MODEL ----------------------------
 # =============================================================================
