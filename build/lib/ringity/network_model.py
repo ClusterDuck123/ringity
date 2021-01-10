@@ -32,7 +32,7 @@ def overlap(dist, a):
     x1 = (2*PI*a-dist).clip(0)
     if a <= 0.5:
         return x1
-    # for box sizesw with a>0 there is a second overlap
+    # for box sizes with a>0 there is a second overlap
     else:
         x2 = (dist-2*PI*(1-a)).clip(0)
         return x1 + x2
@@ -53,13 +53,15 @@ def slope(rho, kappa, a):
 
 def get_a_min(rho, beta):
     if   beta == 0:
-        return 1
+        return 0.
     elif beta == 1:
         return rho/2
     else:
         kappa = np.tan(PI*(1-beta)/2)
         x = np.sinh(PI*kappa)*(1-rho)
         return 1/2-np.log(np.sqrt(x**2+1)+x)/(2*PI*kappa)
+
+
 # =============================================================================
 #  ------------------------------  NETWORK MODEL ----------------------------
 # =============================================================================
@@ -84,7 +86,7 @@ def weighted_network_model(N, rho, beta, a=None, return_positions=False):
     if a is None:
         a = a_min
 
-    assert 0 < a <= 1
+    assert 0 <= a <= 1
 
     if beta == 0 or a == 1:
         posis = np.zeros(N)

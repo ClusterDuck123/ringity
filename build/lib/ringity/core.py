@@ -67,7 +67,7 @@ def get_distance_matrix(G, metric, efficiency='speed', verbose=False):
     if   metric == 'resistance':
         return resistance(G)
     elif metric == 'SPL':
-        return nx.floyd_warshall_numpy(G, weight=None).A
+        return nx.floyd_warshall_numpy(G, weight=None)
     else:
         if not nx.get_edge_attributes(G, metric):
             induce_weight(G=G,
@@ -76,7 +76,7 @@ def get_distance_matrix(G, metric, efficiency='speed', verbose=False):
                           verbose=verbose)
 
         t1 = time.time()
-        D  = nx.floyd_warshall_numpy(G, weight=metric).A
+        D  = nx.floyd_warshall_numpy(G, weight=metric)
         t2 = time.time()
 
         if verbose:

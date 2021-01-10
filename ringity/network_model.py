@@ -18,7 +18,7 @@ def get_positions(N, beta):
         return np.random.exponential(scale=1/np.tan(PI*(1-beta)/2), size=N) % (2*PI)
 
 
-def geodesic_distances(thetas):
+def circular_distances(thetas):
     abs_dists = pdist(thetas.reshape(-1,1))
     return np.where(abs_dists<PI, abs_dists, 2*PI-abs_dists)
 
@@ -37,18 +37,18 @@ def overlap(dist, a):
         x2 = (dist-2*PI*(1-a)).clip(0)
         return x1 + x2
 
-def slope(rho, kappa, a):
-    mu_S = mean_similarity(kappa,a)
+def slope(rho, rate, a):
+    mu_S = mean_similarity(rate,a)
     if rho <= mu_S:
         return rho/mu_S
     else:
-        const = 1/np.sinh(PI*kappa)
+        const = 1/np.sinh(PI*rate)
         def integral(k): # This can probably be further simplified
-            term1 = np.sinh((1 + 2*a*(1/k-1))*PI*kappa)
-            term2 = (k*np.sinh((a*PI*kappa)/k)*np.sinh(((a+k-2*a*k)*PI*kappa)/k))/(a*PI*kappa)
+            term1 = np.sinh((1 + 2*a*(1/k-1))*PI*rate)
+            term2 = (k*np.sinh((a*PI*rate)/k)*np.sinh(((a+k-2*a*k)*PI*rate)/k))/(a*PI*rate)
             return term1-term2
         return scipy.optimize.newton(
-            func = lambda k: const*integral(k) + (1-cdf_similarity(1/k, kappa, a)) - rho,
+            func = lambda k: const*integral(k) + (1-cdf_similarity(1/k, rate, a)) - rho,
             x0 = rho/mu_S)
 
 def get_a_min(rho, beta):
@@ -57,9 +57,9 @@ def get_a_min(rho, beta):
     elif beta == 1:
         return rho/2
     else:
-        kappa = np.tan(PI*(1-beta)/2)
-        x = np.sinh(PI*kappa)*(1-rho)
-        return 1/2-np.log(np.sqrt(x**2+1)+x)/(2*PI*kappa)
+        rate = np.tan(PI*(1-beta)/2)
+        x = np.sinh(PI*rate)*(1-rho)
+        return 1/2-np.log(np.sqrt(x**2+1)+x)/(2*PI*rate)
 
 
 # =============================================================================
@@ -77,7 +77,7 @@ def weighted_network_model(N, rho, beta, a=None, return_positions=False):
      - their connection probabilities, given the expected density rho.
     """
 
-    # just maiking sure no one tries to be funny...
+    # just making sure no one tries to be funny...
     assert 0 <= beta <= 1
     assert 0 <= rho  <= 1
 
@@ -95,7 +95,7 @@ def weighted_network_model(N, rho, beta, a=None, return_positions=False):
         probs = (simis*k).clip(0,1)
     elif beta == 1:
         posis = np.random.uniform(0,2*PI, size=N)
-        dists = geodesic_distances(posis)
+        dists = circular_distances(posis)
         simis = overlap(dists, a)/(2*PI*a)
 
         if np.isclose(a,a_min):
@@ -109,16 +109,16 @@ def weighted_network_model(N, rho, beta, a=None, return_positions=False):
         else:
             assert rho <= 2*a, "Please increase `a` or decrease `rho`!"
     else:
-        kappa = np.tan(PI*(1-beta)/2)
-        posis = np.random.exponential(scale=1/kappa, size=N) % (2*PI)
-        dists = geodesic_distances(posis)
+        rate = np.tan(PI*(1-beta)/2)
+        posis = np.random.exponential(scale=1/rate, size=N) % (2*PI)
+        dists = circular_distances(posis)
         simis = overlap(dists, a)/(2*PI*a)
 
-        rho_max = 1-np.sinh((PI-2*a*PI)*kappa)/np.sinh(PI*kappa)
+        rho_max = 1-np.sinh((PI-2*a*PI)*rate)/np.sinh(PI*rate)
         if np.isclose(rho,rho_max):
             probs = np.sign(simis)
-        elif rho < 1-np.sinh((PI-2*a*PI)*kappa)/np.sinh(PI*kappa):
-            k = slope(rho, kappa, a)
+        elif rho < 1-np.sinh((PI-2*a*PI)*rate)/np.sinh(PI*rate):
+            k = slope(rho, rate, a)
             probs = (simis*k).clip(0,1)
         else:
             assert rho <= rho_max, "Please increase `a` or decrease `rho`!"
