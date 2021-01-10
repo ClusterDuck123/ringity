@@ -3,7 +3,7 @@ from numpy import pi as PI
 import scipy
 import numpy as np
 
-def get_lambda(theta, parameter_type):
+def get_rate_parameter(theta, parameter_type):
     if   parameter_type.lower() == 'rate':
         return theta
     elif parameter_type.lower() == 'shape':
@@ -21,9 +21,11 @@ def pdf_delay(t, theta, parameter_type='rate'):
     specified by the `parameter_type`.
     Support is on [0,2*pi].
     """
-    _lambda = get_lambda(theta, parameter_type)
+    rate = get_rate_parameter(theta, parameter_type)
     support = np.where((0<t) & (t<2*np.pi), 1., 0.)
-    return support * _lambda*np.exp(-t*_lambda)/(1-np.exp(-2*np.pi*_lambda))
+    values  = np.exp(-t*rate)
+    normalization = rate / (1-np.exp(-2*np.pi*rate))
+    return support * values * normalization
 
 
 def pdf_absolute_distance(t, theta, parameter_type='rate'):
@@ -32,10 +34,11 @@ def pdf_absolute_distance(t, theta, parameter_type='rate'):
     exponentialy distributed random variables with scale parameter kappa.
     Support is on [0,2pi].
     """
-    _lambda = get_lambda(theta, parameter_type)
+    rate = get_rate_parameter(theta, parameter_type)
     support = np.where((0<t) & (t<2*PI), 1., 0.)
-    return support * _lambda* (np.exp(-t*_lambda)-np.exp(_lambda*(t-4*PI))) /\
-                     (np.exp(-4*PI*_lambda)*(np.exp(2*PI*_lambda)-1)**2)
+    values  = np.exp(-t*rate) - np.exp(rate*(t-4*PI))
+    normalization = rate / (np.exp(-4*PI*rate)*(np.exp(2*PI*rate)-1)**2)
+    return support * values * normalization
 
 
 # =============================================================================
@@ -47,9 +50,11 @@ def pdf_circular_distance(t, theta, parameter_type='rate'):
     exponentialy distributed random variables with scale parameter kappa.
     Support is on [0,pi].
     """
-    _lambda = get_lambda(theta, parameter_type)
+    rate = get_rate_parameter(theta, parameter_type)
     support = np.where((0<t) & (t<PI), 1., 0.)
-    return support * _lambda/np.sinh(PI*_lambda) * np.cosh((PI-t)*_lambda)
+    values  = np.cosh((PI-t)*rate)
+    normalization  = rate/np.sinh(PI*rate)
+    return support * values * normalization
 
 def cdf_circular_distance(t, theta, parameter_type='rate'):
     """
@@ -57,10 +62,11 @@ def cdf_circular_distance(t, theta, parameter_type='rate'):
     exponentialy distributed random variables with scale parameter kappa.
     F(t)=0 for t<0 and F(t)=1 for t>pi.
     """
-    _lambda = get_lambda(theta, parameter_type)
+    rate = get_rate_parameter(theta, parameter_type)
     support = np.where(0<=t, 1., 0.)
-    values = 1 - np.sinh((PI-t)*rate) / np.sinh(PI*rate)
-    return support * np.where(t>=PI,1,values)
+    values = np.sinh(rate*(PI-t))
+    normalization = 1 / np.sinh(rate*PI)
+    return support * np.where(t >= PI, 1, 1-values*normalization)
 
 def pdf_similarity(t, theta, a, parameter_type='rate'):
     """
@@ -73,11 +79,12 @@ def pdf_similarity(t, theta, a, parameter_type='rate'):
     Normalization is taken to be the area of one box, 2*pi*a. Hence, the
     support is on [s_min,pi], where s_min=|2-1/a|^+.
     """
+    rate = get_rate_parameter(theta, parameter_type)
     s_min = np.clip(2-1/a,0,1)
     support = np.where((s_min<=t) & (t<=1), 1., 0.)
-    return support * 2*a*PI*pdf_circular_distance(2*a*PI*(1-t),
-                                                  theta,
-                                                  parameter_type = parameter_type)
+    values  = np.cosh(PI*rate * (1-2*a*(1-t)))
+    normalization = 2*a*PI * rate / np.sinh(PI*rate)
+    return support * values * normalization
 
 def cdf_similarity(t, theta, a, parameter_type='rate'):
     """
@@ -90,14 +97,15 @@ def cdf_similarity(t, theta, a, parameter_type='rate'):
     Normalization is taken to be the area of one box, 2*pi*a. Hence, the
     support is on [s_min,pi], where s_min=|2-1/a|^+.
     """
-    _lambda = get_lambda(theta, parameter_type)
+    rate = get_rate_parameter(theta, parameter_type)
     s_min = np.clip(2-1/a,0,1)
     support = np.where(s_min<=t, 1., 0.)
-    values = 1 - cdf_circular_distance(2*a*PI*(1-t), rate=rate)
-    return support * np.where(t>=1, 1., values)
+    numerator   = np.sinh(rate*(PI-2*a*PI*(1-t)))
+    denominator = np.sinh(rate*PI)
+    return support * np.where(t>=1, 1., numerator / denominator)
 
 def mean_similarity(theta, a, parameter_type='rate'):
-    _lambda = get_lambda(theta, parameter_type)
-    numer = 2*np.sinh(PI*rate)*np.sinh((1-a)*PI*rate)*np.sinh(a*PI*rate)
-    denom = a*PI*rate*(np.cosh(2*PI*rate)-1)
-    return 1 - numer/denom
+    rate = get_rate_parameter(theta, parameter_type)
+    numerator = 2*np.sinh(PI*rate)*np.sinh((1-a)*PI*rate)*np.sinh(a*PI*rate)
+    denominator = a*PI*rate*(np.cosh(2*PI*rate)-1)
+    return 1 - numerator/denominator
