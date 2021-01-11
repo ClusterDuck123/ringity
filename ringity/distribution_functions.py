@@ -104,6 +104,35 @@ def cdf_similarity(t, theta, a, parameter_type='rate'):
     denominator = np.sinh(rate*PI)
     return support * np.where(t>=1, 1., numerator / denominator)
 
+def pdf_probability(t, theta, a, rho, parameter_type='rate'):
+    """
+    (Continuous part of the) probability density function of [MISSING]
+    """
+    rate = get_rate_parameter(theta, parameter_type)
+    mu_S = mean_similarity(rate,a)
+    if rho <= mu_S:
+        k = rho/mu_S
+        s_min = np.clip(2-1/a,0,1)
+        support = np.where((k*s_min<=t) & (t<=k), 1., 0.)
+        values  = np.cosh(PI*rate * (1-2*a*(1-t/k)))
+        normalization = 2*a*PI * rate / np.sinh(PI*rate)
+        return support * values * normalization / k
+
+def cdf_probability(t, theta, a, rho, parameter_type='rate'):
+    """
+    Cumulative distribution function of [MISSING]
+    """
+    rate = get_rate_parameter(theta, parameter_type)
+    mu_S = mean_similarity(rate,a)
+
+    if rho <= mu_S:
+        k = rho/mu_S
+        s_min = np.clip(2-1/a,0,1)
+        support = np.where(s_min<=t, 1., 0.)
+        numerator   = np.sinh(rate*(PI-2*a*PI*(1-t/k)))
+        denominator = np.sinh(rate*PI)
+        return support * np.where(t>=1, 1., numerator / denominator)
+
 def mean_similarity(theta, a, parameter_type='rate'):
     rate = get_rate_parameter(theta, parameter_type)
     numerator = 2*np.sinh(PI*rate)*np.sinh((1-a)*PI*rate)*np.sinh(a*PI*rate)

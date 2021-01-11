@@ -43,7 +43,7 @@ def slope(rho, rate, a):
         return rho/mu_S
     else:
         const = 1/np.sinh(PI*rate)
-        def integral(k): # This can probably be further simplified
+        def integral(k):
             term1 = np.sinh((1 + 2*a*(1/k-1))*PI*rate)
             term2 = (k*np.sinh((a*PI*rate)/k)*np.sinh(((a+k-2*a*k)*PI*rate)/k))/(a*PI*rate)
             return term1-term2
