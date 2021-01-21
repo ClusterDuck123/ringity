@@ -69,6 +69,7 @@ def cdf_absolute_distance(t, parameter, parameter_type='rate'):
     normalization = 1 / (np.exp(-4*PI*rate)*(np.exp(2*PI*rate)-1)**2)
     return support * np.where(t>=2*PI, 1, values*normalization)
 
+
 def pdf_conditional_absolute_distance(t, theta,
                                       parameter,
                                       parameter_type='rate'):
@@ -83,7 +84,6 @@ def pdf_conditional_absolute_distance(t, theta,
                                   parameter = parameter,
                                   parameter_type = parameter_type)
     return term1 + term2
-
 
 def cdf_conditional_absolute_distance(t, theta,
                                       parameter,
@@ -157,6 +157,11 @@ def cdf_conditional_circular_distance(t, theta,
     return support * np.where(t >= PI, 1, term1 + (1-term2))
 
 
+# =============================================================================
+#  ----- SIMILARITY AND INTERACTION PROBABILITY DISTRIBUTION FUNCTIONS -------
+# =============================================================================
+
+
 def pdf_similarity(t, parameter, a, parameter_type='rate'):
     """
     (Continuous part of the) probability density function of s_a ∘ d(X,Y),
@@ -193,6 +198,26 @@ def cdf_similarity(t, parameter, a, parameter_type='rate'):
     denominator = np.sinh(rate*PI)
     return support * np.where(t>=1, 1., numerator / denominator)
 
+
+def pdf_conditional_similarity(t, theta, a,
+                               parameter,
+                               parameter_type = 'rate'):
+    """
+    [MISSING]
+    """
+    return 2*PI*a * pdf_conditional_circular_distance(2*PI*a * (1-t),
+                                                      theta = theta,
+                                                      parameter = parameter,
+                                                      parameter_type = parameter_type)
+def cdf_conditional_similarity(t, theta, a,
+                               parameter,
+                               parameter_type = 'rate'):
+    """
+    [MISSING]
+    """
+    assert False, "Not implemented yet!"
+
+
 def pdf_probability(t, parameter, a, rho, parameter_type='rate'):
     """
     (Continuous part of the) probability density function of [MISSING]
@@ -206,6 +231,8 @@ def pdf_probability(t, parameter, a, rho, parameter_type='rate'):
         values  = np.cosh(PI*rate * (1-2*a*(1-t/k)))
         normalization = 2*a*PI * rate / np.sinh(PI*rate)
         return support * values * normalization / k
+    else:
+        assert False, "Not implemented yet!"
 
 def cdf_probability(t, parameter, a, rho, parameter_type='rate'):
     """
@@ -214,13 +241,36 @@ def cdf_probability(t, parameter, a, rho, parameter_type='rate'):
     rate = get_rate_parameter(parameter, parameter_type)
     mu_S = mean_similarity(rate,a)
 
+    # CHECK CALCULATIONS!!!!
     if rho <= mu_S:
         k = rho/mu_S
         s_min = np.clip(2-1/a,0,1)
-        support = np.where(s_min<=t, 1., 0.)
+        support = np.where(k*s_min<=t, 1., 0.)
         numerator   = np.sinh(rate*(PI-2*a*PI*(1-t/k)))
         denominator = np.sinh(rate*PI)
         return support * np.where(t>=1, 1., numerator / denominator)
+
+
+def pdf_conditional_probability(t, theta, parameter, a, rho, parameter_type='rate'):
+    """
+    (Continuous part of the) probability density function of [MISSING]
+    """
+    rate = get_rate_parameter(parameter, parameter_type)
+    mu_S = mean_similarity(rate,a)
+    if rho <= mu_S:
+        k = rho/mu_S
+        return pdf_conditional_similarity(t/k, theta=theta, a=a,
+                                          parameter = parameter,
+                                          parameter_type = parameter_type)/k
+    else:
+        assert False, "Not implemented yet!"
+
+def cdf_conditional_probability(t, theta, parameter, a, rho, parameter_type='rate'):
+    """
+    [MISSING]
+    """
+    assert False, "Not implemented yet!"
+
 
 def mean_similarity(parameter, a, parameter_type='rate'):
     rate = get_rate_parameter(parameter, parameter_type)
