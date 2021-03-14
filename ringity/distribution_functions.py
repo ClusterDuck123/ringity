@@ -300,11 +300,11 @@ def expected_node_degree(theta, a, rho, parameter, parameter_type = 'rate'):
         term_B2 = (theta*rate-2*a*PI*rate-1) * np.exp(-rate * 2*PI)
 
     else:
+        term_A1 = -2 * np.exp(-rate * theta)
+        term_A2 =      np.exp(-rate * (theta-2*a*PI))
+
         if theta + 2*a*PI <= 2*PI:
             const = 0
-
-            term_A1 = -2 * np.exp(-rate * theta)
-            term_A2 =      np.exp(-rate * (theta-2*a*PI))
 
             term_B1 = np.exp(-rate * (2*a*PI + theta))
             term_B2 = 0
@@ -312,11 +312,8 @@ def expected_node_degree(theta, a, rho, parameter, parameter_type = 'rate'):
         else:
             const = theta*rate - 1 - 2*(1-a)*PI*rate
 
-            term_A1 = -2 * np.exp(-rate * theta)
-            term_A2 =      np.exp(-rate * (theta-2*a*PI))
-
-            term_B1 = (1 - 2*(a-1)*PI*rate - theta*rate) * np.exp(-rate*2*PI)
-            term_B2 =                                      np.exp(-rate*(2*(a-1)*PI + theta))
+            term_B1 =                                      np.exp(-rate * (2*(a-1)*PI + theta))
+            term_B2 = (1 - 2*(a-1)*PI*rate - theta*rate) * np.exp(-rate * 2*PI)
 
     integral = normalization * (term_A1 + term_A2 +term_B1 + term_B2 + const)
 
