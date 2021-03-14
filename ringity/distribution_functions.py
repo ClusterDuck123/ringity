@@ -265,8 +265,59 @@ def cdf_conditional_probability(t, theta, parameter, a, rho, parameter_type='rat
     assert False, "Not implemented yet!"
 
 
+# =============================================================================
+#  ----------------------------- MISCELLANEOUS -------------------------------
+# =============================================================================
+
 def mean_similarity(parameter, a, parameter_type='rate'):
     rate = get_rate_parameter(parameter, parameter_type)
     numerator = 2*np.sinh(PI*rate)*np.sinh((1-a)*PI*rate)*np.sinh(a*PI*rate)
     denominator = a*PI*rate*(np.cosh(2*PI*rate)-1)
     return 1 - numerator/denominator
+
+
+def expected_node_degree(theta, a, rho, parameter, parameter_type = 'rate'):
+
+    if a > 0.5:
+        assert False, "Not implemented yet!"
+
+    rate = get_rate_parameter(parameter, parameter_type)
+    mu_S = mean_similarity(rate,a)
+    k = rho/mu_S
+
+    if k > 1:
+        assert False, "Not implemented yet!"
+
+    normalization = 1 / ((1-np.exp(-2*PI*rate)) * rate * (2*PI*a)**2)
+
+    if theta <= 2*PI*a:
+        const = 1 + 2*a*PI*rate - theta*rate
+
+        term_A1 = -2 * np.exp(-rate * theta)
+        term_A2 =      np.exp(-rate * (2*PI + theta - 2*a*PI))
+
+        term_B1 =                              np.exp(-rate * (2*a*PI + theta))
+        term_B2 = (theta*rate-2*a*PI*rate-1) * np.exp(-rate * 2*PI)
+
+    else:
+        if theta + 2*a*PI <= 2*PI:
+            const = 0
+
+            term_A1 = -2 * np.exp(-rate * theta)
+            term_A2 =      np.exp(-rate * (theta-2*a*PI))
+
+            term_B1 = np.exp(-rate * (2*a*PI + theta))
+            term_B2 = 0
+
+        else:
+            const = theta*rate - 1 - 2*(1-a)*PI*rate
+
+            term_A1 = -2 * np.exp(-rate * theta)
+            term_A2 =      np.exp(-rate * (theta-2*a*PI))
+
+            term_B1 = (1 - 2*(a-1)*PI*rate - theta*rate) * np.exp(-rate*2*PI)
+            term_B2 =                                      np.exp(-rate*(2*(a-1)*PI + theta))
+
+    integral = normalization * (term_A1 + term_A2 +term_B1 + term_B2 + const)
+
+    return k*integral*2*PI*a
