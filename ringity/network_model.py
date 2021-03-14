@@ -1,4 +1,4 @@
-from ringity.distribution_functions import mean_similarity, cdf_similarity
+from ringity.distribution_functions import mean_similarity, cdf_similarity, get_rate_parameter
 from scipy.spatial.distance import pdist, squareform
 from numpy import pi as PI
 
@@ -65,6 +65,31 @@ def get_a_min(rho, beta):
 # =============================================================================
 #  ------------------------------  NETWORK MODEL ----------------------------
 # =============================================================================
+def get_delays(N, param, parameter_type = 'delay'):
+    if parameter_type == 'delay':
+        return get_positions(N, param)
+    else:
+        assert False, "Not implemented yet!"
+
+def delays_to_distances(dels):
+    return circular_distances(dels)
+
+def distances_to_similarities(dists, a):
+    return overlap(dists, a)/(2*PI*a)
+
+def similarities_to_probabilities(simis, param, a, rho, parameter_type='rate'):
+    rate = get_rate_parameter(param, parameter_type=parameter_type)
+    rho_max = 1-np.sinh((PI-2*a*PI)*rate)/np.sinh(PI*rate)
+
+    if np.isclose(rho,rho_max):
+        probs = np.sign(simis)
+    elif rho < 1-np.sinh((PI-2*a*PI)*rate)/np.sinh(PI*rate):
+        k = slope(rho, rate, a)
+        probs = (simis*k).clip(0,1)
+    else:
+        assert rho <= rho_max, "Please increase `a` or decrease `rho`!"
+
+    return probs
 
 def weighted_network_model(N, rho, beta, a=None, return_positions=False):
     """
