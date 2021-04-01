@@ -318,3 +318,56 @@ def expected_node_degree(theta, a, rho, parameter, parameter_type = 'rate'):
     integral = normalization * (term_A1 + term_A2 +term_B1 + term_B2 + const)
 
     return k*integral*2*PI*a
+
+def d_expected_node_degree(theta, a, rho, parameter, parameter_type = 'rate'):
+
+    if a > 0.5:
+        assert False, "Not implemented yet!"
+
+    rate = get_rate_parameter(parameter, parameter_type)
+    mu_S = mean_similarity(rate,a)
+    k = rho/mu_S
+
+    if k > 1:
+        assert False, "Not implemented yet!"
+
+    normalization = 1 / ((1-np.exp(-2*PI*rate)) * rate * (2*PI*a)**2)
+
+    if theta <= 2*PI*a:
+        const = - rate
+
+        term_A1 = 2*rate * np.exp(-rate * theta)
+        term_A2 =  -rate * np.exp(-rate * (2*PI + theta - 2*a*PI))
+
+        term_B1 =  -rate * np.exp(-rate * (2*a*PI + theta))
+        term_B2 =   rate * np.exp(-rate * 2*PI)
+
+    else:
+        term_A1 = 2*rate * np.exp(-rate * theta)
+        term_A2 =  -rate * np.exp(-rate * (theta-2*a*PI))
+
+        if theta + 2*a*PI <= 2*PI:
+            const = 0
+
+            term_B1 = -rate * np.exp(-rate * (2*a*PI + theta))
+            term_B2 = 0
+
+        else:
+            const = rate
+
+            term_B1 = -rate * np.exp(-rate * (2*(a-1)*PI + theta))
+            term_B2 = -rate * np.exp(-rate * 2*PI)
+
+    integral = normalization * (term_A1 + term_A2 +term_B1 + term_B2 + const)
+
+    return k*integral*2*PI*a
+
+def get_max_expectancy(a, parameter, parameter_type):
+    rate = get_rate_parameter(parameter=parameter, parameter_type=parameter_type)
+    term = (2 - np.exp(-rate * (2*PI - 2*a*PI)) - np.exp(-rate * 2*a*PI)) / (1 - np.exp(-rate*2*PI))
+    return np.log(term)/rate
+
+def get_min_expectancy(a, parameter, parameter_type):
+    rate = get_rate_parameter(parameter=parameter, parameter_type=parameter_type)
+    term = (np.exp(rate * 2*a*PI) + np.exp(-rate * (2*a*PI-2*PI)) - 2) / (1 - np.exp(-rate * 2*PI))
+    return np.log(term)/rate
