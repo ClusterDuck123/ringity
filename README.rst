@@ -55,4 +55,5 @@ How to cite
 -----------
 
 If you want to cite this package, please use the DOI:
-[![DOI](https://zenodo.org/badge/196970975.svg)](https://zenodo.org/badge/latestdoi/196970975)
+.. image:: https://zenodo.org/badge/196970975.svg
+   :target: https://zenodo.org/badge/latestdoi/196970975
