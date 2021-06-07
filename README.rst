@@ -50,3 +50,9 @@ License
 Released under the MIT License (see `LICENSE.txt`)::
 
    Copyright (c) 2019 Markus K. Youssef <mk.youssef@hotmail.com>
+
+How to cite
+-----------
+
+If you want to cite this package, please use the DOI:
+[![DOI](https://zenodo.org/badge/196970975.svg)](https://zenodo.org/badge/latestdoi/196970975)
