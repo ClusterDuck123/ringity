@@ -58,3 +58,6 @@ If you want to cite this package, please use the DOI:
 
 .. image:: https://zenodo.org/badge/196970975.svg
    :target: https://zenodo.org/badge/latestdoi/196970975
+   
+.. image:: https://img.shields.io/github/v/tag/kiri93/ringity   
+   :alt: GitHub tag (latest by date)
