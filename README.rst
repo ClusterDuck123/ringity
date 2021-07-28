@@ -1,7 +1,10 @@
 ringity
 =======
-.. image:: https://img.shields.io/github/v/tag/kiri93/ringity   
-   :alt: GitHub tag (latest by date)
+.. image:: https://img.shields.io/badge/DOI-10.5281%2FZENODO.4908927-orange
+   :target: https://zenodo.org/badge/latestdoi/196970975
+
+.. image:: https://img.shields.io/github/license/kiri93/ringity
+.. image:: https://img.shields.io/github/v/tag/kiri93/ringity?style=social
 
 ringity is a Python package to analyze networks in their global ring structure.
 
@@ -57,6 +60,4 @@ How to cite
 -----------
 
 If you want to cite this package, please use the DOI:
-
-.. image:: https://zenodo.org/badge/196970975.svg
-   :target: https://zenodo.org/badge/latestdoi/196970975
+`10.5281/ZENODO.4908927 <https://doi.org/10.5281/ZENODO.4908927>`_
