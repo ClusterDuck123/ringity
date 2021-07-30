@@ -9,6 +9,9 @@ import networkx as nx
 # =============================================================================
 #  -------------------------------  PREPARATION -----------------------------
 # =============================================================================
+
+# TODO: collect parameters in a dictionary, e.g. network_parms
+
 def get_positions(N, beta):
     if   beta == 0:
         return np.zeros(N)
