@@ -11,6 +11,7 @@ from ringity.network_model import *
 from ringity.distribution_functions import *
 
 import sys
+import ringity.test_venv_compability
 
 # Check for proper Python version
 if sys.version_info[:2] < (3, 6):
