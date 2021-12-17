@@ -3,7 +3,6 @@ __author__ = "Markus Kirolos Youssef"
 __version__ = "0.0a17"
 
 from ringity.methods       import *
-from ringity.classes       import *
 from ringity.core          import *
 from ringity.centralities  import *
 from ringity.plots         import *
