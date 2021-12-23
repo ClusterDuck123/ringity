@@ -24,7 +24,7 @@ class PositionGenerator:
         self.N = N
 
         if isinstance(distn, str):
-            distn = get_rv(distn)
+            distn = _get_distn(distn)
 
         if isinstance(distn, ss._distn_infrastructure.rv_frozen):
             self.random_position = distn
@@ -37,7 +37,31 @@ class PositionGenerator:
                                                        random_state=random_state)
 
 class NetworkBuilder:
-    pass
+    def __init__(self, N,
+                 distn = 'wrapped_exponential'
+                 rho = None,
+                 beta = None,
+                 rate = None,
+                 a = None):
+        self.N = N
+        self.rho = _get_rho()
+        self.beta = beta
+        self.rate = np.tan(PI * (1 - beta) / 2)
+
+        self.a_min = get_a_min(rho, beta)
+        self.rho_max = 1 - \
+            np.sinh((PI - 2 * self.a * PI) * self.rate) / \
+            np.sinh(PI * self.rate)
+
+        if a is None:
+            self.a = self.a_min
+        else:
+            self.a = a
+
+        assert 0 <= self.beta <= 1
+        assert 0 <= self.rho <= 1
+
+        assert self.a_min <= self.a <= 1
 
 
 class GeneralNetworkBuilder:
