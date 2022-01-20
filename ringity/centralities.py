@@ -1,5 +1,6 @@
 from ringity.exceptions import DisconnectedGraphError
 from scipy.stats import rankdata
+from numba import njit
 
 import time
 import scipy.sparse
@@ -7,7 +8,39 @@ import scipy.stats
 import numpy as np
 import networkx as nx
 
-# Newest version
+@njit
+def _edge_to_single_value(C, u, v):
+    F_row = C[u]-C[v]
+    ranks = np.empty_like(F_row) # calculate ranks using numpy's argsort function
+    ranks[np.argsort(F_row)] = np.arange(1, len(F_row)+1)
+    
+    return np.sum((2*ranks-1-len(F_row))*F_row)
+
+@njit
+def _resistance_to_flow(C, row_idx, col_idx):
+    return [_edge_to_single_value(C, u, v) 
+                    for (u,v) in zip(row_idx, col_idx) 
+                            if u <= v]
+
+def net_flow_new(G, verbose=False):
+    if not nx.is_connected(G):
+        raise DisconnectedGraphError
+        
+    if nx.number_of_selfloops(G) > 0:
+        if verbose:
+            print('Self loops in graph detected. They will be removed!')
+        G.remove_edges_from(nx.selfloop_edges(G))
+        
+    L = nx.laplacian_matrix(G, weight=None).toarray()
+    C = np.zeros(L.shape)
+    C[1:,1:] = np.linalg.inv(L[1:,1:])
+
+    A_coo = nx.adjacency_matrix(G).tocoo()
+    values = _resistance_to_flow(C, A_coo.row, A_coo.col)
+    edge_dict  = dict(zip(G.edges, values))
+    return edge_dict
+
+
 def net_flow(G, efficiency='speed'):
     if not nx.is_connected(G):
         raise DisconnectedGraphError
