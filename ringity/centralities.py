@@ -1,4 +1,5 @@
 from ringity.exceptions import DisconnectedGraphError
+from scipy.sparse import csgraph
 from scipy.stats import rankdata
 from numba import njit
 
@@ -17,56 +18,30 @@ def _edge_to_single_value(C, u, v):
     return np.sum((2*ranks-1-len(F_row))*F_row)
 
 @njit
-def _resistance_to_flow(C, row_idx, col_idx):
+def _resistance_matrix_to_flow_matrix(C, row_idx, col_idx):
     return [_edge_to_single_value(C, u, v) 
                     for (u,v) in zip(row_idx, col_idx) 
                             if u <= v]
 
-def net_flow_new(G, verbose=False):
+def net_flow(G, verbose=False):
+    node_label = dict(enumerate(G.nodes))
     if not nx.is_connected(G):
         raise DisconnectedGraphError
         
-    if nx.number_of_selfloops(G) > 0:
-        if verbose:
-            print('Self loops in graph detected. They will be removed!')
-        G.remove_edges_from(nx.selfloop_edges(G))
-        
-    L = nx.laplacian_matrix(G, weight=None).toarray()
+    A = nx.adjacency_matrix(G)
+    L = csgraph.laplacian(A).toarray()
+
     C = np.zeros(L.shape)
     C[1:,1:] = np.linalg.inv(L[1:,1:])
 
-    A_coo = nx.adjacency_matrix(G).tocoo()
-    values = _resistance_to_flow(C, A_coo.row, A_coo.col)
-    edge_dict  = dict(zip(G.edges, values))
-    return edge_dict
+    A_coo = A.tocoo()
 
+    row_idx, col_idx = map(np.array, zip(*((i,j) 
+                        for (i,j) in zip(A_coo.row, A_coo.col) if i<j)))
+    values = _resistance_matrix_to_flow_matrix(C, row_idx, col_idx )
 
-def net_flow(G, efficiency='speed'):
-    if not nx.is_connected(G):
-        raise DisconnectedGraphError
-
-    L = nx.laplacian_matrix(G, weight=None).toarray()
-    C = np.zeros(L.shape)
-    C[1:,1:] = np.linalg.inv(L[1:,1:])
-
-    N = G.number_of_nodes()
-    E = G.number_of_edges()
-    B = nx.incidence_matrix(G, oriented=True).T #shape=(nodes,edges)
-
-    if   efficiency == 'memory':
-        values = np.zeros(G.number_of_edges())
-        for idx, B_row in enumerate(B):
-            F_row = B_row@C
-            rank = rankdata(F_row)
-            values[idx] = np.sum((2*rank-1-N)*F_row)
-    elif efficiency == 'speed':
-        F = B@C
-        F_ranks = np.apply_along_axis(rankdata, arr = F, axis = 1)
-        values = np.sum((2*F_ranks-1-N)*F, axis=1)
-    else:
-        raise Exception("Efficiency unknown.")
-
-    edge_dict  = dict(zip(G.edges, values))
+    edge_dict = {(node_label[i], node_label[j]) : value 
+                        for (i,j,value) in zip(row_idx, col_idx, values)}
     return edge_dict
 
 
@@ -176,3 +151,32 @@ def current_flow_betweenness(G):
                     sum([abs(T[i,s]-T[i,t]-T[j,s]+T[j,t]) for j in G[i]])
                                                             for i in range(N)])
     return (I+(N-1)) / (N*(N-1))
+    
+    
+def net_flow_old(G, efficiency='speed'):
+    if not nx.is_connected(G):
+        raise DisconnectedGraphError
+
+    L = nx.laplacian_matrix(G, weight=None).toarray()
+    C = np.zeros(L.shape)
+    C[1:,1:] = np.linalg.inv(L[1:,1:])
+
+    N = G.number_of_nodes()
+    E = G.number_of_edges()
+    B = nx.incidence_matrix(G, oriented=True).T #shape=(nodes,edges)
+
+    if   efficiency == 'memory':
+        values = np.zeros(G.number_of_edges())
+        for idx, B_row in enumerate(B):
+            F_row = B_row@C
+            rank = rankdata(F_row)
+            values[idx] = np.sum((2*rank-1-N)*F_row)
+    elif efficiency == 'speed':
+        F = B@C
+        F_ranks = np.apply_along_axis(rankdata, arr = F, axis = 1)
+        values = np.sum((2*F_ranks-1-N)*F, axis=1)
+    else:
+        raise Exception("Efficiency unknown.")
+
+    edge_dict  = dict(zip(G.edges, values))
+    return edge_dict
