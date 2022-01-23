@@ -4,8 +4,6 @@ import ringity
 import unittest
 import numpy as np
 
-RINGITY_PATH = os.path.dirname(ringity.__file__)
-
 class TestSyntheticExamples(unittest.TestCase):
     def setUp(self):
         self.signal = random.random()
@@ -52,7 +50,7 @@ class TestSyntheticExamples(unittest.TestCase):
 
 class TestKnownNetworks(unittest.TestCase):
     def test_lipid_network(self):
-        dgm = ringity.classes.diagram.load_dgm(f"{RINGITY_PATH}/test_data/lipid_coexp_dgm.txt")
+        dgm = ringity.classes.diagram.load_dgm("test_data/lipid_coexp_dgm.txt")
         self.assertAlmostEqual(dgm.score, 0.7669806588679011)
 
 if __name__ == '__main__':

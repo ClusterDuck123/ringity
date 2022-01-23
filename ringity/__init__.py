@@ -1,6 +1,6 @@
 name = "ringity"
 __author__ = "Markus Kirolos Youssef"
-__version__ = "0.0a17"
+__version__ = "0.1a0"
 
 from ringity.methods       import *
 from ringity.core          import *
