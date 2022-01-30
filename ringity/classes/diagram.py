@@ -1,7 +1,7 @@
 
 from itertools import starmap, islice
 from ringity.methods import draw_diagram
-from ringity.exceptions import SchroedingersException, TimeParadoxError, BeginningOfTimeError
+from ringity.classes.exceptions import SchroedingersException, TimeParadoxError, BeginningOfTimeError
 
 import warnings
 import numpy as np
