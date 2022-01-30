@@ -1,4 +1,4 @@
-from ringity.exceptions import DisconnectedGraphError
+from ringity.classes.exceptions import DisconnectedGraphError
 from scipy.sparse import csgraph
 from scipy.stats import rankdata
 from numba import njit
