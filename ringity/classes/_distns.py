@@ -1,12 +1,16 @@
+import inspect
+import numpy as np
 import scipy.stats as ss
 import scipy.special as sc
-import numpy as np
 
 # =============================================================================
 #  ----------------------- RANDOM VARIABLE CLASSES ---------------------------
 # =============================================================================
 
-class wrappedExponGenerator(ss.rv_continuous):
+# PEP8 conventions have been ignored here to make the code mimic the style of
+# scipy.
+
+class wrappedexpon_gen(ss.rv_continuous):
     r"""A wrapped exponential continuous random variable with rate parameter
     ``rate``.
     """
@@ -19,20 +23,29 @@ class wrappedExponGenerator(ss.rv_continuous):
     def _cdf(self, x, rate):
         return -sc.expm1(-x*rate) / -sc.expm1(-2*np.pi*rate)
 
-wrapexpon = wrappedExponGenerator(a=0.0, b=2*np.pi, name='wrapexpon')
+wrappedexpon = wrappedexpon_gen(a=0.0, b=2*np.pi, name='wrappedexpon')
 
 
 # =============================================================================
 #  ------------------------------ FUNCTIONS ----------------------------------
 # =============================================================================
 
-def _get_rv(distn):
+def _get_rv(distn, **kwargs):
     # Check if this function isn't implemented already in scipy: what does the
-    # parameter ``name`` stand for?
-    assert isinstance(distn, str)
-
-    if   distn == 'wrapped_exponential':
-        return wrapexpon
+    # parameter ``name`` do?
+    
+    if   isinstance(distn, str):
+        if   distn == 'wrappedexpon':
+            possible_args = inspect.getfullargspec(wrappedexpon._parse_args)[0]
+            given_args = {key:value for (key,value) in kwargs.items() if key in possible_args}
+            return wrappedexpon, given_args
+        else:
+            assert False, f"Distribution {distn} not known."
+    
+    elif isinstance(distn, ss._distn_infrastructure.rv_frozen):
+        return ss.rv_continuous(name = 'frozen'), None
+    else:
+        assert False, f"data type of distn recognized: ({type(self.distribution)})"
 
 def get_rate_parameter(parameter, parameter_type):
     if   parameter_type.lower() == 'rate':

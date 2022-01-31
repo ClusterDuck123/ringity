@@ -1,8 +1,8 @@
-from ringity.distribution_functions import mean_similarity, cdf_similarity, get_rate_parameter
+from ringity.distribution_functions import mean_similarity, cdf_similarity
 from ringity.classes._distns import _get_rv
+from ringity.classes.exceptions import ConflictingParametersError, ProvideParameterError, NotImplementedYetError
 from scipy.spatial.distance import pdist, squareform
 from scipy.optimize import newton
-from numpy import pi as PI
 
 import numpy as np
 import networkx as nx
@@ -12,10 +12,54 @@ import scipy.stats as ss
 # =============================================================================
 #  --------------------------- OOP Here I come!! ------------------------------
 # =============================================================================
+def circular_distance(pts, period = 2*np.pi):
+    """Takes a vector of points ``pts`` on the interval [0, ``period``] 
+    and returns the shortest circular distance within that period. """
+    
+    assert ((pts >= 0) & (pts <= period)).all()
+    
+    abs_dists = pdist(pts.reshape(-1,1))
+    return np.where(abs_dists < period / 2, abs_dists, period - abs_dists)
+
+def overlap(dist, a):
+    """
+    Calculates the overlap of two boxes of length 2*pi*a on the circle for a
+    given distance dist (measured from center to center).
+    """
+    
+    # TODO: substitute ``a`` with ``box_length``
+    
+    x1 = (2*np.pi*a - dist).clip(0)
+    
+    if a <= 0.5:
+        return x1
+    # for box sizes with a>0 there is a second overlap
+    else:
+        x2 = (dist - 2*np.pi*(1-a)).clip(0)
+        return x1 + x2
+            
+def normalized_overlap(dists, a):
+    return overlap(dists, a)/(2*np.pi*a)
+    
+def similarities_to_probabilities(simis, param, a, rho, parameter_type='rate'):
+    # This needs some heavy refactoring...
+    rate = get_rate_parameter(param, parameter_type=parameter_type)
+    rho_max = 1-np.sinh((PI-2*a*PI)*rate)/np.sinh(PI*rate)
+
+    if np.isclose(rho,rho_max):
+        # if rho is close to rho_max, all the similarities are 1.
+        probs = np.sign(simis)
+    elif rho < rho_max:
+        k = slope(rho, rate, a)
+        probs = (simis*k).clip(0,1)
+    else:
+        assert rho <= rho_max, "Please increase `a` or decrease `rho`!"
+
+    return probs
+
 class PositionGenerator:
     def __init__(self, N,
-                 distn='wrapped_exponential',
-                 random_state=None,
+                 distn = 'wrappedexpon',
                  **kwargs):
         """
         The variable `distribution` can either be a string or a random variable
@@ -23,74 +67,155 @@ class PositionGenerator:
         """
         self.N = N
 
-        if isinstance(distn, str):
-            self.distribution = distn
-            self.rv = _get_rv(distn)
-            
-
-        if isinstance(distn, ss._distn_infrastructure.rv_frozen):
-            self.random_position = distn
+        # In scipy-jargon a `rv` (random variable) is what we'd rather call a 
+        # distribution *family* (e.g. a normal distribution). This corresponds
+        # to our notion of `random_position`. 
+        # A `frozen` random variable is what I would call an actual random variable
+        # (e.g. a normal distribution with mu = 0, and sd = 1). This corresponds
+        # to our notion of `frozen_position`.
+        # Finally, a `rvs` (random variates) is an instantiation of a random variable
+        # (e.g. 3.14159). This corresponds to our notion of `instantiated_position`.
+        
+        if   isinstance(distn, str):
+            self.distribution_name = distn
+            self.random_positions, self.distribution_args = _get_rv(distn, **kwargs)
+            self.frozen_positions = self.random_positions(**self.distribution_args)
+        elif isinstance(distn, ss._distn_infrastructure.rv_frozen):
+            self.distribution_name = 'frozen'
+            self.random_positions = 'frozen'
+            self.frozen_positions = distn
         elif isinstance(distn, ss._distn_infrastructure.rv_generic):
-            self.random_position = distn(**kwargs)
+            self.distribution_name = distn.name
+            self.random_positions = distn
+            self.frozen_positions = self.random_positions(**kwargs)
         else:
-            assert False, f"data type of distn recognized: ({type(distn)})"
-
-        self.fixed_position = self.random_position.rvs(size=N,
-                                                       random_state=random_state)
+            assert False, f"data type of distn recognized: ({type(self.distribution)})"
+            
+        self.current_positions = self.frozen_positions.rvs(size = N,
+                                                           random_state = None)
                                                        
-    def redraw(self, random_state=None):
-        self.fixed_position = self.random_position.rvs(size=N,
-                                                       random_state=random_state)
+    def redraw(self, random_state = None):
+        self.current_positions = self.frozen_positions.rvs(size = self.N,
+                                                           random_state = random_state)
+        return self.current_positions                                                   
 
 class NetworkBuilder:
     def __init__(self, N,
-                 distn = 'wrapped_exponential',
+                 distn = 'wrappedexpon',
                  rho = None,
-                 beta = None,
+                 k_max = None,
+                 delay = None,
                  rate = None,
-                 a = None):
+                 a = None,
+                 **kwargs):
         self.N = N
-        self.rho = _get_rho()
-        self.beta = beta
-        self.rate = np.tan(PI * (1 - beta) / 2)
-
-        self.a_min = get_a_min(rho, beta)
+        self.distn = distn
+        self.kwargs = kwargs
+        self._set_distribution_parameters(delay = delay, rate = rate)
+        self._set_density_parameters(rho = rho, k_max = k_max)
+        self._set_grid_parameters(a = a)
+        self._position_generator = PositionGenerator(N = self.N,
+                                                     distn = self.distn,
+                                                     rate = self.rate,
+                                                     delay = self.delay,
+                                                     **kwargs)
+        
+        # Check where this thing belongs
         self.rho_max = 1 - \
-            np.sinh((PI - 2 * self.a * PI) * self.rate) / \
-            np.sinh(PI * self.rate)
+            np.sinh((np.pi - 2 * self.a * np.pi) * self.rate) / \
+            np.sinh(np.pi * self.rate)
 
-        if a is None:
-            self.a = self.a_min
-        else:
-            self.a = a
-
-        assert 0 <= self.beta <= 1
+        assert 0 <= self.delay <= 1
         assert 0 <= self.rho <= 1
 
         assert self.a_min <= self.a <= 1
+    
+    def _set_density_parameters(self, rho = None, k_max = None):
+        if rho is not None and k_max is not None:
+            raise NotImplementedYetError("Conversion from ``rho`` to ``k_max`` not implemented yet!")
+        elif rho:
+            self.rho = rho
+        elif k_max:
+            raise NotImplementedYetError("Density parameter ``k_max`` not implemented yet!")
+        else:
+            raise ProvideParameterError("Please provide a density paramter!")
+    
+    def _set_distribution_parameters(self, delay = None, rate = None):
+        # TODO: use Python's in-built getter and setter functions
+        if delay is not None and rate is not None:
+            
+            delay_check = np.isclose(delay, np.tan(np.pi*(1-delay)/2))
+            rate_check  = np.isclose(rate , 1 - 2/np.pi*np.arctan(self.rate))
+            
+            if not delay_check or not rate_check:
+                raise ConflictingParametersError(f"Conflicting distribution parameters found!"
+                                                  "rate = {rate}, delay = {delay}")
+            else:
+                self.delay = delay
+                seld.rate  = rate
+                
+        elif delay:
+            self.delay = delay
+            self.rate = np.tan(np.pi*(1-delay)/2)
+            
+        elif rate:
+            self.rate = rate
+            self.delay = 1 - 2/np.pi*np.arctan(self.rate)
+        else:
+            raise ProvideParameterError("Please provide a distribution paramter!")
+                        
+    def _set_grid_parameters(self, a = None):
+        self.a_min = self._set_a_min()
         
-    def get_positions():
+        if a is None:
+            self.a = self.a_min
+        else:
+            self.a = a
+        
+            
+    def _set_a_min(self):
+        if np.isclose(self.delay, 0):
+            self.a_min = 0.
+        elif np.isclose(self.delay, 1):
+            self.a_min = self.rho/2
+        else:
+            # TODO: break up the following expressions into interpretable terms
+            x = np.sinh(np.pi*self.rate) * (1 - self.rho)
+            return 1/2 - np.log(np.sqrt(x**2 + 1) + x)/(2*np.pi*self.rate)
+        
+    def generate_positions(self, random_state = None):
+        self.positions = self._position_generator.redraw(random_state)
+        
+    def calculate_distances(self):
+        self.distances = circular_distance(self.positions)
+    
+    def calculate_similarities(self, calculate_from = 'distances'):
+        self.similarities = normalized_overlap(self.distances, a = self.a)
+    
+    def calculate_probabilities(self, calculate_from = 'similarities'):
+        pass
+        
+    def instanciate_network(self):
         pass
 
-
 class GeneralNetworkBuilder:
-    def __init__(self, N, rho, beta, a=None):
+    def __init__(self, N, rho, delay, a=None):
         self.N = N
         self.rho = rho
-        self.beta = beta
-        self.rate = np.tan(PI * (1 - beta) / 2)
+        self.delay = delay
+        self.rate = np.tan(np.pi * (1 - delay) / 2)
 
-        self.a_min = get_a_min(rho, beta)
+        self.a_min = get_a_min(rho, delay)
         self.rho_max = 1 - \
-            np.sinh((PI - 2 * self.a * PI) * self.rate) / \
-            np.sinh(PI * self.rate)
+            np.sinh((np.pi - 2 * self.a * np.pi) * self.rate) / \
+            np.sinh(np.pi * self.rate)
 
         if a is None:
             self.a = self.a_min
         else:
             self.a = a
 
-        assert 0 <= self.beta <= 1
+        assert 0 <= self.delay <= 1
         assert 0 <= self.rho <= 1
 
         assert self.a_min <= self.a <= 1
@@ -100,14 +225,14 @@ class GeneralNetworkBuilder:
         if self.rho <= mu_S:
             return self.rho / mu_S
         else:
-            const = 1 / np.sinh(PI * self.rate)
+            const = 1 / np.sinh(np.pi * self.rate)
 
             def integral(k):
                 term1 = np.sinh((1 + 2 * self.a * (1 / k - 1))
-                                * PI * self.rate)
-                term2 = (k * np.sinh((self.a * PI * self.rate) / k) *
-                         np.sinh(((self.a + k - 2 * k * self.a) * PI * self.rate) / k)) / \
-                    (self.a * PI * self.rate)
+                                * np.pi * self.rate)
+                term2 = (k * np.sinh((self.a * np.pi * self.rate) / k) *
+                         np.sinh(((self.a + k - 2 * k * self.a) * np.pi * self.rate) / k)) / \
+                    (self.a * np.pi * self.rate)
                 return term1 - term2
             self.slope = newton(
                 func=lambda k: const * integral(k) +
@@ -116,8 +241,8 @@ class GeneralNetworkBuilder:
                 x0=self.rho / mu_S)
 
     def get_positions(self):
-        self.positions = np.random.exponential(scale=1 / np.tan(PI * (1 - self.beta) / 2),
-                                               size=self.N) % (2 * PI)
+        self.positions = np.random.exponential(scale=1 / np.tan(np.pi * (1 - self.delay) / 2),
+                                               size=self.N) % (2 * np.pi)
 
     def get_distances(self):
         self.distances = positions_to_distances(self.positions)
@@ -165,7 +290,7 @@ class WSNetworkBuilder:
     def __init__(self, N, rho, a=None):
         self.N = N
         self.rho = rho
-        self.beta = 1
+        self.delay = 1
         self.a_min = rho / 2
         self.rho_max = 1  # Maybe....
 
@@ -174,7 +299,7 @@ class WSNetworkBuilder:
         else:
             self.a = a
 
-        assert 0 <= self.beta <= 1
+        assert 0 <= self.delay <= 1
         assert 0 <= self.rho <= 1
 
         assert self.a_min <= self.a <= 1
@@ -190,8 +315,8 @@ class WSNetworkBuilder:
             assert self.rho <= 2 * self.a, "Please increase `a` or decrease `rho`!"
 
     def get_positions(self):
-        self.positions = np.random.exponential(scale=1 / np.tan(PI * (1 - self.beta) / 2),
-                                               size=self.N) % (2 * PI)
+        self.positions = np.random.exponential(scale=1 / np.tan(np.pi * (1 - self.delay) / 2),
+                                               size=self.N) % (2 * np.pi)
 
     def get_distances(self):
         self.distances = positions_to_distances(self.positions)
