@@ -3,7 +3,7 @@ from ringity.classes.diagram import Dgm
 from ringity.centralities import net_flow, resistance
 from ringity.methods import _yes_or_no
 from ringity.constants import _assertion_statement
-from ringity.exceptions import UnknownGraphType
+from ringity.classes.exceptions import UnknownGraphType
 
 import networkx as nx
 import numpy as np

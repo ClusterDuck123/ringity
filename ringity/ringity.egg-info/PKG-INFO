@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: ringity
-Version: 0.1a0
+Version: 0.0a17
 Summary: ringity package
 Home-page: https://github.com/kiri93/ringity
 Author: Markus K. Youssef
@@ -8,9 +8,10 @@ Author-email: mk.youssef@hotmail.com
 License: UNKNOWN
 Project-URL: Bug Tracker, https://github.com/kiri93/ringity/issues
 Platform: UNKNOWN
-Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
 Classifier: License :: OSI Approved :: MIT License
-Classifier: Operating System :: OS Independent
+Classifier: Topic :: Communications :: Email
+Classifier: Development Status :: 3 - Alpha
 Requires-Python: >=3.6
 Description-Content-Type: text/x-rst
 License-File: LICENSE.txt
