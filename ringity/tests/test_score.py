@@ -4,8 +4,6 @@ import ringity
 import unittest
 import numpy as np
 
-RINGITY_PATH = os.path.dirname(ringity.__file__)
-
 class TestSyntheticExamples(unittest.TestCase):
     def setUp(self):
         self.signal = random.random()
@@ -16,24 +14,24 @@ class TestSyntheticExamples(unittest.TestCase):
         sequence = self.noise + multiple_signals + \
                    self.noise + multiple_signals + \
                    self.noise
-        self.assertAlmostEqual(ringity.classes.score(sequence), 0,
+        self.assertAlmostEqual(ringity.classes.diagram.score(sequence), 0,
                                places=8)
 
     def test_score_of_zero2(self):
         sequence = ()
-        self.assertAlmostEqual(ringity.classes.score(sequence), 0,
+        self.assertAlmostEqual(ringity.classes.diagram.score(sequence), 0,
                                places=8)
 
     def test_score_of_one(self):
         sequence = self.noise + [self.signal] + self.noise
-        self.assertAlmostEqual(ringity.classes.score(sequence), 1,
+        self.assertAlmostEqual(ringity.classes.diagram.score(sequence), 1,
                                places=8)
 
     def test_score_of_half(self):
         sequence = self.noise + [self.signal] + \
                    self.noise + [self.signal] + \
                    self.noise
-        self.assertAlmostEqual(ringity.classes.score(sequence), 0.5,
+        self.assertAlmostEqual(ringity.classes.diagram.score(sequence), 0.5,
                                places=8)
 
     def test_score_of_two_high_noises(self):
@@ -46,13 +44,13 @@ class TestSyntheticExamples(unittest.TestCase):
                    self.noise + [noise1] + \
                    self.noise + [noise2] + \
                    self.noise
-        self.assertAlmostEqual(ringity.classes.score(sequence),
+        self.assertAlmostEqual(ringity.classes.diagram.score(sequence),
                                1-noise_ratio1/2 - noise_ratio2/4,
                                places=8)
 
 class TestKnownNetworks(unittest.TestCase):
     def test_lipid_network(self):
-        dgm = ringity.classes.load_dgm(f"{RINGITY_PATH}/test_data/lipid_coexp_dgm.txt")
+        dgm = ringity.classes.diagram.load_dgm("test_data/lipid_coexp_dgm.txt")
         self.assertAlmostEqual(dgm.score, 0.7669806588679011)
 
 if __name__ == '__main__':
