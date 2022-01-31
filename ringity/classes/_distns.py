@@ -1,6 +1,7 @@
+import inspect
+import numpy as np
 import scipy.stats as ss
 import scipy.special as sc
-import numpy as np
 
 # =============================================================================
 #  ----------------------- RANDOM VARIABLE CLASSES ---------------------------
@@ -29,18 +30,20 @@ wrappedexpon = wrappedexpon_gen(a=0.0, b=2*np.pi, name='wrappedexpon')
 #  ------------------------------ FUNCTIONS ----------------------------------
 # =============================================================================
 
-def _get_rv(distn):
+def _get_rv(distn, **kwargs):
     # Check if this function isn't implemented already in scipy: what does the
     # parameter ``name`` do?
     
     if   isinstance(distn, str):
         if   distn == 'wrappedexpon':
-            return wrappedexpon
+            possible_args = inspect.getfullargspec(wrappedexpon._parse_args)[0]
+            given_args = {key:value for (key,value) in kwargs.items() if key in possible_args}
+            return wrappedexpon, given_args
         else:
             assert False, f"Distribution {distn} not known."
     
     elif isinstance(distn, ss._distn_infrastructure.rv_frozen):
-        return ss.rv_continuous(name = 'frozen')
+        return ss.rv_continuous(name = 'frozen'), None
     else:
         assert False, f"data type of distn recognized: ({type(self.distribution)})"
 

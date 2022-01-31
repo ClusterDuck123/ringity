@@ -12,14 +12,54 @@ import scipy.stats as ss
 # =============================================================================
 #  --------------------------- OOP Here I come!! ------------------------------
 # =============================================================================
-def _convert_delay_to_rate(delay):
-    scaled_delay = np.pi*delay/2
-    return np.cos(scaled_delay) / np.sin(scaled_delay)
+def circular_distance(pts, period = 2*np.pi):
+    """Takes a vector of points ``pts`` on the interval [0, ``period``] 
+    and returns the shortest circular distance within that period. """
+    
+    assert ((pts >= 0) & (pts <= period)).all()
+    
+    abs_dists = pdist(pts.reshape(-1,1))
+    return np.where(abs_dists < period / 2, abs_dists, period - abs_dists)
+
+def overlap(dist, a):
+    """
+    Calculates the overlap of two boxes of length 2*pi*a on the circle for a
+    given distance dist (measured from center to center).
+    """
+    
+    # TODO: substitute ``a`` with ``box_length``
+    
+    x1 = (2*np.pi*a - dist).clip(0)
+    
+    if a <= 0.5:
+        return x1
+    # for box sizes with a>0 there is a second overlap
+    else:
+        x2 = (dist - 2*np.pi*(1-a)).clip(0)
+        return x1 + x2
+            
+def normalized_overlap(dists, a):
+    return overlap(dists, a)/(2*np.pi*a)
+    
+def similarities_to_probabilities(simis, param, a, rho, parameter_type='rate'):
+    # This needs some heavy refactoring...
+    rate = get_rate_parameter(param, parameter_type=parameter_type)
+    rho_max = 1-np.sinh((PI-2*a*PI)*rate)/np.sinh(PI*rate)
+
+    if np.isclose(rho,rho_max):
+        # if rho is close to rho_max, all the similarities are 1.
+        probs = np.sign(simis)
+    elif rho < rho_max:
+        k = slope(rho, rate, a)
+        probs = (simis*k).clip(0,1)
+    else:
+        assert rho <= rho_max, "Please increase `a` or decrease `rho`!"
+
+    return probs
 
 class PositionGenerator:
     def __init__(self, N,
                  distn = 'wrappedexpon',
-                 random_state = None,
                  **kwargs):
         """
         The variable `distribution` can either be a string or a random variable
@@ -38,26 +78,26 @@ class PositionGenerator:
         
         if   isinstance(distn, str):
             self.distribution_name = distn
-            self.random_position = _get_rv(distn)
-            self.frozen_position = self.random_position(**kwargs)
+            self.random_positions, self.distribution_args = _get_rv(distn, **kwargs)
+            self.frozen_positions = self.random_positions(**self.distribution_args)
         elif isinstance(distn, ss._distn_infrastructure.rv_frozen):
             self.distribution_name = 'frozen'
-            self.random_position = 'frozen'
-            self.frozen_position = distn
+            self.random_positions = 'frozen'
+            self.frozen_positions = distn
         elif isinstance(distn, ss._distn_infrastructure.rv_generic):
             self.distribution_name = distn.name
-            self.random_position = distn
-            self.frozen_position = self.random_position(**kwargs)
+            self.random_positions = distn
+            self.frozen_positions = self.random_positions(**kwargs)
         else:
             assert False, f"data type of distn recognized: ({type(self.distribution)})"
             
-        self.current_position = self.frozen_position.rvs(size = N,
-                                                         random_state = random_state,
-                                                         **kwargs)
+        self.current_positions = self.frozen_positions.rvs(size = N,
+                                                           random_state = None)
                                                        
     def redraw(self, random_state = None):
-        self.current_position = self.frozen_position.rvs(size = N,
-                                                         random_state = random_state)
+        self.current_positions = self.frozen_positions.rvs(size = self.N,
+                                                           random_state = random_state)
+        return self.current_positions                                                   
 
 class NetworkBuilder:
     def __init__(self, N,
@@ -69,10 +109,16 @@ class NetworkBuilder:
                  a = None,
                  **kwargs):
         self.N = N
-        
+        self.distn = distn
+        self.kwargs = kwargs
         self._set_distribution_parameters(delay = delay, rate = rate)
         self._set_density_parameters(rho = rho, k_max = k_max)
         self._set_grid_parameters(a = a)
+        self._position_generator = PositionGenerator(N = self.N,
+                                                     distn = self.distn,
+                                                     rate = self.rate,
+                                                     delay = self.delay,
+                                                     **kwargs)
         
         # Check where this thing belongs
         self.rho_max = 1 - \
@@ -137,13 +183,20 @@ class NetworkBuilder:
             x = np.sinh(np.pi*self.rate) * (1 - self.rho)
             return 1/2 - np.log(np.sqrt(x**2 + 1) + x)/(2*np.pi*self.rate)
         
-    def get_positions(self, random_state = None):
-        positions = PositionGenerator(N = N,
-                                      distn = distn,
-                                      random_state = random_state)
-                                      
-        self.positions = positions
-
+    def generate_positions(self, random_state = None):
+        self.positions = self._position_generator.redraw(random_state)
+        
+    def calculate_distances(self):
+        self.distances = circular_distance(self.positions)
+    
+    def calculate_similarities(self, calculate_from = 'distances'):
+        self.similarities = normalized_overlap(self.distances, a = self.a)
+    
+    def calculate_probabilities(self, calculate_from = 'similarities'):
+        pass
+        
+    def instanciate_network(self):
+        pass
 
 class GeneralNetworkBuilder:
     def __init__(self, N, rho, delay, a=None):
