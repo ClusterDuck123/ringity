@@ -1,5 +1,5 @@
 from ringity.distribution_functions import mean_similarity, cdf_similarity, get_rate_parameter
-from ringity.classes._distns import get_rv
+from ringity.classes._distns import _get_rv
 from scipy.spatial.distance import pdist, squareform
 from scipy.optimize import newton
 from numpy import pi as PI
@@ -24,7 +24,9 @@ class PositionGenerator:
         self.N = N
 
         if isinstance(distn, str):
-            distn = _get_distn(distn)
+            self.distribution = distn
+            self.rv = _get_rv(distn)
+            
 
         if isinstance(distn, ss._distn_infrastructure.rv_frozen):
             self.random_position = distn
@@ -35,10 +37,14 @@ class PositionGenerator:
 
         self.fixed_position = self.random_position.rvs(size=N,
                                                        random_state=random_state)
+                                                       
+    def redraw(self, random_state=None):
+        self.fixed_position = self.random_position.rvs(size=N,
+                                                       random_state=random_state)
 
 class NetworkBuilder:
     def __init__(self, N,
-                 distn = 'wrapped_exponential'
+                 distn = 'wrapped_exponential',
                  rho = None,
                  beta = None,
                  rate = None,
@@ -62,6 +68,9 @@ class NetworkBuilder:
         assert 0 <= self.rho <= 1
 
         assert self.a_min <= self.a <= 1
+        
+    def get_positions():
+        pass
 
 
 class GeneralNetworkBuilder:

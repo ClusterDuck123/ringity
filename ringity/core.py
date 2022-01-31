@@ -15,7 +15,6 @@ def diagram(graph = None,
             verbose = False,
             metric = 'net_flow',
             distance_matrix = False,
-            efficiency='speed',
             p = 1):
     """
     Returns the p-persistence diagram of a graph or a distance matrix. The graph
@@ -45,7 +44,6 @@ def diagram(graph = None,
 
         D = get_distance_matrix(G,
                                 metric=metric,
-                                efficiency=efficiency,
                                 verbose=verbose)
 
     t1 = time.time()
@@ -59,7 +57,7 @@ def diagram(graph = None,
     return dgm
 
 
-def get_distance_matrix(G, metric, efficiency='speed', verbose=False):
+def get_distance_matrix(G, metric, verbose=False):
     """
     Returns numpy array of distances for each pair of nodes in the given graph.
     Distances are specified by the keyword 'metric'.
@@ -72,7 +70,6 @@ def get_distance_matrix(G, metric, efficiency='speed', verbose=False):
         if not nx.get_edge_attributes(G, metric):
             induce_weight(G=G,
                           weight=metric,
-                          efficiency=efficiency,
                           verbose=verbose)
 
         t1 = time.time()
@@ -97,13 +94,14 @@ def existing_edge_attribute_warning(weight):
         return 0
 
 
-def induce_weight(G, weight = 'net_flow', efficiency='speed', verbose=False):
+def induce_weight(G, weight = 'net_flow', verbose=False):
     if verbose and nx.get_edge_attributes(G, weight):
         exit_status = existing_edge_attribute_warning(weight)
-        if exit_status: return exit_status
+        if exit_status: 
+            return exit_status
 
     if   weight == 'net_flow':
-        bb = net_flow(G, efficiency=efficiency)
+        bb = net_flow(G)
     elif weight == 'betweenness':
         bb = nx.edge_betweenness_centrality(G)
     elif weight == 'current_flow':

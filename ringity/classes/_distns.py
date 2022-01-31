@@ -26,7 +26,7 @@ wrapexpon = wrappedExponGenerator(a=0.0, b=2*np.pi, name='wrapexpon')
 #  ------------------------------ FUNCTIONS ----------------------------------
 # =============================================================================
 
-def _get_distn(distn):
+def _get_rv(distn):
     # Check if this function isn't implemented already in scipy: what does the
     # parameter ``name`` stand for?
     assert isinstance(distn, str)
