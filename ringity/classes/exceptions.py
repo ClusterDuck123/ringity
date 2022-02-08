@@ -13,29 +13,38 @@ class RingityException(Exception):
 class NotImplementedYetError(RingityException):
     pass
 
-# ---------------------------- Parameter Errors ----------------------------
-class ParameterError(RingityException):
+# ---------------------------- Network Parameter Errors ----------------------------
+class NetworkParameterError(RingityException):
     pass
 
-class ConflictingParametersError(ParameterError):
+class ConflictingParametersError(NetworkParameterError):
     pass
 
-class ProvideParameterError(ParameterError):
+class ProvideParameterError(NetworkParameterError):
     pass
 
 
 # ----------------------------- Dgm Exceptions -----------------------------
-class SchroedingersException(IndexError):
-    # Don't know yet how to combine two exception classes
-    pass
-    
 class DgmException(RingityException):
     pass
     
-class TimeParadoxError(DgmException):
+class DgmTimeError(DgmException):
     pass
     
-class BeginningOfTimeError(DgmException):
+class SchroedingersException(IndexError, DgmTimeError):
+    # Don't know yet how to combine two exception classes
+    pass   
+     
+class TimeParadoxError(DgmTimeError):
+    pass
+    
+class BeginningOfTimeError(DgmTimeError):
+    pass
+    
+class EndOfTimeError(DgmTimeError):
+    pass
+    
+class SettingPersistenceError(DgmException):
     pass
 
 # ----------------------- NetworkX related Exceptions -----------------------
