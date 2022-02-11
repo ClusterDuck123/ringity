@@ -1,4 +1,4 @@
-from ringity.exceptions import DisconnectedGraphError
+from ringity.classes.exceptions import DisconnectedGraphError
 
 import os
 import sys

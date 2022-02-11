@@ -52,9 +52,6 @@ class PDgmPt(tuple):
     
     @birth.setter
     def birth(self, value):
-        if value < 0:
-            raise BeginningOfTimeError('Hole must be born after the beginning of time! '
-                                      f'DgmPt.birth = {birth}')
         self._birth = float(value)
         
     @property    
@@ -117,13 +114,13 @@ class PDgmPt(tuple):
         return (self.birth == other[0]) and (self.death == other[1])
 
     def __add__(self, other):
-        return type(self)(self.birth + other, self.death + other)
+        return type(self)((self.birth + other, self.death + other))
     
     def __mul__(self, other):
-        return type(self)(self.birth * other, self.death * other)
+        return type(self)((self.birth * other, self.death * other))
     
     def __truediv__(self, other):
-        return type(self)(self._birth/other, self._death/other)
+        return type(self)((self._birth/other, self._death/other))
 
 
 # =============================================================================
