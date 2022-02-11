@@ -3,6 +3,27 @@ import numpy as np
 import scipy.stats as ss
 import scipy.special as sc
 
+from scipy.stats._distn_infrastructure import rv_generic, rv_frozen
+
+# =============================================================================
+#  -------------------------- GLOBAL CONSTANTS ------------------------------
+# =============================================================================
+
+
+DISTN_NAME2LEMMA = {
+    'normal' : 'norm',
+    'exponential' : 'expon',
+    'wrappedexponential' : 'wrappedexpon'
+}
+
+RINGITY_DISTN_NAMES_LIST = ['wrappedexpon']
+SCIPY_DISTN_NAMES_LIST = list(filter
+                (
+                lambda d: isinstance(getattr(ss, d), rv_generic),
+                dir(ss))
+                )
+
+
 # =============================================================================
 #  ----------------------- RANDOM VARIABLE CLASSES ---------------------------
 # =============================================================================
@@ -30,9 +51,26 @@ wrappedexpon = wrappedexpon_gen(a=0.0, b=2*np.pi, name='wrappedexpon')
 #  ------------------------------ FUNCTIONS ----------------------------------
 # =============================================================================
 
+def _get_frozen_random_variable(distn_arg, **kwargs):
+    if isinstance(distn_arg, rv_frozen):
+        frozen_rv = distn_arg
+    else:
+        if isinstance(distn_arg, str):
+            distn_name = DISTN_NAME2LEMMA.get(distn_arg, distn_arg)
+            if distn_name in SCIPY_DISTN_NAMES_LIST:
+                rv_gen = getattr(ss, distn_name)
+            elif distn_name in RINGITY_DISTN_NAMES_LIST:
+                rv_gen = eval(distn_name)
+        elif isinstance(distn_arg, rv_generic):
+            rv_gen = distn_arg
+        else:
+            raise ValueError(f'Type {type(distn_arg)} unknown.')
+        frozen_rv = rv_gen(**kwargs)
+        
+    assert isinstance(frozen_rv, rv_frozen)
+    return frozen_rv
+        
 def _get_rv(distn, **kwargs):
-    # Check if this function isn't implemented already in scipy: what does the
-    # parameter ``name`` do?
     
     if   isinstance(distn, str):
         if   distn == 'wrappedexpon':
@@ -42,7 +80,7 @@ def _get_rv(distn, **kwargs):
         else:
             assert False, f"Distribution {distn} not known."
     
-    elif isinstance(distn, ss._distn_infrastructure.rv_frozen):
+    elif isinstance(distn, rv_frozen):
         return ss.rv_continuous(name = 'frozen'), None
     else:
         assert False, f"data type of distn recognized: ({type(self.distribution)})"

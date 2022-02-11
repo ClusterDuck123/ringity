@@ -1,5 +1,5 @@
 from ripser import ripser
-from ringity.classes.diagram import Dgm
+from ringity.classes.new_diagram import PDgm
 from ringity.centralities import net_flow, resistance
 from ringity.methods import _yes_or_no
 from ringity.constants import _assertion_statement
@@ -11,7 +11,7 @@ import subprocess
 import time
 import os
 
-def diagram(graph = None,
+def diagram(arg1 = None,
             verbose = False,
             metric = 'net_flow',
             distance_matrix = False,
@@ -27,13 +27,13 @@ def diagram(graph = None,
     """
 
     if distance_matrix:
-        D = graph
+        D = arg1
     else:
-        input_type = type(graph)
+        input_type = type(arg1)
         if input_type == np.ndarray:
-            G = nx.from_numpy_array(graph)
+            G = nx.from_numpy_array(arg1)
         elif input_type == nx.classes.graph.Graph:
-            G = graph
+            G = arg1
         else:
             raise UnknownGraphType(f"Unknown graph type {input_type}!")
 
@@ -48,7 +48,7 @@ def diagram(graph = None,
 
     t1 = time.time()
     ripser_output = ripser(np.array(D), maxdim=p, distance_matrix=True)
-    dgm = Dgm(ripser_output['dgms'][p])
+    dgm = PDgm(ripser_output['dgms'][p])
     t2 = time.time()
 
     if verbose:
@@ -110,21 +110,3 @@ def induce_weight(G, weight = 'net_flow', verbose=False):
         raise Exception(f"Weight '{weight}' unknown!")
 
     nx.set_edge_attributes(G, values=bb, name=weight)
-
-
-# ---------------------------- NOT IMPLEMENTED YET ----------------------------
-
-def _pathological_cases(G, distance, verbose):
-    E = G.number_of_edges()
-    N = G.number_of_nodes()
-
-    if N == 1:
-        if verbose:
-            print('Graph with only one node was given.')
-        return True, Dgm()
-    elif E == round(N*(N-1)/2) and not distance:
-        if verbose:
-            print('Complete graph with no edge attribute was given.')
-        return True, Dgm()
-    else:
-        return False, None

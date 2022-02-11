@@ -1,6 +1,7 @@
 import numpy as np
 
 from gtda.homology import VietorisRipsPersistence
+from ringity.generators.diagram import random_pdiagram, random_pdiagram_point
 from ringity.classes.new_diagram import PDgm, PDgmPt
 from ringity.classes.exceptions import DgmTimeError
 
@@ -57,3 +58,10 @@ print(pdgm.score())
 print(pdgm.score(skip=1))
 print(pdgm.score(skip=1))
 print(pdgm.score(skip=2))
+
+print()
+
+random_dgm = random_pdiagram(2**10, 'wrappedexponential')
+print(random_dgm[:10])
+
+print(random_dgm.score())
