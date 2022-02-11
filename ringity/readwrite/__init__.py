@@ -1,6 +1,6 @@
 name = "ringity"
 __author__ = "Markus Kirolos Youssef"
-__version__ = "0.1a1"
+__version__ = "0.1a0"
 
 from ringity.methods       import *
 from ringity.core          import *
@@ -8,9 +8,6 @@ from ringity.centralities  import *
 from ringity.plots         import *
 from ringity.network_model import *
 from ringity.distribution_functions import *
-
-from ringity.readwrite.diagram import *
-from ringity.generators.diagram import *
 
 import sys
 import ringity.test_venv_compability

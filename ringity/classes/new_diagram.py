@@ -156,6 +156,10 @@ class PDgm(list):
     def sequence(self, length = None):
         return tuple(p / self.signal for p in self.persistences)
         
+    @property
+    def ring_score(self):
+        return self.score()
+        
 # -------------------------------- Methods ---------------------------------
     
     def append(self, item):

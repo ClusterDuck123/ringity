@@ -4,11 +4,11 @@ import unittest
 
 RINGITY_PATH = os.path.dirname(ringity.__file__)
 
-class TestSaveAndLoad(unittest.TestCase):
+class TestReadAndWrite(unittest.TestCase):
     def test_save_and_load(self):
-        dgm1 = ringity.classes.diagram.random_Dgm(length=100)
-        dgm1.save("tmp/random_dgm.txt")
-        dgm2 = ringity.classes.diagram.load_dgm("tmp/random_dgm.txt")
+        dgm1 = ringity.random_pdiagram(100)
+        ringity.write_pdiagram(dgm1, "tmp/random_dgm.txt")
+        dgm2 = ringity.read_pdiagram("tmp/random_dgm.txt")
         self.assertEqual(dgm1,dgm2)
         os.remove("tmp/random_dgm.txt")
 
