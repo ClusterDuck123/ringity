@@ -3,9 +3,6 @@ import scipy.stats as ss
 from ringity.classes._distns import _get_frozen_random_variable
 from ringity.classes.new_diagram import PDgmPt, PDgm
 
-def read_pdgm(path):
-    pass
-
 def random_pdiagram_point(distn_arg = 'uniform', **kwargs):
     frozen_rv = _get_frozen_random_variable(distn_arg, **kwargs)
     return PDgmPt(sorted(frozen_rv.rvs(2)))

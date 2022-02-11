@@ -61,7 +61,7 @@ print(pdgm.score(skip=2))
 
 print()
 
-random_dgm = random_pdiagram(2**10, 'wrappedexponential')
+random_dgm = random_pdiagram(2**10, 'exponential')
 print(random_dgm[:10])
 
 print(random_dgm.score())
