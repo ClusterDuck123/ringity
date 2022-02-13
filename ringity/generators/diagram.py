@@ -1,7 +1,7 @@
 import scipy.stats as ss
 
 from ringity.classes._distns import _get_frozen_random_variable
-from ringity.classes.new_diagram import PDgmPt, PDgm
+from ringity.classes.diagram import PDgmPt, PDgm
 
 def random_pdiagram_point(distn_arg = 'uniform', **kwargs):
     frozen_rv = _get_frozen_random_variable(distn_arg, **kwargs)

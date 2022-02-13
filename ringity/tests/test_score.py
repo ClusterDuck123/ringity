@@ -14,24 +14,24 @@ class TestSyntheticExamples(unittest.TestCase):
         sequence = self.noise + multiple_signals + \
                    self.noise + multiple_signals + \
                    self.noise
-        self.assertAlmostEqual(ringity.classes.new_diagram.score(sequence), 0,
+        self.assertAlmostEqual(ringity.classes.diagram.signal_score(sequence), 0,
                                places=8)
 
     def test_score_of_zero2(self):
         sequence = ()
-        self.assertAlmostEqual(ringity.classes.new_diagram.score(sequence), 0,
+        self.assertAlmostEqual(ringity.classes.diagram.signal_score(sequence), 0,
                                places=8)
 
     def test_score_of_one(self):
         sequence = self.noise + [self.signal] + self.noise
-        self.assertAlmostEqual(ringity.classes.new_diagram.score(sequence), 1,
+        self.assertAlmostEqual(ringity.classes.diagram.signal_score(sequence), 1,
                                places=8)
 
     def test_score_of_half(self):
         sequence = self.noise + [self.signal] + \
                    self.noise + [self.signal] + \
                    self.noise
-        self.assertAlmostEqual(ringity.classes.new_diagram.score(sequence), 0.5,
+        self.assertAlmostEqual(ringity.classes.diagram.signal_score(sequence), 0.5,
                                places=8)
 
     def test_score_of_two_high_noises(self):
@@ -44,7 +44,7 @@ class TestSyntheticExamples(unittest.TestCase):
                    self.noise + [noise1] + \
                    self.noise + [noise2] + \
                    self.noise
-        self.assertAlmostEqual(ringity.classes.new_diagram.score(sequence),
+        self.assertAlmostEqual(ringity.classes.diagram.signal_score(sequence),
                                1-noise_ratio1/2 - noise_ratio2/4,
                                places=8)
 

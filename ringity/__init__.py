@@ -13,7 +13,6 @@ from ringity.readwrite.diagram import *
 from ringity.generators.diagram import *
 
 import sys
-import ringity.test_venv_compability
 
 # Check for proper Python version
 if sys.version_info[:2] < (3, 6):
