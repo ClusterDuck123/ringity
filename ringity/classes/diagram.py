@@ -1,10 +1,10 @@
+import warnings
+import numpy as np
+
 from itertools import compress
 from itertools import starmap, islice
 from collections.abc import MutableMapping
 from ringity.classes.exceptions import SchroedingersException, TimeParadoxError, BeginningOfTimeError, EndOfTimeError
-
-import warnings
-import numpy as np
 
 
 def signal_score(iterable, is_sorted = False):
@@ -161,7 +161,14 @@ class PDgm(list):
         
     @property
     def ring_score(self):
-        return self.score()
+        return self.signal_score()
+        
+    @property
+    def score(self):
+        warnings.warn("The property `score` is depricated! "
+                      "Please use `ring_score` instead.", 
+                      DeprecationWarning, stacklevel=2)
+        return self.signal_score()
         
 # -------------------------------- Methods ---------------------------------
     
@@ -169,7 +176,7 @@ class PDgm(list):
         list.append(self, PDgmPt(item))
         self.sort(reverse=True)
     
-    def score(self, skip=0):
+    def signal_score(self, skip=0):
         return signal_score(self.persistences[skip:])
     
     def trimmed(self, length = None):
