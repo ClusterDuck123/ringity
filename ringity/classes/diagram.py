@@ -1,38 +1,287 @@
-
+from itertools import compress
 from itertools import starmap, islice
-from ringity.methods import draw_diagram
-from ringity.classes.exceptions import SchroedingersException, TimeParadoxError, BeginningOfTimeError
+from collections.abc import MutableMapping
+from ringity.classes.exceptions import SchroedingersException, TimeParadoxError, BeginningOfTimeError, EndOfTimeError
 
 import warnings
 import numpy as np
 
 
-# =============================================================================
-#  -------------------------------- Dgm METHODS ------------------------------
-# =============================================================================
-
-def score(iterable, sort=True, **kwargs):
-    if sort:
-        iterable = sorted(iterable, **kwargs, reverse=True)
-    iterator = iter(iterable)
-    try:
-        signal = next(iterator)
-        return 1-sum((noise/signal) / 2**i for i,noise in enumerate(iterator,1))
-    except StopIteration:
+def signal_score(iterable, is_sorted = False):
+    if len(iterable) == 0:
         return 0
+    if not is_sorted:
+        iterable = sorted(iterable, reverse=True)
+        
+    iterable_iter = iter(iterable)
+    signal = next(iterable_iter)
+    
+    return 1 - sum((noise/signal) / 2**i for i,noise in enumerate(iterable_iter, 1))
 
-def random_DgmPt(lb=0, ub=1):
-    a, b = np.random.uniform(lb,ub,size=2)
-    return DgmPt(min(a,b), max(b,a))
+# =============================================================================
+#  ------------------------------- DgmPt CLASS -------------------------------
+# =============================================================================
 
-def random_Dgm(lb=0, ub=1, length=1):
-    return Dgm([random_DgmPt(lb,ub) for _ in range(length)])
+class PDgmPt(tuple):
+    def __init__(self, iterable):
+        
+        self._set_birth_death_pair(iterable)
+        
+        self.x = self.birth
+        self.y = self.death
+    
+    def _set_birth_death_pair(self, iterable):
+        if len(iterable) < 1:
+            raise SchroedingersException(
+                        'Empty homology class foun. '
+                        'Please provide a time of birth and death! ' + str(iterable))
+        
+        if len(iterable) < 2:
+            raise EndOfTimeError(
+                        'Everything comes to an end, even homology classes. '
+                        'Please provide a time of death! ' + str(iterable))
+        elif len(iterable) > 2:
+            raise SchroedingersException('No state beyond birth and death '
+                                         'implemented yet!' + str(iterable))
+        else:
+            self.birth = iterable[0]
+            self.death = iterable[1]
 
-def save_dgm(dgm, fname, **kwargs):
-    array = np.array([(k.birth, k.death) for k in dgm])
-    np.savetxt(fname, array, **kwargs)
+# ------------------------------- Properties --------------------------------
+
+    @property    
+    def birth(self):
+        return self._birth
+    
+    @birth.setter
+    def birth(self, value):
+        self._birth = float(value)
+        
+    @property    
+    def death(self):
+        return self._death
+    
+    @death.setter
+    def death(self, value):
+        if value < self.birth:
+            raise TimeParadoxError('Homology class cannot die before it was born! '
+                                  f'DgmPt = ({self.birth}, {value})')
+        self._death = float(value)
+        
+    @property    
+    def persistence(self):
+        return self.death - self.birth
+        
+# ---------------------------- Dunder Methods ----------------------------
+        
+    def __getitem__(self, key):
+        if   key in (0, 'birth'):
+            return self.birth
+        elif key in (1, 'death'):
+            return self.death
+        else:
+            raise SchroedingersException('No state beyond birth and death '
+                                         'implemented yet!')    
+    
+    def __repr__(self):
+        return repr((self.birth, self.death))
+    
+    def __len__(self):
+        return 2
+
+    def __lt__(self, other):
+        try:
+            return self.persistence <  other.persistence
+        except AttributeError:
+            return self.persistence < other
+            
+    def __gt__(self, other):
+        try:
+            return self.persistence >  other.persistence
+        except AttributeError:
+            return self.persistence > other
+    
+    def __le__(self, other):
+        try:
+            return self.persistence <=  other.persistence
+        except AttributeError:
+            return self.persistence <= other
+            
+    def __ge__(self, other):
+        try:
+            return self.persistence >=  other.persistence
+        except AttributeError:
+            return self.persistence >= other
+    
+    def __eq__(self, other):
+        return (self.birth == other[0]) and (self.death == other[1])
+
+    def __add__(self, other):
+        return type(self)((self.birth + other, self.death + other))
+    
+    def __mul__(self, other):
+        return type(self)((self.birth * other, self.death * other))
+    
+    def __truediv__(self, other):
+        return type(self)((self._birth/other, self._death/other))
 
 
+# =============================================================================
+#  -------------------------------- Dgm CLASS --------------------------------
+# =============================================================================
+class PDgm(list):
+    def __init__(self, iterable = (), dim = None):
+        
+        super().extend(sorted(map(PDgmPt, iterable), reverse=True))
+        self.dim = dim
+        
+# -------------------------------- Proerties ---------------------------------
+        
+    @property
+    def births(self):
+        births, deaths = zip(*self)
+        return births
+    
+    @property
+    def deaths(self):
+        births, deaths = zip(*self)
+        return deaths
+    
+    @property
+    def persistences(self):
+        return tuple(pt.persistence for pt in self)
+        
+    @property
+    def signal(self):
+        return self[0].death - self[0].birth
+        
+    @property
+    def sequence(self, length = None):
+        return tuple(p / self.signal for p in self.persistences)
+        
+    @property
+    def ring_score(self):
+        return self.score()
+        
+# -------------------------------- Methods ---------------------------------
+    
+    def append(self, item):
+        list.append(self, PDgmPt(item))
+        self.sort(reverse=True)
+    
+    def score(self, skip=0):
+        return signal_score(self.persistences[skip:])
+    
+    def trimmed(self, length = None):
+        if length is None:
+            return self[self > 0]
+        
+        if length <= len(self):
+            return self[:length]
+            
+        else:
+            other = self.copy()
+            other.extend([(0,0)]*(length - len(self)))
+            return type(self)(other)
+    
+    def extend(self, iterable):
+        super().extend(type(self)(iterable))
+        self.sort(reverse=True)
+        
+# ----------------------------- Dunder Method ------------------------------
+    
+    def __getitem__(self, item):
+        if isinstance(item, slice):
+            return type(self)(super().__getitem__(item))
+        try:
+            item_iter = iter(item)
+        except TypeError:
+            return PDgmPt(super().__getitem__(item))
+        try:
+            return type(self)(super().__getitem__(item_iter))
+        except TypeError:
+            return type(self)(compress(self, item_iter))
+        
+    def __setitem__(self, index, value):
+        raise SettingPersistenceError("Manually setting a persistence point is forbidden. "
+                                      "Use `append` or `extend` instead!")
+    def __lt__(self, item):
+        return list(pt < item for pt in self)
+    def __gt__(self, item):
+        return list(pt > item for pt in self)
+    
+    def __le__(self, item):
+        return list(pt <= item for pt in self)
+    def __ge__(self, item):
+        return list(pt >= item for pt in self)
+    
+    def __str__(self):
+        return str(self.copy()).replace(', (', ',\n (')
+    
+    def __repr__(self):
+        return f"{type(self).__name__}({self.copy()})"
+
+# =============================================================================
+#  ------------------------------ FullDgm CLASS ------------------------------
+# =============================================================================
+
+class FullPDgm(MutableMapping):
+    def __init__(self, data = ()):
+        if isinstance(data, (collections.abc.MutableMapping, dict)):
+            self.dimensions = tuple(sorted(data.keys()))
+            self.mapping = {}
+            # needs more checking
+            self.update(data)
+        if isinstance(data, np.ndarray):
+            self.from_numpy_array(data)
+            
+        self._sort_homologies()
+        
+# -------------------------------- Methods ---------------------------------
+        
+    def from_numpy_array(self, data):
+        m, n = data.shape
+        assert 3 in {m,n}
+        if n != 3:
+            data = data.T
+        self.dimensions = self._extract_dimensions(data)
+        self.mapping = {}
+        self.update({key:data[data[:,2] == key][:,:2] for key in {0,1}})
+    
+    def _extract_dimensions(self, data):
+        dimensions = set(data[:, 2])
+        assert all(map(float.is_integer, dimensions))
+        return tuple(sorted(map(int,dimensions)))
+    
+    def _sort_homologies(self):
+        pass
+        
+# ----------------------------- Dunder Method ------------------------------
+        
+    def __getitem__(self, key):
+        return self.mapping[key]
+    
+    def __setitem__(self, key, value):
+        if key in self:
+            del self[self[key]]
+        self.mapping[key] = value
+    
+    def __delitem__(self, key):
+        del self.mapping[key]
+        
+    def __iter__(self):
+        return iter(self.mapping)
+    
+    def __len__(self):
+        return len(self.mapping)
+    
+    def __repr__(self):
+        return f"{type(self).__name__}({self.mapping.__repr__()})"
+        
+
+# =============================================================================
+#  ---------------------------------- Legacy --------------------------------
+# =============================================================================
 def load_dgm(fname=None, **kwargs):
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
@@ -52,151 +301,3 @@ def indexify_dgm(dgm, inplace=False):
         dgm._values = [DgmPt(*map(value2index.get,pt)) for pt in dgm]
     else:
         return Dgm(DgmPt(*map(value2index.get,pt)) for pt in dgm)
-
-
-# =============================================================================
-#  ------------------------------- DgmPt CLASS -------------------------------
-# =============================================================================
-
-class DgmPt():
-    def __init__(self, birth=0, death=0):
-        self._birth = birth
-        self._death = death
-        if birth > death:
-            raise TimeParadoxError(
-                        'Homology class cannot die before it was born! '
-                       f'DgmPt = ({birth}, {death})')
-        if birth < 0:
-            raise BeginningOfTimeError(
-                        'Hole must be born after the beginning of time! '
-                       f'DgmPt.birth = {birth}')
-    def __getitem__(self, key):
-        if   key == 0:
-            return self.birth
-        elif key == 1:
-            return self.death
-        else:
-            raise SchroedingersException('No state beyond birth and death '
-                                         'implemented yet!')
-    def __repr__(self):
-        return repr((self.birth, self.death))
-    def __len__(self):
-        return 2
-
-    def __lt__(self, other):
-        return self.persistence <  other.persistence
-    def __le__(self, other):
-        return self.persistence <= other.persistence
-    def __eq__(self, other):
-        return (self.birth == other[0]) and (self.death == other[1])
-
-    def __add__(self, other):
-        return DgmPt(self.birth + other, self.death + other)
-    def __truediv__(self, other):
-        return DgmPt(self._birth/other, self._death/other)
-
-# -------------------------------- Proerties ---------------------------------
-    @property
-    def birth(self):
-        return self._birth
-    @property
-    def death(self):
-        return self._death
-    @property
-    def persistence(self):
-        return self.death - self.birth
-
-    @property
-    def x(self):
-        return self._birth
-    @property
-    def y(self):
-        return self._death
-
-# =============================================================================
-#  -------------------------------- Dgm CLASS --------------------------------
-# =============================================================================
-class Dgm():
-    """
-    Immutable collection of DgmPt's sorted (in decending order) by their
-    persistences.
-    """
-    def __init__(self, pts=[]):
-        if isinstance(pts,np.ndarray):
-            m, n = pts.shape
-            assert 2 in {m,n}
-            if n != 2:
-                pts = pts.T
-
-        self._values = tuple(sorted(starmap(DgmPt,pts),
-                                    key=lambda pt:pt.persistence,
-                                    reverse=True))
-
-    def __getitem__(self, item):
-        return self.values[item]
-    def __repr__(self):
-        return f'Dgm({repr(self.values)})'
-    def __str__(self):
-        return '\n'.join(str(pt) for pt in self.values)
-    def __len__(self):
-        return len(self.values)
-    def __eq__(self, other):
-        return self.values == other.values
-    def __add__(self, other):
-        return Dgm(self.values+other.values)
-    def __truediv__(self, other):
-        return Dgm(pt/other for pt in self)
-
-# -------------------------------- Proerties ---------------------------------
-    @property
-    def values(self):
-        return self._values
-    @property
-    def births(self):
-        return [pt.birth for pt in self._values]
-    @property
-    def deaths(self):
-        return [pt.death for pt in self._values]
-
-    @property
-    def signal(self):
-        return self[0].persistence
-    @property
-    def sequence(self):
-        return tuple(pt.persistence/self.signal for pt in self)
-    @property
-    def gap(self):
-        return self.signal - self[1].persistence
-    @property
-    def score(self, max_len = 50):
-        if len(self) == 0:
-            return 0
-        else:
-            iter_sequence = islice(enumerate(self.sequence), 1, max_len)
-            return 1-sum(pers/2**i for i,pers in iter_sequence)
-
-# --------------------------------- Methods ----------------------------------
-    def save(self, fname, **kwargs):
-        save_dgm(self.values, fname, **kwargs)
-
-    def add(self, pt):
-        return Dgm(self._values + (tuple(pt),))
-
-    def cap(self, n):
-        return Dgm(self.values[:n])
-
-    def crop(self, n):   # needs to be improved!
-        dgm_new = self.copy()
-        for i in range(n):
-            dgm_new = dgm_new.add((0,0))
-        return Dgm(dgm_new.values[:n])
-
-
-    def copy(self, index=False):
-        dgm = eval(repr(self))
-        if index:
-            dgm = indexify_dgm(dgm)
-        return dgm
-
-    def draw(self, ax=None):
-        draw_diagram(self, ax=ax)

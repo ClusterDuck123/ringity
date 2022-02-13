@@ -1,5 +1,5 @@
 from ripser import ripser
-from ringity.classes.new_diagram import PDgm
+from ringity.classes.diagram import PDgm
 from ringity.centralities import net_flow, resistance
 from ringity.methods import _yes_or_no
 from ringity.constants import _assertion_statement

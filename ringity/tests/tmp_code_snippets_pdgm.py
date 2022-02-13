@@ -2,7 +2,7 @@ import numpy as np
 
 from gtda.homology import VietorisRipsPersistence
 from ringity.generators.diagram import random_pdiagram, random_pdiagram_point
-from ringity.classes.new_diagram import PDgm, PDgmPt
+from ringity.classes.diagram import PDgm, PDgmPt
 from ringity.classes.exceptions import DgmTimeError
 
 # Single diagram point

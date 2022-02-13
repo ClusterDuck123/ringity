@@ -1,5 +1,5 @@
 import numpy as np
-from ringity.classes.new_diagram import PDgm
+from ringity.classes.diagram import PDgm
 
 def read_pdiagram(fname, **kwargs):
     """
