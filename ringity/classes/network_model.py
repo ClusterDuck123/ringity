@@ -57,67 +57,93 @@ def similarities_to_probabilities(simis, param, a, rho, parameter_type='rate'):
 
     return probs
 
-class PositionGenerator:
+class PeriodicPositionGenerator:
     def __init__(self, N,
-                 distn = 'wrappedexpon',
+                 distn_arg = 'wrappedexpon',
+                 random_state = None,
                  **kwargs):
         """
         The variable `distribution` can either be a string or a random variable
         form scipy.
         """
-        self.N = N
-
+        self.random_state = random_state
+        self._N = N
         # In scipy-jargon a `rv` (random variable) is what we'd rather call a 
         # distribution *family* (e.g. a normal distribution). This corresponds
-        # to our notion of `random_position`. 
+        # to our notion of `random_distribution`. 
         # A `frozen` random variable is what I would call an actual random variable
         # (e.g. a normal distribution with mu = 0, and sd = 1). This corresponds
-        # to our notion of `frozen_position`.
+        # to our notion of `frozen_distribution`.
         # Finally, a `rvs` (random variates) is an instantiation of a random variable
-        # (e.g. 3.14159). This corresponds to our notion of `instantiated_position`.
+        # (e.g. 3.14159). This corresponds to our notion of `positions`.
         
-        if   isinstance(distn, str):
-            self.distribution_name = distn
-            self.random_positions, self.distribution_args = _get_rv(distn, **kwargs)
-            self.frozen_positions = self.random_positions(**self.distribution_args)
-        elif isinstance(distn, ss._distn_infrastructure.rv_frozen):
+        if isinstance(distn_arg, str):
+            self.distribution_name = distn_arg
+            self.random_distribution, self.distribution_args = _get_rv(distn_arg, **kwargs)
+            self.frozen_distribution = self.random_distribution(**self.distribution_args)
+        elif isinstance(distn_arg, ss._distn_infrastructure.rv_frozen):
             self.distribution_name = 'frozen'
-            self.random_positions = 'frozen'
-            self.frozen_positions = distn
-        elif isinstance(distn, ss._distn_infrastructure.rv_generic):
-            self.distribution_name = distn.name
-            self.random_positions = distn
-            self.frozen_positions = self.random_positions(**kwargs)
+            self.random_distribution = 'frozen'
+            self.frozen_distribution = distn_arg
+        elif isinstance(distn_arg, ss._distn_infrastructure.rv_generic):
+            self.distribution_name = distn_arg.name
+            self.random_distribution = distn_arg
+            self.frozen_distribution = self.random_distribution(**kwargs)
         else:
             assert False, f"data type of distn recognized: ({type(self.distribution)})"
             
-        self.current_positions = self.frozen_positions.rvs(size = N,
-                                                           random_state = None)
-                                                       
-    def redraw(self, random_state = None):
-        self.current_positions = self.frozen_positions.rvs(size = self.N,
-                                                           random_state = random_state)
-        return self.current_positions                                                   
+        self.generate_positions(random_state = self.random_state) 
+                                                    
+    @property
+    def N(self):
+        return self._N
+        
+    @N.setter
+    def N(self, value):
+        self._N = value
+        generate_positions(random_state = self.random_state)
+        
+    
+    @property
+    def positions(self):
+        return self._positions
+                                        
+    @positions.setter                                                   
+    def positions(self, values):
+        self._positions = values % (2*np.pi)                                             
+
+    def generate_positions(self, random_state = None):
+        if random_state is None:
+            ranodm_state = self.random_state
+        self._positions = self.frozen_distribution.rvs(size = self.N,
+                                                       random_state = random_state)
 
 class NetworkBuilder:
     def __init__(self, N,
-                 distn = 'wrappedexpon',
+                 distn_arg = 'wrappedexpon',
                  rho = None,
                  k_max = None,
                  delay = None,
                  rate = None,
                  a = None,
+                 random_state = None,
                  **kwargs):
-        self.N = N
-        self.distn = distn
-        self.kwargs = kwargs
+        
+        # These attributes can be changed in isolation
+        self.random_state = random_state
+        
+        # These properties influence the value of other properties
+        self._N = N
+        self._distn_arg = distn_arg
+        self._kwargs = kwargs
         self._set_distribution_parameters(delay = delay, rate = rate)
         self._set_density_parameters(rho = rho, k_max = k_max)
         self._set_grid_parameters(a = a)
         self._position_generator = PositionGenerator(N = self.N,
-                                                     distn = self.distn,
+                                                     distn_arg = self.distn,
                                                      rate = self.rate,
                                                      delay = self.delay,
+                                                     random_state = self.random_state,
                                                      **kwargs)
         
         # Check where this thing belongs
@@ -184,7 +210,9 @@ class NetworkBuilder:
             return 1/2 - np.log(np.sqrt(x**2 + 1) + x)/(2*np.pi*self.rate)
         
     def generate_positions(self, random_state = None):
-        self.positions = self._position_generator.redraw(random_state)
+        if random_state is None:
+            random_state = self.random_state
+        self._positions = self._position_generator.generate_positions(random_state)
         
     def calculate_distances(self):
         self.distances = circular_distance(self.positions)
@@ -195,8 +223,12 @@ class NetworkBuilder:
     def calculate_probabilities(self, calculate_from = 'similarities'):
         pass
         
-    def instanciate_network(self):
+    def instantiate_network(self):
         pass
+        
+# =============================================================================
+#  ---------------------------------- Legacy --------------------------------
+# =============================================================================
 
 class GeneralNetworkBuilder:
     def __init__(self, N, rho, delay, a=None):

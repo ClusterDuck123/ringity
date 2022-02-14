@@ -4,6 +4,7 @@ import scipy.stats as ss
 import scipy.special as sc
 
 from scipy.stats._distn_infrastructure import rv_generic, rv_frozen
+from ringity.classes.exceptions import DistributionParameterError
 
 # =============================================================================
 #  -------------------------- GLOBAL CONSTANTS ------------------------------
@@ -46,6 +47,14 @@ class wrappedexpon_gen(ss.rv_continuous):
 
 wrappedexpon = wrappedexpon_gen(a=0.0, b=2*np.pi, name='wrappedexpon')
 
+def get_frozen_wrappedexpon(arg, argtype):
+    if argtype == 'rate':
+        rate = arg
+    elif argtype == 'delay':
+        rate =  np.tan(np.pi*(1-arg)/2)
+    else:
+        raise DistributionParameterError(f"Argtype `{argtype}` unknown!")
+    return wrappedexpon(rate=rate)
 
 # =============================================================================
 #  ------------------------------ FUNCTIONS ----------------------------------

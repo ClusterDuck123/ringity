@@ -13,7 +13,11 @@ class RingityException(Exception):
 class NotImplementedYetError(RingityException):
     pass
 
-# ---------------------------- Network Parameter Errors ----------------------------
+# ---------------------------- Distribution Errors ----------------------------
+class DistributionParameterError(RingityException):
+    pass
+    
+# -------------------------- Network Parameter Errors --------------------------
 class NetworkParameterError(RingityException):
     pass
 
