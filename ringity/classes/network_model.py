@@ -186,7 +186,7 @@ class NetworkBuilder:
             
         elif rate:
             self.rate = rate
-            self.delay = 1 - 2/np.pi*np.arctan(self.rate)
+            self.delay = 1 - 2/np.pi*np.arctan(rate)
         else:
             raise ProvideParameterError("Please provide a distribution paramter!")
                         
