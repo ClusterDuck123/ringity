@@ -44,7 +44,7 @@ def normalized_overlap(dists, a):
 def similarities_to_probabilities(simis, param, a, rho, parameter_type='rate'):
     # This needs some heavy refactoring...
     rate = get_rate_parameter(param, parameter_type=parameter_type)
-    rho_max = 1-np.sinh((PI-2*a*PI)*rate)/np.sinh(PI*rate)
+    rho_max = 1-np.sinh((np.pi-2*a*np.pi)*rate)/np.sinh(np.pi*rate)
 
     if np.isclose(rho,rho_max):
         # if rho is close to rho_max, all the similarities are 1.
@@ -229,6 +229,30 @@ class NetworkBuilder:
 # =============================================================================
 #  ---------------------------------- Legacy --------------------------------
 # =============================================================================
+def slope(rho, rate, a):
+    mu_S = mean_similarity(rate,a)
+    if rho <= mu_S:
+        return rho/mu_S
+    else:
+        const = 1/np.sinh(np.pi*rate)
+        def integral(k):
+            term1 = np.sinh((1 + 2*a*(1/k-1))*np.pi*rate)
+            term2 = (k*np.sinh((a*np.pi*rate)/k)*np.sinh(((a+k-2*a*k)*np.pi*rate)/k))/(a*np.pi*rate)
+            return term1-term2
+        return scipy.optimize.newton(
+            func = lambda k: const*integral(k) + (1-cdf_similarity(1/k, rate, a)) - rho,
+            x0 = rho/mu_S)
+            
+def get_rate_parameter(parameter, parameter_type):
+    if   parameter_type.lower() == 'rate':
+        return parameter
+    elif parameter_type.lower() == 'shape':
+        return 1/parameter
+    elif parameter_type.lower() == 'delay':
+        return np.cos(np.pi*parameter/2) / np.sin(np.pi*parameter/2)
+    else:
+        assert False, f"Parameter type '{parameter_type}' not known! " \
+                       "Please choose between 'rate', 'shape' and 'delay'."
 
 class GeneralNetworkBuilder:
     def __init__(self, N, rho, delay, a=None):
