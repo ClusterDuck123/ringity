@@ -4,6 +4,7 @@ from ringity.classes.exceptions import ConflictingParametersError, ProvideParame
 from scipy.spatial.distance import pdist, squareform
 from scipy.optimize import newton
 
+import scipy
 import numpy as np
 import networkx as nx
 import scipy.stats as ss
