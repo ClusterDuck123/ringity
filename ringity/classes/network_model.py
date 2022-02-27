@@ -11,225 +11,33 @@ import scipy.stats as ss
 
 
 # =============================================================================
-#  --------------------------- OOP Here I come!! ------------------------------
+#  --------------------------- TRANSFORMATIONS ------------------------------
 # =============================================================================
-def circular_distance(pts, period = 2*np.pi):
-    """Takes a vector of points ``pts`` on the interval [0, ``period``] 
-    and returns the shortest circular distance within that period. """
+def box_cosine_similarity(dists, box_length):
+    """Calculate the normalized overlap of two boxes on the circle."""    
+    x1 = (box_length - dists).clip(0)
     
-    assert ((pts >= 0) & (pts <= period)).all()
-    
-    abs_dists = pdist(pts.reshape(-1,1))
-    return np.where(abs_dists < period / 2, abs_dists, period - abs_dists)
-
-def overlap(dist, a):
-    """
-    Calculates the overlap of two boxes of length 2*pi*a on the circle for a
-    given distance dist (measured from center to center).
-    """
-    
-    # TODO: substitute ``a`` with ``box_length``
-    
-    x1 = (2*np.pi*a - dist).clip(0)
-    
-    if a <= 0.5:
-        return x1
-    # for box sizes with a>0 there is a second overlap
+    # For box lengths larger than half of the circle there is a second overlap
+    if box_length <= np.pi:
+        x2 = 0
     else:
-        x2 = (dist - 2*np.pi*(1-a)).clip(0)
-        return x1 + x2
-            
-def normalized_overlap(dists, a):
-    return overlap(dists, a)/(2*np.pi*a)
+        x2 = (dists - (2*np.pi - box_length)).clip(0)
+        
+    total_overlap = x1 + x2
+    return total_overlap / box_length    
+
+
+def linear_probability(sims, a, b):
+    """Calculate linear transformation, capped at 0 an 1."""
     
-def similarities_to_probabilities(simis, param, a, rho, parameter_type='rate'):
-    # This needs some heavy refactoring...
-    rate = get_rate_parameter(param, parameter_type=parameter_type)
-    rho_max = 1-np.sinh((np.pi-2*a*np.pi)*rate)/np.sinh(np.pi*rate)
-
-    if np.isclose(rho,rho_max):
-        # if rho is close to rho_max, all the similarities are 1.
-        probs = np.sign(simis)
-    elif rho < rho_max:
-        k = slope(rho, rate, a)
-        probs = (simis*k).clip(0,1)
-    else:
-        assert rho <= rho_max, "Please increase `a` or decrease `rho`!"
-
-    return probs
-
-class PeriodicPositionGenerator:
-    def __init__(self, N,
-                 distn_arg = 'wrappedexpon',
-                 random_state = None,
-                 **kwargs):
-        """
-        The variable `distribution` can either be a string or a random variable
-        form scipy.
-        """
-        self.random_state = random_state
-        self._N = N
-        # In scipy-jargon a `rv` (random variable) is what we'd rather call a 
-        # distribution *family* (e.g. a normal distribution). This corresponds
-        # to our notion of `random_distribution`. 
-        # A `frozen` random variable is what I would call an actual random variable
-        # (e.g. a normal distribution with mu = 0, and sd = 1). This corresponds
-        # to our notion of `frozen_distribution`.
-        # Finally, a `rvs` (random variates) is an instantiation of a random variable
-        # (e.g. 3.14159). This corresponds to our notion of `positions`.
+    if a < 0:
+        Warning(f"Slope parameter `a` is negative: {a}")
+    if b < 0:
+        Warning(f"Intercept parameter `b` is negative {b}")
         
-        if isinstance(distn_arg, str):
-            self.distribution_name = distn_arg
-            self.random_distribution, self.distribution_args = _get_rv(distn_arg, **kwargs)
-            self.frozen_distribution = self.random_distribution(**self.distribution_args)
-        elif isinstance(distn_arg, ss._distn_infrastructure.rv_frozen):
-            self.distribution_name = 'frozen'
-            self.random_distribution = 'frozen'
-            self.frozen_distribution = distn_arg
-        elif isinstance(distn_arg, ss._distn_infrastructure.rv_generic):
-            self.distribution_name = distn_arg.name
-            self.random_distribution = distn_arg
-            self.frozen_distribution = self.random_distribution(**kwargs)
-        else:
-            assert False, f"data type of distn recognized: ({type(self.distribution)})"
-            
-        self.generate_positions(random_state = self.random_state) 
-                                                    
-    @property
-    def N(self):
-        return self._N
-        
-    @N.setter
-    def N(self, value):
-        self._N = value
-        generate_positions(random_state = self.random_state)
-        
+    return (a*sims + b).clip(0, 1)
     
-    @property
-    def positions(self):
-        return self._positions
-                                        
-    @positions.setter                                                   
-    def positions(self, values):
-        self._positions = values % (2*np.pi)                                             
-
-    def generate_positions(self, random_state = None):
-        if random_state is None:
-            ranodm_state = self.random_state
-        self._positions = self.frozen_distribution.rvs(size = self.N,
-                                                       random_state = random_state)
-
-class NetworkBuilder:
-    def __init__(self, N,
-                 distn_arg = 'wrappedexpon',
-                 rho = None,
-                 k_max = None,
-                 delay = None,
-                 rate = None,
-                 a = None,
-                 random_state = None,
-                 **kwargs):
-        
-        # These attributes can be changed in isolation
-        self.random_state = random_state
-        
-        # These properties influence the value of other properties
-        self._N = N
-        self._distn_arg = distn_arg
-        self._kwargs = kwargs
-        self._set_distribution_parameters(delay = delay, rate = rate)
-        self._set_density_parameters(rho = rho, k_max = k_max)
-        self._set_grid_parameters(a = a)
-        self._position_generator = PositionGenerator(N = self.N,
-                                                     distn_arg = self.distn,
-                                                     rate = self.rate,
-                                                     delay = self.delay,
-                                                     random_state = self.random_state,
-                                                     **kwargs)
-        
-        # Check where this thing belongs
-        self.rho_max = 1 - \
-            np.sinh((np.pi - 2 * self.a * np.pi) * self.rate) / \
-            np.sinh(np.pi * self.rate)
-
-        assert 0 <= self.delay <= 1
-        assert 0 <= self.rho <= 1
-
-        assert self.a_min <= self.a <= 1
     
-    def _set_density_parameters(self, rho = None, k_max = None):
-        if rho is not None and k_max is not None:
-            raise NotImplementedYetError("Conversion from ``rho`` to ``k_max`` not implemented yet!")
-        elif rho:
-            self.rho = rho
-        elif k_max:
-            raise NotImplementedYetError("Density parameter ``k_max`` not implemented yet!")
-        else:
-            raise ProvideParameterError("Please provide a density paramter!")
-    
-    def _set_distribution_parameters(self, delay = None, rate = None):
-        # TODO: use Python's in-built getter and setter functions
-        if delay is not None and rate is not None:
-            
-            delay_check = np.isclose(delay, np.tan(np.pi*(1-delay)/2))
-            rate_check  = np.isclose(rate , 1 - 2/np.pi*np.arctan(self.rate))
-            
-            if not delay_check or not rate_check:
-                raise ConflictingParametersError(f"Conflicting distribution parameters found!"
-                                                  "rate = {rate}, delay = {delay}")
-            else:
-                self.delay = delay
-                seld.rate  = rate
-                
-        elif delay:
-            self.delay = delay
-            self.rate = np.tan(np.pi*(1-delay)/2)
-            
-        elif rate:
-            self.rate = rate
-            self.delay = 1 - 2/np.pi*np.arctan(rate)
-        else:
-            raise ProvideParameterError("Please provide a distribution paramter!")
-                        
-    def _set_grid_parameters(self, a = None):
-        self.a_min = self._set_a_min()
-        
-        if a is None:
-            self.a = self.a_min
-        else:
-            self.a = a
-        
-            
-    def _set_a_min(self):
-        if np.isclose(self.delay, 0):
-            self.a_min = 0.
-        elif np.isclose(self.delay, 1):
-            self.a_min = self.rho/2
-        else:
-            # TODO: break up the following expressions into interpretable terms
-            x = np.sinh(np.pi*self.rate) * (1 - self.rho)
-            return 1/2 - np.log(np.sqrt(x**2 + 1) + x)/(2*np.pi*self.rate)
-        
-    def generate_positions(self, random_state = None):
-        if random_state is None:
-            random_state = self.random_state
-        self._positions = self._position_generator.generate_positions(random_state)
-        
-    def calculate_distances(self):
-        self.distances = circular_distance(self.positions)
-    
-    def calculate_similarities(self, calculate_from = 'distances'):
-        self.similarities = normalized_overlap(self.distances, a = self.a)
-    
-    def calculate_probabilities(self, calculate_from = 'similarities'):
-        pass
-        
-    def instantiate_network(self):
-        pass
-        
-# =============================================================================
-#  ---------------------------------- Legacy --------------------------------
-# =============================================================================
 def slope(rho, rate, a):
     mu_S = mean_similarity(rate,a)
     if rho <= mu_S:
@@ -244,172 +52,244 @@ def slope(rho, rate, a):
             func = lambda k: const*integral(k) + (1-cdf_similarity(1/k, rate, a)) - rho,
             x0 = rho/mu_S)
             
-def get_rate_parameter(parameter, parameter_type):
-    if   parameter_type.lower() == 'rate':
-        return parameter
-    elif parameter_type.lower() == 'shape':
-        return 1/parameter
-    elif parameter_type.lower() == 'delay':
-        return np.cos(np.pi*parameter/2) / np.sin(np.pi*parameter/2)
-    else:
-        assert False, f"Parameter type '{parameter_type}' not known! " \
-                       "Please choose between 'rate', 'shape' and 'delay'."
 
-class GeneralNetworkBuilder:
-    def __init__(self, N, rho, delay, a=None):
+# =============================================================================
+#  ------------------------------- PARSERS ----------------------------------
+# =============================================================================
+def get_canonical_distn_name(distn_name):
+    """Transform string to match a corresponding scipy.stats class."""
+    distn_name = ''.join(filter(str.isalnum, distn_name.lower()))
+    distn_name_converer = {
+        'normal' : 'norm',
+        'exponential' : 'expon',
+        'wrappedexponential' : 'wrappedexpon'
+    }
+    return distn_name_converer.get(distn_name, distn_name)
+
+
+def get_canonical_sim_name(sim_name):
+    """Transform string to match name of a similarity function."""
+    sim_name = sim_name.lower()
+    if not sim_name.endswith('_similarity'):
+        sim_name = sim_name + '_similarity'
+    return sim_name
+
+
+def get_canonical_prob_name(prob_name):
+    """Transform string to match name of a probability function."""
+    prob_name = prob_name.lower()
+    if not prob_name.endswith('_probability'):
+        prob_name = prob_name + '_probability'
+    return prob_name
+
+
+def string_to_distribution(distn_name,
+                           **kwargs):
+    """Take a string and returns a scipy.stats frozen random variable. 
+    
+    Parameters to the frozen random variable can be passed on via ``**kwargs`` 
+    (e.g. loc = 5 or scale = 3). 
+    The string is trying to match a corresponding scipy.stats class even 
+    if there is no exact match. For example, the string 'exponential' will
+    return the random variable scipy.stats.expon.
+    See function ``get_canonical_distn_name`` for details on name conversion. 
+    """
+    
+    distn_name = get_canonical_distn_name(distn_name)
+    try:
+        rv_gen = getattr(ss, distn_name)
+    except AttributeError:
+        raise AttributeError(f"distribution {distn_name} unknown.")
+        
+    return rv_gen(**kwargs)
+
+
+def string_to_similarity_function(sim_name):
+    """Take a string and returns a similarity function."""
+    sim_name = get_canonical_sim_name(sim_name)
+    return eval(sim_name)
+
+
+def string_to_probability_function(prob_name):
+    """Take a string and returns a similarity function."""
+    prob_name = get_canonical_prob_name(prob_name)
+    return eval(prob_name)
+    
+# =============================================================================
+#  ---------------------------- NETWORK BUILDER ------------------------------
+# =============================================================================
+    
+    
+class NetworkBuilder:
+    """General use class to build a network model.
+    
+    Tailored to standard network model with parameters:
+    - N ....... network parameter: network size.
+    - rho ..... network parameter: expected network density.
+    - beta .... distribution parameter: normalized rate parameter
+    - alpha ... response parameter: length of the box functions.
+    
+    Model is not optimized for memory usage! In particular, distances, 
+    similarities and probabilities are stored separately rather than 
+    being transformed.
+    """
+    def __init__(self, **kwargs):
+        self.__dict__ = kwargs
+
+# ------------------------------------------------------------------        
+# --------------------------- PROPERTIES ---------------------------
+# ------------------------------------------------------------------
+
+# ----------------------- NETWORK PARAMETERS -----------------------
+    @property
+    def N(self):
+        return self._N
+    
+    @N.setter
+    def N(self, value):
+        if hasattr(self, 'N') and self.N != value:
+            raise AttributeError(f"Trying to set conflicting values "
+                                 f"for N: {value} != {self.N}")
+        self._N = value
+        
+    @property
+    def alpha(self):
+        return self._alpha
+    
+    @alpha.setter
+    def alpha(self, value):
+        if hasattr(self, 'alpha') and self.alpha != value:
+            raise AttributeError(f"Trying to set conflicting values "
+                                 f"for alpha: {value} != {self.alpha}")
+        self._alpha = value
+        
+# -------------------------- NETWORK DATA --------------------------
+
+    @property
+    def distribution(self):
+        return self._distribution
+    
+    @distribution.setter
+    def distribution(self, value):
+        assert isinstance(value, ss._distn_infrastructure.rv_frozen)
+        self._distribution = value
+        
+    @property
+    def positions(self):
+        return self._positions
+    
+    @positions.setter
+    def positions(self, value):
+        assert np.all((0 <= value) & (value <= 2*np.pi))
+        self._positions = value
+        
+    @property
+    def distances(self):
+        return squareform(self._distances)
+    
+    @distances.setter
+    def distances(self, value):
+        assert len(value.shape) == 1
+        self._distances = value
+        
+    @property
+    def similarities(self):
+        return squareform(self._similarities)
+    
+    @similarities.setter
+    def similarities(self, value):
+        assert len(value.shape) == 1
+        self._similarities = value
+        
+# ------------------------------------------------------------------        
+# ---------------------------- METHODS ----------------------------
+# ------------------------------------------------------------------
+            
+    def set_distribution(self, 
+                         distn_arg, 
+                         **kwargs):
+        """Takes either a frozen distribution from scipy.stats or a string 
+        specifying a parametrized family of distributions and sets the property 
+        `frozen_distribution` to the corresponding frozen distribution. `**kwargs`
+        will be used to specify the parameters of the distribution.
+        """
+            
+        if isinstance(distn_arg, str):
+            distn_arg =  string_to_distribution(distn_name = distn_arg, **kwargs)
+        elif not isinstance(distn_arg, ss._distn_infrastructure.rv_frozen):
+            raise TypeError(f"Type of {distn_arg} unknown.")
+        
+        self.distribution = self.distribution = distn_arg
+            
+    def instantiate_positions(self, N, random_state = None):
+        """Draws `N` elements on a circle from the distribution specified in 
+        self.distribution.
+        
+        
+        `random_state` is an attribute that can be overwritten."""
         self.N = N
-        self.rho = rho
-        self.delay = delay
-        self.rate = np.tan(np.pi * (1 - delay) / 2)
-
-        self.a_min = get_a_min(rho, delay)
-        self.rho_max = 1 - \
-            np.sinh((np.pi - 2 * self.a * np.pi) * self.rate) / \
-            np.sinh(np.pi * self.rate)
-
-        if a is None:
-            self.a = self.a_min
+        
+        if random_state is None:
+            random_state = self.__dict__.get('random_state', None)
+        
+        positions = self.distribution.rvs(N, random_state = random_state)
+        self.positions = positions % (2*np.pi)
+        
+        
+    def calculate_distances(self, circular = True, metric = 'euclidean'):
+        abs_dists = pdist(self.positions.reshape(-1,1), metric = metric)
+        
+        if not circular:
+            self.distances = abs_dists
         else:
+            self.distances = np.where(abs_dists < np.pi, 
+                                      abs_dists, 
+                                      2*np.pi - abs_dists)
+            
+    def calculate_similarities(self, sim_func = 'box_cosine', alpha = None):
+        if alpha is not None:
+            self.alpha = alpha
+            
+        if isinstance(sim_func, str):
+            sim_func = string_to_similarity_function(sim_name = sim_func)
+        elif not callable(sim_func):
+            raise TypeError(f"Type of {distn_arg} unknown.")
+        
+        self.similarities = sim_func(squareform(self.distances), 
+                                     box_length = 2*np.pi*self.alpha)
+        
+    def calculate_probabilities(self, prob_func = 'linear', a = None, b = None):
+        if a is not None:
             self.a = a
-
-        assert 0 <= self.delay <= 1
-        assert 0 <= self.rho <= 1
-
-        assert self.a_min <= self.a <= 1
-
-    def get_slope(self):
-        mu_S = mean_similarity(self.rate, self.a)
-        if self.rho <= mu_S:
-            return self.rho / mu_S
-        else:
-            const = 1 / np.sinh(np.pi * self.rate)
-
-            def integral(k):
-                term1 = np.sinh((1 + 2 * self.a * (1 / k - 1))
-                                * np.pi * self.rate)
-                term2 = (k * np.sinh((self.a * np.pi * self.rate) / k) *
-                         np.sinh(((self.a + k - 2 * k * self.a) * np.pi * self.rate) / k)) / \
-                    (self.a * np.pi * self.rate)
-                return term1 - term2
-            self.slope = newton(
-                func=lambda k: const * integral(k) +
-                (1 - cdf_similarity(1 / k, self.rate, self.a)) -
-                self.rho,
-                x0=self.rho / mu_S)
-
-    def get_positions(self):
-        self.positions = np.random.exponential(scale=1 / np.tan(np.pi * (1 - self.delay) / 2),
-                                               size=self.N) % (2 * np.pi)
-
-    def get_distances(self):
-        self.distances = positions_to_distances(self.positions)
-
-    def get_similarities(self):
-        self.similarities = distances_to_similarities(self.distances, self.a)
-
-    def get_probabilities(self):
-        self.probabilities = (self.similarities * self.slope).clip(0, 1)
-
-    def generate_model(self, save_memory=False):
-        self.get_slope()
-        self.get_positions()
-
-        self.get_distances()
-        self.get_similarities()
-
-        if save_memory:
-            del self.distances
-
-        self.get_probabilities()
-
-        if save_memory:
-            del self.similarities
-
-    def get_network(self):
-        coin_flip = np.random.uniform(size=int(N * (N - 1) / 2))
-        A = squareform(np.where(self.probablities > coin_flip, 1, 0))
-        return nx.from_numpy_array(A)
-
-
-class ERNetworkBuilder:
-    def __init__(self, N, rho):
-        self.N = N
-        self.rho = rho
-
-    def generate_model(self):
-        pass
-
-    def get_network(self):
-        return nx.erdos_renyi_graph(n=self.N, p=self.rho)
-
-
-class WSNetworkBuilder:
-    def __init__(self, N, rho, a=None):
-        self.N = N
-        self.rho = rho
-        self.delay = 1
-        self.a_min = rho / 2
-        self.rho_max = 1  # Maybe....
-
-        if a is None:
-            self.a = self.a_min
-        else:
-            self.a = a
-
-        assert 0 <= self.delay <= 1
-        assert 0 <= self.rho <= 1
-
-        assert self.a_min <= self.a <= 1
-
-    def get_slope(self):
-        if np.isclose(self.a, self.a_min):
-            self.slope = None
-        elif self.rho <= self.a:
-            self.slope = self.rho / self.a
-        elif self.rho < 2 * self.a:
-            self.slope = self.a / (2 * self.a - self.rho)
-        else:
-            assert self.rho <= 2 * self.a, "Please increase `a` or decrease `rho`!"
-
-    def get_positions(self):
-        self.positions = np.random.exponential(scale=1 / np.tan(np.pi * (1 - self.delay) / 2),
-                                               size=self.N) % (2 * np.pi)
-
-    def get_distances(self):
-        self.distances = positions_to_distances(self.positions)
-
-    def get_similarities(self):
-        self.similarities = distances_to_similarities(self.distances, self.a)
-
-    def get_probabilities(self):
-        if np.isclose(self.a, self.a_min):
-            self.probabilities = np.sign(self.similarities)
-        elif self.rho <= self.a:
-            self.probabilities = (self.similarities).clip(0, 1)
-        elif self.rho < 2 * self.a:
-            self.probabilities = (self.similarities * self.slope).clip(0, 1)
-        else:
-            assert False, "Something went wrong..."
-
-    def generate_model(self, save_memory=False):
-        self.get_slope()
-        self.get_positions()
-
-        self.get_distances()
-        self.get_similarities()
-
-        if save_memory:
-            del self.distances
-
-        self.get_probabilities()
-
-        if save_memory:
-            del self.similarities
-
-    def get_network(self):
-        coin_flip = np.random.uniform(size=int(N * (N - 1) / 2))
-        A = squareform(np.where(self.probablities > coin_flip, 1, 0))
-        return nx.from_numpy_array(A)
+        if b is not None:
+            self.b = b
+            
+        if isinstance(prob_func, str):
+            prob_func = string_to_probability_function(prob_name = prob_func)
+        elif not callable(prob_func):
+            raise TypeError(f"Type of {distn_arg} unknown.")
+        
+        self.probabilities = prob_func(squareform(self.similarities), 
+                                       a = self.a,
+                                       b = self.b)
+        
+    def instantiate_network(self, random_state = None):
+        """Draws a network from the probabilities specified in 
+        self.probabilities.
+        
+        
+        `random_state` is an attribute that can be overwritten."""
+        
+        if random_state is None:
+            random_state = self.__dict__.get('random_state', None)
+        
+        if not hasattr(self, 'N'):
+            self.N = len(self.positions)
+        
+        np_rng = np.random.RandomState(random_state)
+        coinflips = np_rng.uniform(size = (self.N * (self.N - 1)) // 2)
+        
+        self.network = self.probabilities >= coinflips
 
 
 # =============================================================================
