@@ -29,7 +29,7 @@ def net_flow(G, verbose=False):
         raise DisconnectedGraphError
         
     A = nx.adjacency_matrix(G)
-    L = csgraph.laplacian(A).toarray()
+    L = csgraph.laplacian(A.astype(float)).toarray()
 
     C = np.zeros(L.shape)
     C[1:,1:] = np.linalg.inv(L[1:,1:])
