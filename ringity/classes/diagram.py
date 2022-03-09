@@ -7,7 +7,7 @@ from collections.abc import MutableMapping
 from ringity.classes.exceptions import SchroedingersException, TimeParadoxError, BeginningOfTimeError, EndOfTimeError
 
 
-def signal_score(iterable, is_sorted = False):
+def signal_score(iterable, is_sorted = False, precision = 50):
     if len(iterable) == 0:
         return 0
     if not is_sorted:
@@ -16,13 +16,14 @@ def signal_score(iterable, is_sorted = False):
     iterable_iter = iter(iterable)
     signal = next(iterable_iter)
     
-    return 1 - sum((noise/signal) / 2**i for i,noise in enumerate(iterable_iter, 1))
+    return 1 - sum((noise/signal) / 2**i 
+                            for i,noise in enumerate(islice(iterable_iter, precision), 1))
 
 # =============================================================================
 #  ------------------------------- DgmPt CLASS -------------------------------
 # =============================================================================
 
-class PDgmPt(tuple):
+class PersistenceDiagramPoint(tuple):
     def __init__(self, iterable):
         
         self._set_birth_death_pair(iterable)
@@ -65,7 +66,7 @@ class PDgmPt(tuple):
     def death(self, value):
         if value < self.birth:
             raise TimeParadoxError('Homology class cannot die before it was born! '
-                                  f'DgmPt = ({self.birth}, {value})')
+                                  f'PersistenceDiagramPoint = ({self.birth}, {value})')
         self._death = float(value)
         
     @property    
@@ -129,11 +130,16 @@ class PDgmPt(tuple):
 # =============================================================================
 #  -------------------------------- Dgm CLASS --------------------------------
 # =============================================================================
-class PDgm(list):
+class PersistenceDiagram(list):
     def __init__(self, iterable = (), dim = None):
         
-        super().extend(sorted(map(PDgmPt, iterable), reverse=True))
+        super().extend(sorted(map(PersistenceDiagramPoint, iterable), reverse=True))
         self.dim = dim
+        
+    @classmethod
+    def from_gtda(cls, arr, dim = 1):
+        dgm = arr[arr[:,2] == dim][:,:2]
+        return cls(dgm)
         
 # -------------------------------- Proerties ---------------------------------
         
@@ -173,7 +179,7 @@ class PDgm(list):
 # -------------------------------- Methods ---------------------------------
     
     def append(self, item):
-        list.append(self, PDgmPt(item))
+        list.append(self, PersistenceDiagramPoint(item))
         self.sort(reverse=True)
     
     def signal_score(self, skip=0):
@@ -195,6 +201,9 @@ class PDgm(list):
         super().extend(type(self)(iterable))
         self.sort(reverse=True)
         
+    def to_array(self):
+        return np.array(self)
+        
 # ----------------------------- Dunder Method ------------------------------
     
     def __getitem__(self, item):
@@ -203,7 +212,7 @@ class PDgm(list):
         try:
             item_iter = iter(item)
         except TypeError:
-            return PDgmPt(super().__getitem__(item))
+            return PersistenceDiagramPoint(super().__getitem__(item))
         try:
             return type(self)(super().__getitem__(item_iter))
         except TypeError:

@@ -1,5 +1,5 @@
 from ripser import ripser
-from ringity.classes.diagram import PDgm
+from ringity.classes.diagram import PersistenceDiagram
 from ringity.centralities import net_flow, resistance
 from ringity.methods import _yes_or_no
 from ringity.constants import _assertion_statement
@@ -48,7 +48,7 @@ def diagram(arg1 = None,
 
     t1 = time.time()
     ripser_output = ripser(np.array(D), maxdim=p, distance_matrix=True)
-    dgm = PDgm(ripser_output['dgms'][p])
+    dgm = PersistenceDiagram(ripser_output['dgms'][p])
     t2 = time.time()
 
     if verbose:
