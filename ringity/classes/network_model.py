@@ -1,4 +1,3 @@
-from ringity.distribution_functions import mean_similarity, cdf_similarity
 from ringity.classes._distns import _get_rv
 from ringity.classes.exceptions import ConflictingParametersError, ProvideParameterError, NotImplementedYetError
 from scipy.spatial.distance import pdist, squareform
@@ -9,6 +8,37 @@ import numpy as np
 import networkx as nx
 import scipy.stats as ss
 
+def network_model(N, 
+                  a = 0.5, 
+                  beta = None, 
+                  rho = None, 
+                  rate = None,
+                  K = None, 
+                  random_state = None,
+                  return_positions = False):
+    
+    rate = get_rate_parameter(rate = rate, beta = beta)
+    
+    if rho is not None:
+        if K is None:
+            raise ValueError(f"Conflicting interaction parameters given: "
+                             f"rho = {rho}, K = {K}")
+        K = density_to_interaction_strength(rho, a=a, rate=rate)
+    
+    network_builder = NetworkBuilder(random_state = random_state)
+    network_builder.set_distribution('exponential', scale = 1/rate)
+    network_builder.instantiate_positions(N)
+    network_builder.calculate_distances(metric = 'euclidean', circular = True)
+    network_builder.calculate_similarities(alpha = a, sim_func = 'box_cosine')
+    network_builder.calculate_probabilities(a = K, b = 0)
+    network_builder.instantiate_network()
+    
+    G = nx.from_numpy_array(squareform(network_builder.network))
+    
+    if return_positions:
+        return G, network_builder.positions
+    else:
+        return G
 
 # =============================================================================
 #  --------------------------- TRANSFORMATIONS ------------------------------
@@ -37,20 +67,27 @@ def linear_probability(sims, a, b):
         
     return (a*sims + b).clip(0, 1)
     
+
+def mean_similarity(rate, a):
+    """Calculate expected mean similarity (equivalently maximal expected density). 
     
-def slope(rho, rate, a):
-    mu_S = mean_similarity(rate,a)
+    This function assumies a (wrapped) exponential function and a cosine similarity 
+    of box functions.
+    """
+    
+    numerator = 2*np.sinh(np.pi*rate)*np.sinh((1-a)*np.pi*rate)*np.sinh(a*np.pi*rate)
+    denominator = a*np.pi*rate * (np.cosh(2*np.pi*rate) - 1)
+    return 1 - numerator/denominator
+            
+            
+def density_to_interaction_strength(rho, a, rate = None, beta = None):
+    rate = get_rate_parameter(rate = rate, beta = beta)
+        
+    mu_S = mean_similarity(rate = rate, a = a)
     if rho <= mu_S:
         return rho/mu_S
     else:
-        const = 1/np.sinh(np.pi*rate)
-        def integral(k):
-            term1 = np.sinh((1 + 2*a*(1/k-1))*np.pi*rate)
-            term2 = (k*np.sinh((a*np.pi*rate)/k)*np.sinh(((a+k-2*a*k)*np.pi*rate)/k))/(a*np.pi*rate)
-            return term1-term2
-        return scipy.optimize.newton(
-            func = lambda k: const*integral(k) + (1-cdf_similarity(1/k, rate, a)) - rho,
-            x0 = rho/mu_S)
+        raise ValueError("Please provide a lower density!")
             
 
 # =============================================================================
@@ -114,6 +151,22 @@ def string_to_probability_function(prob_name):
     """Take a string and returns a similarity function."""
     prob_name = get_canonical_prob_name(prob_name)
     return eval(prob_name)
+    
+def get_rate_parameter(rate, beta):
+    if beta is None and rate is None:
+        raise ValueError(f"Please provide a distribution parameter: "
+                         f"beta = {beta}, rate = {rate}")
+    elif beta is not None and rate is not None:
+        raise ValueError(f"Conflicting distribution parameters given: "
+                         f"beta = {beta}, rate = {rate}")
+    elif rate is not None:
+        return rate
+    elif beta is not None:
+        return np.tan(np.pi * (1-beta) / 2)      
+    else:
+        return ValueError("Unknown error. Please contact the developers "
+                          "if you encounter this in the wild.")
+        
     
 # =============================================================================
 #  ---------------------------- NETWORK BUILDER ------------------------------

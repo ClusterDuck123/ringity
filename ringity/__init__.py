@@ -8,6 +8,9 @@ from ringity.centralities  import *
 from ringity.plots         import *
 from ringity.network_model import *
 from ringity.distribution_functions import *
+from ringity.graphlet_coefficients import *
+from ringity.classes.network_model import network_model
+from ringity.gtda import *
 
 from ringity.readwrite.diagram import *
 from ringity.generators.diagram import *
