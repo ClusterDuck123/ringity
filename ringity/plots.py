@@ -15,9 +15,9 @@ def set():
     plt.rc('xtick', labelsize=24)
     plt.rc('ytick', labelsize=24)
 
-def ax_setup(ax):
+def ax_setup(ax, labelsize=24):
 
-    ax.tick_params(axis='both', which='major', labelsize=24)
+    ax.tick_params(axis='both', which='major', labelsize=labelsize)
 
     ax.patch.set_alpha(0)
 
