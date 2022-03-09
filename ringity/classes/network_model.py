@@ -74,10 +74,14 @@ def mean_similarity(rate, a):
     This function assumies a (wrapped) exponential function and a cosine similarity 
     of box functions.
     """
+    plamb = np.pi * rate
     
-    numerator = 2*np.sinh(np.pi*rate)*np.sinh((1-a)*np.pi*rate)*np.sinh(a*np.pi*rate)
-    denominator = a*np.pi*rate * (np.cosh(2*np.pi*rate) - 1)
-    return 1 - numerator/denominator
+    # Alternatively:
+    # numerator = 2*(np.sinh(plamb*(1-a)) * np.sinh(plamb*a))
+    numerator = (np.cosh(plamb) - np.cosh(plamb*(1 - a*2)))
+    denominator = (a*2*plamb * np.sinh(plamb))
+    
+    return 1 - numerator / denominator 
             
             
 def density_to_interaction_strength(rho, a, rate = None, beta = None):
@@ -88,6 +92,12 @@ def density_to_interaction_strength(rho, a, rate = None, beta = None):
         return rho/mu_S
     else:
         raise ValueError("Please provide a lower density!")
+        
+def interaction_strength_to_density(K, a, rate = None, beta = None):
+    rho = mean_similarity(a=a, rate = rate) * K
+    return rho
+        
+
             
 
 # =============================================================================
@@ -254,6 +264,15 @@ class NetworkBuilder:
         assert len(value.shape) == 1
         self._similarities = value
         
+    @property
+    def probabilities(self):
+        return squareform(self._probabilities)
+    
+    @probabilities.setter
+    def probabilities(self, value):
+        assert len(value.shape) == 1
+        self._probabilities = value
+        
 # ------------------------------------------------------------------        
 # ---------------------------- METHODS ----------------------------
 # ------------------------------------------------------------------
@@ -342,7 +361,7 @@ class NetworkBuilder:
         np_rng = np.random.RandomState(random_state)
         coinflips = np_rng.uniform(size = (self.N * (self.N - 1)) // 2)
         
-        self.network = self.probabilities >= coinflips
+        self.network = self._probabilities >= coinflips
 
 
 # =============================================================================
