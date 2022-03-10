@@ -18,19 +18,17 @@ def network_model(N,
                   return_positions = False):
     
     rate = get_rate_parameter(rate = rate, beta = beta)
+    K = get_interaction_parameter(K=K, rho=rho, rate=rate, a=a)
     
-    if rho is not None:
-        if K is None:
-            raise ValueError(f"Conflicting interaction parameters given: "
-                             f"rho = {rho}, K = {K}")
-        K = density_to_interaction_strength(rho, a=a, rate=rate)
+    assert rate >= 0
+    assert 0 <= K <= 1
     
     network_builder = NetworkBuilder(random_state = random_state)
     network_builder.set_distribution('exponential', scale = 1/rate)
     network_builder.instantiate_positions(N)
     network_builder.calculate_distances(metric = 'euclidean', circular = True)
     network_builder.calculate_similarities(alpha = a, sim_func = 'box_cosine')
-    network_builder.calculate_probabilities(a = K, b = 0)
+    network_builder.calculate_probabilities(prob_func = 'linear', slope = K, intercept = 0)
     network_builder.instantiate_network()
     
     G = nx.from_numpy_array(squareform(network_builder.network))
@@ -57,15 +55,15 @@ def box_cosine_similarity(dists, box_length):
     return total_overlap / box_length    
 
 
-def linear_probability(sims, a, b):
+def linear_probability(sims, slope, intercept):
     """Calculate linear transformation, capped at 0 an 1."""
     
-    if a < 0:
-        Warning(f"Slope parameter `a` is negative: {a}")
-    if b < 0:
-        Warning(f"Intercept parameter `b` is negative {b}")
+    if slope < 0:
+        Warning(f"Slope parameter is negative: {slope}")
+    if intercept < 0:
+        Warning(f"Intercept parameter is negative {intercept}")
         
-    return (a*sims + b).clip(0, 1)
+    return (slope*sims + intercept).clip(0, 1)
     
 
 def mean_similarity(rate, a):
@@ -173,6 +171,21 @@ def get_rate_parameter(rate, beta):
         return rate
     elif beta is not None:
         return np.tan(np.pi * (1-beta) / 2)      
+    else:
+        return ValueError("Unknown error. Please contact the developers "
+                          "if you encounter this in the wild.")
+                          
+def get_interaction_parameter(K, rho, a, rate):
+    if rho is None and K is None:
+        raise ValueError(f"Please provide a distribution parameter: "
+                         f"rho = {rho}, K = {K}")
+    elif rho is not None and K is not None:
+        raise ValueError(f"Conflicting distribution parameters given: "
+                         f"rho = {rho}, K = {K}")
+    elif K is not None:
+        return K
+    elif rho is not None:
+        return density_to_interaction_strength(rho=rho, a=a, rate=rate)
     else:
         return ValueError("Unknown error. Please contact the developers "
                           "if you encounter this in the wild.")
@@ -330,20 +343,16 @@ class NetworkBuilder:
         self.similarities = sim_func(squareform(self.distances), 
                                      box_length = 2*np.pi*self.alpha)
         
-    def calculate_probabilities(self, prob_func = 'linear', a = None, b = None):
-        if a is not None:
-            self.a = a
-        if b is not None:
-            self.b = b
-            
+    def calculate_probabilities(self, prob_func = 'linear', slope = None, intercept = None):
+        # TODO: create interaction probability class            
         if isinstance(prob_func, str):
             prob_func = string_to_probability_function(prob_name = prob_func)
         elif not callable(prob_func):
             raise TypeError(f"Type of {distn_arg} unknown.")
         
-        self.probabilities = prob_func(squareform(self.similarities), 
-                                       a = self.a,
-                                       b = self.b)
+        self.probabilities = prob_func(self._similarities, 
+                                       slope = slope,
+                                       intercept = intercept)
         
     def instantiate_network(self, random_state = None):
         """Draws a network from the probabilities specified in 

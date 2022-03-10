@@ -6,10 +6,10 @@ from ringity.methods       import *
 from ringity.core          import *
 from ringity.centralities  import *
 from ringity.plots         import *
-from ringity.network_model import *
+#from ringity.network_model import *
 from ringity.distribution_functions import *
 from ringity.graphlet_coefficients import *
-from ringity.classes.network_model import network_model
+from ringity.classes.network_model import network_model, interaction_strength_to_density, density_to_interaction_strength
 from ringity.gtda import *
 
 from ringity.readwrite.diagram import *
