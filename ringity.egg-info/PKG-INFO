@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: ringity
-Version: 0.1a0
+Version: 0.2a1
 Summary: ringity package
 Home-page: https://github.com/kiri93/ringity
 Author: Markus K. Youssef
@@ -44,7 +44,7 @@ Calculate ring score as described in [1]:
     >>> G = nx.Graph()
     >>> G.add_edges_from([(i%100,(i+1)%100) for i in range(100)])
     >>> dgm = rng.diagram(G)
-    >>> dgm.score
+    >>> dgm.ring_score
     1
 
 [1]: Paper not available yet.
