@@ -9,7 +9,7 @@ import networkx as nx
 import scipy.stats as ss
 
 def network_model(N, 
-                  a = 0.5, 
+                  a = 0.25, 
                   beta = None, 
                   rho = None, 
                   rate = None,
