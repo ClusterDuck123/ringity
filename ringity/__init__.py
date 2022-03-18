@@ -2,7 +2,6 @@ name = "ringity"
 __author__ = "Markus Kirolos Youssef"
 __version__ = "0.1a1"
 
-from ringity.methods       import *
 from ringity.core          import *
 from ringity.centralities  import *
 from ringity.plots         import *

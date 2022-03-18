@@ -1,8 +1,7 @@
 from ripser import ripser
-from ringity.classes.diagram import PersistenceDiagram
 from ringity.centralities import net_flow, resistance
-from ringity.methods import _yes_or_no
-from ringity.constants import _assertion_statement
+from ringity.classes.diagram import PersistenceDiagram
+from ringity.readwrite.prompts import _yes_or_no, _assertion_statement
 from ringity.classes.exceptions import UnknownGraphType
 
 import networkx as nx
@@ -97,7 +96,7 @@ def existing_edge_attribute_warning(weight):
 def induce_weight(G, weight = 'net_flow', verbose=False):
     if verbose and nx.get_edge_attributes(G, weight):
         exit_status = existing_edge_attribute_warning(weight)
-        if exit_status: 
+        if exit_status:
             return exit_status
 
     if   weight == 'net_flow':
