@@ -1,3 +1,16 @@
+"""
+This module is for supplementary material needed in demonstrations of ringity.
+"""
+
+def get_canonical_gene_id(gene_id):
+    """Convert string to match ringity-conventions of gene id names."""
+    gene_id = gene_id.lower()
+    gene_id = ''.join(filter(str.isalnum, gene_id))
+    gene_id = re.sub('id|symbol', '', gene_id)
+    return gene_id
+
+
+
 s_genes_symbol = [
     'ATAD2',
     'BLM',
@@ -43,7 +56,7 @@ s_genes_symbol = [
     'USP1',
     'WDR76',
     ]
-    
+
 g2m_genes_symbol = [
     'ANLN',
     'ANP32E',
@@ -100,6 +113,6 @@ g2m_genes_symbol = [
     'TUBB4B',
     'UBE2C',
     ]
-    
-def get_cell_cycle_genes(gene_id = 'SYMBOL'):
+
+def get_cell_cycle_genes(gene_id = 'symbol'):
     return s_genes_symbol + g2m_genes_symbol
