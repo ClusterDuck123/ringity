@@ -28,10 +28,10 @@ def set_parameters(verbose=False):
     Parameters
     ----------
     vebose : bool, optional
-        If True, something something.  
+        If True, something something.
         If False, something something.
         The default is False.
-    
+
 
     Examples
     --------
