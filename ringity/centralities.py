@@ -11,81 +11,82 @@ import networkx as nx
 
 @njit
 def potential_to_current_flow_edge(C, edge):
-    """Calculates the current flow for a single edge given the potential 
+    """Calculates the current flow for a single edge given the potential
     matrix."""
     u, v = edge
     F_row = C[u]-C[v]
     ranks = np.empty_like(F_row) # calculate ranks using numpy's argsort function
     ranks[np.argsort(F_row)] = np.arange(1, len(F_row)+1)
-    
+
     return np.sum((2*ranks-1-len(F_row))*F_row)
 
 @njit
 def _current_flow_loop(C, row_idx, col_idx):
-    """Loops the function ``potential_to_current_flow_edge`` over all 
-    edges defined via ``row_idx`` and ``col_idx``. 
-    
+    """Loops the function ``potential_to_current_flow_edge`` over all
+    edges defined via ``row_idx`` and ``col_idx``.
+
     The purpose of this function is to use numba's decorator ``@njit``.
     """
-    return [potential_to_current_flow_edge(C, (u, v)) 
-                    for (u,v) in zip(row_idx, col_idx) 
+    return [potential_to_current_flow_edge(C, (u, v))
+                    for (u,v) in zip(row_idx, col_idx)
                             if u <= v]
 
 def net_flow(G, verbose=False):
-    """Calculate edge dictionary corresponding to a weighted adjacency matrices 
+    """Calculate edge dictionary corresponding to a weighted adjacency matrices
     of absorbing random-walk based centrality measure on graphs.
-    
+
     This algorithm is based on an algorithm from Brandes and Fleischer. [1]
-    
+
     Parameters
     ----------
     G : networkx.classes.graph.Graph
+
     
     Returns
     -------
     edge_dict : dictionary of edge weights
-    
-    
+
+
     References
     ----------
-    [1] Brandes, Ulrik, and Daniel Fleischer. "Centrality measures based on 
-    current flow." Annual symposium on theoretical aspects of computer science. 
+    [1] Brandes, Ulrik, and Daniel Fleischer. "Centrality measures based on
+    current flow." Annual symposium on theoretical aspects of computer science.
     Springer, Berlin, Heidelberg, 2005.
     """
     node_label = dict(enumerate(G.nodes))
     if not nx.is_connected(G):
         raise DisconnectedGraphError
-        
+
     A = nx.adjacency_matrix(G)
-    
+
     # Inverted Laplacian is going to be dense anyways.
     # So there is no harm in working with dense matrices here.
     L = csgraph.laplacian(A.astype(float)).toarray()
 
     # Removing first (or any other) row and corresponding column from the
     # Laplacian matrix leads to an invertible matrix if the graph is connected.
-    # The invers of this matrix can be interpreted as a 'potential' matrix 
-    # that leads to voltage vectors by taking differences. 
+    # The invers of this matrix can be interpreted as a 'potential' matrix
+    # that leads to voltage vectors by taking differences.
     C = np.zeros(L.shape)
     C[1:,1:] = np.linalg.inv(L[1:,1:])
-    
+
     # Calculating the current flow directly involves taking all pairwise distances
-    # twice: We need to take all pairwise distances for each source-target pair 
-    # (leading to a voltage vector V_st), and we need to do that for all source-target 
+    # twice: We need to take all pairwise distances for each source-target pair
+    # (leading to a voltage vector V_st), and we need to do that for all source-target
     # pairs (leading to the current flow matrix). This is computationally expensive.
     # We can reduce the complexity by realizing that not all values need to be calculated
-    # and that some computations can be reused. This idea is based on an algorithm from 
+    # and that some computations can be reused. This idea is based on an algorithm from
     # Brandes and Fleischer.
-    
-    # The implementation here is optimized for COO sparse format, converting 
+
+    # The implementation here is optimized for COO sparse format, converting
     # CSR to COO is cheap.
     A_coo = A.tocoo()
 
-    row_idx, col_idx = map(np.array, zip(*((i,j) 
+    row_idx, col_idx = map(np.array, zip(*((i,j)
                         for (i,j) in zip(A_coo.row, A_coo.col) if i<j)))
-                        
+
     edge_values = _current_flow_loop(C, row_idx, col_idx )
-    edge_dict = {(node_label[i], node_label[j]) : edge_values 
+    edge_dict = {(node_label[i], node_label[j]) : edge_values
                         for (i,j,edge_values) in zip(row_idx, col_idx, edge_values)}
     return edge_dict
 
@@ -196,8 +197,8 @@ def current_flow_betweenness(G):
                     sum([abs(T[i,s]-T[i,t]-T[j,s]+T[j,t]) for j in G[i]])
                                                             for i in range(N)])
     return (I+(N-1)) / (N*(N-1))
-    
-    
+
+
 def net_flow_old(G, efficiency='speed'):
     if not nx.is_connected(G):
         raise DisconnectedGraphError

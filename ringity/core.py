@@ -1,14 +1,71 @@
 from ripser import ripser
+from ringity.gtda import vietoris_rips_from_point_cloud
 from ringity.centralities import net_flow, resistance
 from ringity.classes.diagram import PersistenceDiagram
 from ringity.readwrite.prompts import _yes_or_no, _assertion_statement
 from ringity.classes.exceptions import UnknownGraphType
 
-import networkx as nx
-import numpy as np
-import subprocess
-import time
 import os
+import time
+import subprocess
+import scipy.sparse
+
+import numpy as np
+import networkx as nx
+
+
+def ring_score_from_persistence_diagram(dgm, flavour = 'geometric'):
+    if flavour == 'geometric':
+        return dgm.ring_score
+    elif flavour == 'amplitude':
+        return dgm.sequence[0] / np.sum(dgm.sequence)
+    elif flavour == 'entropy':
+        # Needs to be checked / adapted
+        if base is None:
+            base = np.e
+
+        # Normalize by uniform distribution on non-zero persistences.
+
+        # dgm.trimmed() reduces the diagram to points with positive length.
+        # This should usually be the case anyways but since this can have an effect on
+        # entropy it's explicitly ensured.
+        normalisation = np.log(len(dgm.trimmed()))
+        return 1 - np.log(base)*ss.entropy(dgm.sequence, base = base) / normalisation
+    else:
+        raise Exception(f"Flavour {flavour} unknown.")
+
+def ring_score(arg, argtype = 'pointcloud', flavour = 'geometric'):
+    """Calculates ring score from various data structures and of different
+    flavours.
+
+    If X is a numpy array or sparse matrix the paramter ``argtype`` specifies
+    how to interpret the data.
+
+    Parameters
+    ----------
+    arg : numpy array, sparse matrix, networkx graph or ringity persistence
+    diagram.
+
+    Returns
+    -------
+    score : float, ring-score of given object.
+    """
+
+    if isinstance(arg, nx.Graph):
+        dgm = diagram(arg)
+    elif isinstance(arg, PersistenceDiagram):
+        dgm = arg
+    elif isinstance(arg, np.ndarray) or isinstance(arg, scipy.sparse.spmatrix):
+        if argtype == 'pointcloud':
+            dgm = vietoris_rips_from_point_cloud(arg)
+        else:
+            raise Error
+    else:
+        raise Error
+
+    score = ring_score_from_persistence_diagram(dgm=dgm, flavour=flavour)
+    return score
+
 
 def diagram(arg1 = None,
             verbose = False,
