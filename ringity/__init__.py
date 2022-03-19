@@ -5,11 +5,11 @@ __version__ = "0.1a1"
 from ringity.core          import *
 from ringity.centralities  import *
 from ringity.plots         import *
-#from ringity.network_model import *
 from ringity.distribution_functions import *
 from ringity.graphlet_coefficients import *
 from ringity.classes.network_model import network_model, interaction_strength_to_density, density_to_interaction_strength
-from ringity.gtda import *
+from ringity.gtda import vietoris_rips_from_point_cloud
+from ringity.single_cell import get_cell_cycle_genes
 
 from ringity.readwrite.diagram import *
 from ringity.generators.diagram import *
