@@ -1,1 +1,10 @@
-.DS_Store
+*.DS_Store
+*.pyc
+.DS_Store*
+*.egg-info
+
+# sc-datasets
+E-GEOD-*
+*.ipynb_checkpoints*
+*.ipynb_checkpoints*
+E-MTAB-*

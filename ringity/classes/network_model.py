@@ -9,7 +9,7 @@ import networkx as nx
 import scipy.stats as ss
 
 def network_model(N, 
-                  a = 0.5, 
+                  a = 0.25, 
                   beta = None, 
                   rho = None, 
                   rate = None,
@@ -92,6 +92,7 @@ def density_to_interaction_strength(rho, a, rate = None, beta = None):
         raise ValueError("Please provide a lower density!")
         
 def interaction_strength_to_density(K, a, rate = None, beta = None):
+    rate = get_rate_parameter(rate = rate, beta = beta)
     rho = mean_similarity(a=a, rate = rate) * K
     return rho
         
