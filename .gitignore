@@ -8,3 +8,4 @@ E-GEOD-*
 *.ipynb_checkpoints*
 *.ipynb_checkpoints*
 E-MTAB-*
+**/.DS_Store
