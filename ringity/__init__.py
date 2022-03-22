@@ -1,16 +1,15 @@
 name = "ringity"
 __author__ = "Markus Kirolos Youssef"
-__version__ = "0.2a1"
+__version__ = "0.2a2"
 
-from ringity.methods       import *
 from ringity.core          import *
 from ringity.centralities  import *
 from ringity.plots         import *
-#from ringity.network_model import *
 from ringity.distribution_functions import *
 from ringity.graphlet_coefficients import *
 from ringity.classes.network_model import network_model, interaction_strength_to_density, density_to_interaction_strength
-from ringity.gtda import *
+from ringity.gtda import vietoris_rips_from_point_cloud
+from ringity.single_cell import get_cell_cycle_genes
 
 from ringity.readwrite.diagram import *
 from ringity.generators.diagram import *
