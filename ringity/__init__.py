@@ -13,6 +13,7 @@ from ringity.single_cell import get_cell_cycle_genes
 
 from ringity.readwrite.diagram import *
 from ringity.generators.diagram import *
+from ringity.ring_scores import geometric_ring_score, linear_ring_score
 
 import sys
 
