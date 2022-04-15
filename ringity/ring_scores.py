@@ -38,13 +38,13 @@ def geometric_ring_score(seq, nb_pers = 2, base = 2, tol = 1e-10):
 
     if nb_pers == np.inf:
         max_score = 1 / (base-1)
-        # weights of persistences after this one are below tolerance level 
-        nb_pers = tol // np.log10(base)
+        # weights of later persistences are below tolerance level 
+        nb_pers =  int(-np.log(tol) // np.log(base)) + 1
     else:
         max_score = (1 - base**(-nb_pers + 1)) / (base-1)
         
     seq_iter = iter(sorted(seq, reverse = True))
-    p0 = next(seq_iter)    
+    p0 = next(seq_iter)
     noise_score = sum((pi / (p0 * base**i) for i, pi in enumerate(islice(seq_iter, nb_pers-1), 1)))
     score = 1 - noise_score/max_score
     return score
@@ -92,11 +92,12 @@ def amplitude_ring_score(seq, nb_pers = 2):
     
     if nb_pers == np.inf:
         mass = np.sum(seq)
+        max_score = 1
     else:
         mass = sum(pi for pi in islice(seq, nb_pers))
+        max_score = (nb_pers - 1) / nb_pers
     
     noise_score = 1 - max(seq) / mass
-    max_score = (nb_pers - 1) / nb_pers
     score = 1 - noise_score/max_score
     return score
     
@@ -143,53 +144,3 @@ def ring_score_from_sequence(seq, flavour = 'geometric', nb_pers = 2, base = Non
         return linear_ring_score(seq, nb_pers = nb_pers)
     else:
         raise Exception(f"Ring score flavour {flavour} unknown.")
-        
-        
-#  ------------------------------------- LEGACY --------------------------------------
-
-def ring_score(X):
-    """Calculates ring score from point cloud of different flavours.
-    
-    If X is a numpy array it is converted into a ringity PersistenceDiagram object.
-    Otherwise X is assumed to be a PersistenceDiagram itself. 
-    A PersistenceDiagram can easily be converted into a numpy array via np.array(dgm)."""
-    
-    if isinstance(X, np.ndarray):
-        dgm = rng.vietoris_rips_from_point_cloud(X)
-    else:
-        dgm = X
-        
-    if len(dgm.trimmed()) == 0:
-        return 0
-    
-    if flavour == 'geometric':
-        if N_trim is None:
-            return dgm.ring_score
-        else:
-            return trimmed_geometric_score(dgm, N_trim)
-    elif flavour == 'amplitude':
-        if N_trim is None:
-            return dgm.sequence[0] / np.sum(dgm.sequence)
-        else:
-            dgm = dgm.trimmed(N_trim)
-            p0 = dgm.sequence[0]
-            p_sum = np.sum(dgm.sequence)
-            return (N_trim*p0 - p_sum) / (p_sum*(N_trim-1))
-    elif flavour == 'entropy':
-        # Needs to be checked / adapted
-        if base is None:
-            base = np.e
-        
-        # Normalize by uniform distribution on non-zero persistences.
-        
-        # dgm.trimmed() reduces the diagram to points with positive length. 
-        # TODO: trimm dgm automatically in the packeage! 
-        if N_trim is None:
-            normalisation = np.log(len(dgm.trimmed()))
-            return 1 - np.log(base)*ss.entropy(dgm.sequence, base = base) / normalisation
-        else:
-            dgm = dgm.trimmed(N_trim)
-            normalisation = np.log(N_trim)
-            return 1 - np.log(base)*ss.entropy(dgm.sequence, base = base) / normalisation
-    else:
-        raise Exception(f"Flavour {flavour} unknown.")
