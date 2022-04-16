@@ -5,7 +5,7 @@ import ringity as rng
 
 def generate_message(seq, ring_score, rand_nb_pers, rand_base):
     nb_pers = min(10, len(seq))
-    msg = f"seq: {seq[:nb_pers]} \n" \
+    msg = f"\nseq: {seq[:nb_pers]} \n" \
           f"ring score: {ring_score.__name__} \n" \
           f"nb_pers: {rand_nb_pers} \n" \
           f"base: {rand_base} \n"
@@ -79,17 +79,21 @@ class TestFiniteEdgeCases(unittest.TestCase):
             
     def test_finiteness(self):
         for ring_score in all_ring_scores - {rng.gap_ring_score}:
+            msg = generate_message(self.rand_seq, 
+                                   ring_score, 
+                                   self.rand_nb_pers, 
+                                   self.rand_base)
             kwargs = {}
             if 'base' in inspect.signature(ring_score).parameters:
                 kwargs['base'] = self.rand_base
-            msg = generate_message(self.rand_seq, ring_score, self.rand_nb_pers, self.rand_base)
             
             score1 = ring_score(self.rand_seq, 
-                                nb_pers = self.rand_nb_pers - 1, 
+                                nb_pers = self.rand_nb_pers, 
                                 **kwargs)
-            score2 = ring_score(self.rand_seq + [min(self.rand_seq)], 
-                                nb_pers = self.rand_nb_pers - 1, 
+            score2 = ring_score(list(self.rand_seq) + [min(self.rand_seq)], 
+                                nb_pers = self.rand_nb_pers, 
                                 **kwargs)
+            
             self.assertAlmostEqual(score1, score2, msg=msg)
             
             
@@ -147,6 +151,26 @@ class TestInfiniteCases(unittest.TestCase):
                 kwargs['nb_pers'] = np.inf
             msg = generate_message(seq, ring_score, np.inf, self.rand_base)
             self.assertAlmostEqual(ring_score(seq, **kwargs), 0., msg=msg, delta=delta)
+            
+    def test_infiniteness(self):
+        seq = np.random.uniform(size = 5)
+        for ring_score in inf_ring_scores - {rng.entropy_ring_score}:
+            msg = generate_message(seq, 
+                                   ring_score, 
+                                   np.inf, 
+                                   self.rand_base)
+            kwargs = {}
+            if 'base' in inspect.signature(ring_score).parameters:
+                kwargs['base'] = self.rand_base
+            
+            score1 = ring_score(seq, 
+                                nb_pers = np.inf, 
+                                **kwargs)
+            score2 = ring_score(list(seq) + [0]*self.rand_zero_pads, 
+                                nb_pers = np.inf, 
+                                **kwargs)
+            
+            self.assertAlmostEqual(score1, score2, msg=msg)
 
 if __name__ == '__main__':
     unittest.main()
