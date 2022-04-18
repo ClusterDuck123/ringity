@@ -3,7 +3,6 @@ requires = [
     "setuptools>=42",
     "wheel",
     "matplotlib",
-    "ripser",
     "numba",
     "networkx"
 ]

@@ -32,12 +32,12 @@ class TestDgm(unittest.TestCase):
 
     def test_score1(self):
         dgm = ringity.classes.diagram.PersistenceDiagram(self.signal_pt for _ in range(100))
-        self.assertAlmostEqual(dgm.signal_score(), 0, places = 8)
+        self.assertAlmostEqual(dgm.ring_score(), 0, places = 8)
 
     def test_score2(self):
         dgm = ringity.classes.diagram.PersistenceDiagram(self.noise_pt for _ in range(100))
         dgm.append(self.signal_pt)
-        self.assertAlmostEqual(dgm.signal_score(), 1, places=8)
+        self.assertAlmostEqual(dgm.ring_score(), 1, places=8)
 
     def test_birth_and_death_extractions(self):
         dgm = random_pdgm(100)

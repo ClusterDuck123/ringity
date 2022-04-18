@@ -4,20 +4,12 @@ import numpy as np
 from itertools import compress
 from itertools import starmap, islice
 from collections.abc import MutableMapping
-from ringity.classes.exceptions import SchroedingersException, TimeParadoxError, BeginningOfTimeError, EndOfTimeError
-
-
-def signal_score(iterable, is_sorted = False, precision = 50):
-    if len(iterable) == 0:
-        return 0
-    if not is_sorted:
-        iterable = sorted(iterable, reverse=True)
-        
-    iterable_iter = iter(iterable)
-    signal = next(iterable_iter)
-    
-    return 1 - sum((noise/signal) / 2**i 
-                            for i,noise in enumerate(islice(iterable_iter, precision), 1))
+from ringity.ring_scores import ring_score_from_sequence
+from ringity.classes.exceptions import (
+                                    SchroedingersException,
+                                    TimeParadoxError,
+                                    BeginningOfTimeError,
+                                    EndOfTimeError)
 
 # =============================================================================
 #  ------------------------------- DgmPt CLASS -------------------------------
@@ -25,18 +17,18 @@ def signal_score(iterable, is_sorted = False, precision = 50):
 
 class PersistenceDiagramPoint(tuple):
     def __init__(self, iterable):
-        
+
         self._set_birth_death_pair(iterable)
-        
+
         self.x = self.birth
         self.y = self.death
-    
+
     def _set_birth_death_pair(self, iterable):
         if len(iterable) < 1:
             raise SchroedingersException(
                         'Empty homology class foun. '
                         'Please provide a time of birth and death! ' + str(iterable))
-        
+
         if len(iterable) < 2:
             raise EndOfTimeError(
                         'Everything comes to an end, even homology classes. '
@@ -50,31 +42,31 @@ class PersistenceDiagramPoint(tuple):
 
 # ------------------------------- Properties --------------------------------
 
-    @property    
+    @property
     def birth(self):
         return self._birth
-    
+
     @birth.setter
     def birth(self, value):
         self._birth = float(value)
-        
-    @property    
+
+    @property
     def death(self):
         return self._death
-    
+
     @death.setter
     def death(self, value):
         if value < self.birth:
             raise TimeParadoxError('Homology class cannot die before it was born! '
                                   f'PersistenceDiagramPoint = ({self.birth}, {value})')
         self._death = float(value)
-        
-    @property    
+
+    @property
     def persistence(self):
         return self.death - self.birth
-        
+
 # ---------------------------- Dunder Methods ----------------------------
-        
+
     def __getitem__(self, key):
         if   key in (0, 'birth'):
             return self.birth
@@ -82,11 +74,11 @@ class PersistenceDiagramPoint(tuple):
             return self.death
         else:
             raise SchroedingersException('No state beyond birth and death '
-                                         'implemented yet!')    
-    
+                                         'implemented yet!')
+
     def __repr__(self):
         return repr((self.birth, self.death))
-    
+
     def __len__(self):
         return 2
 
@@ -95,34 +87,34 @@ class PersistenceDiagramPoint(tuple):
             return self.persistence <  other.persistence
         except AttributeError:
             return self.persistence < other
-            
+
     def __gt__(self, other):
         try:
             return self.persistence >  other.persistence
         except AttributeError:
             return self.persistence > other
-    
+
     def __le__(self, other):
         try:
             return self.persistence <=  other.persistence
         except AttributeError:
             return self.persistence <= other
-            
+
     def __ge__(self, other):
         try:
             return self.persistence >=  other.persistence
         except AttributeError:
             return self.persistence >= other
-    
+
     def __eq__(self, other):
         return (self.birth == other[0]) and (self.death == other[1])
 
     def __add__(self, other):
         return type(self)((self.birth + other, self.death + other))
-    
+
     def __mul__(self, other):
         return type(self)((self.birth * other, self.death * other))
-    
+
     def __truediv__(self, other):
         return type(self)((self._birth/other, self._death/other))
 
@@ -132,80 +124,79 @@ class PersistenceDiagramPoint(tuple):
 # =============================================================================
 class PersistenceDiagram(list):
     def __init__(self, iterable = (), dim = None):
-        
+
         super().extend(sorted(map(PersistenceDiagramPoint, iterable), reverse=True))
         self.dim = dim
-        
+
     @classmethod
     def from_gtda(cls, arr, dim = 1):
         dgm = arr[arr[:,2] == dim][:,:2]
         return cls(dgm)
-        
+
 # -------------------------------- Proerties ---------------------------------
-        
+
     @property
     def births(self):
         births, deaths = zip(*self)
         return births
-    
+
     @property
     def deaths(self):
         births, deaths = zip(*self)
         return deaths
-    
+
     @property
     def persistences(self):
         return tuple(pt.persistence for pt in self)
-        
+
     @property
     def signal(self):
         return self[0].death - self[0].birth
-        
+
     @property
     def sequence(self, length = None):
         return tuple(p / self.signal for p in self.persistences)
-        
-    @property
-    def ring_score(self):
-        return self.signal_score()
-        
+
     @property
     def score(self):
         warnings.warn("The property `score` is depricated! "
-                      "Please use `ring_score` instead.", 
+                      "Please use `ring_score` instead.",
                       DeprecationWarning, stacklevel=2)
-        return self.signal_score()
-        
+        return self.ring_score()
+
 # -------------------------------- Methods ---------------------------------
-    
+
     def append(self, item):
         list.append(self, PersistenceDiagramPoint(item))
         self.sort(reverse=True)
-    
-    def signal_score(self, skip=0):
-        return signal_score(self.persistences[skip:])
-    
+
     def trimmed(self, length = None):
         if length is None:
             return self[self > 0]
-        
+
         if length <= len(self):
             return self[:length]
-            
+
         else:
             other = self.copy()
             other.extend([(0,0)]*(length - len(self)))
             return type(self)(other)
-    
+
     def extend(self, iterable):
         super().extend(type(self)(iterable))
         self.sort(reverse=True)
-        
+
     def to_array(self):
         return np.array(self)
-        
+
+    def ring_score(self, flavour = 'geometric', nb_pers = np.inf, base = 2):
+        return ring_score_from_sequence(self.sequence,
+                                        flavour = flavour,
+                                        nb_pers = nb_pers,
+                                        base = base)
+
 # ----------------------------- Dunder Method ------------------------------
-    
+
     def __getitem__(self, item):
         if isinstance(item, slice):
             return type(self)(super().__getitem__(item))
@@ -217,7 +208,7 @@ class PersistenceDiagram(list):
             return type(self)(super().__getitem__(item_iter))
         except TypeError:
             return type(self)(compress(self, item_iter))
-        
+
     def __setitem__(self, index, value):
         raise SettingPersistenceError("Manually setting a persistence point is forbidden. "
                                       "Use `append` or `extend` instead!")
@@ -225,15 +216,15 @@ class PersistenceDiagram(list):
         return list(pt < item for pt in self)
     def __gt__(self, item):
         return list(pt > item for pt in self)
-    
+
     def __le__(self, item):
         return list(pt <= item for pt in self)
     def __ge__(self, item):
         return list(pt >= item for pt in self)
-    
+
     def __str__(self):
         return str(self.copy()).replace(', (', ',\n (')
-    
+
     def __repr__(self):
         return f"{type(self).__name__}({self.copy()})"
 
@@ -250,11 +241,11 @@ class FullPDgm(MutableMapping):
             self.update(data)
         if isinstance(data, np.ndarray):
             self.from_numpy_array(data)
-            
+
         self._sort_homologies()
-        
+
 # -------------------------------- Methods ---------------------------------
-        
+
     def from_numpy_array(self, data):
         m, n = data.shape
         assert 3 in {m,n}
@@ -263,37 +254,37 @@ class FullPDgm(MutableMapping):
         self.dimensions = self._extract_dimensions(data)
         self.mapping = {}
         self.update({key:data[data[:,2] == key][:,:2] for key in {0,1}})
-    
+
     def _extract_dimensions(self, data):
         dimensions = set(data[:, 2])
         assert all(map(float.is_integer, dimensions))
         return tuple(sorted(map(int,dimensions)))
-    
+
     def _sort_homologies(self):
         pass
-        
+
 # ----------------------------- Dunder Method ------------------------------
-        
+
     def __getitem__(self, key):
         return self.mapping[key]
-    
+
     def __setitem__(self, key, value):
         if key in self:
             del self[self[key]]
         self.mapping[key] = value
-    
+
     def __delitem__(self, key):
         del self.mapping[key]
-        
+
     def __iter__(self):
         return iter(self.mapping)
-    
+
     def __len__(self):
         return len(self.mapping)
-    
+
     def __repr__(self):
         return f"{type(self).__name__}({self.mapping.__repr__()})"
-        
+
 
 # =============================================================================
 #  ---------------------------------- Legacy --------------------------------
