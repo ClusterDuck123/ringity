@@ -1,9 +1,10 @@
-from ripser import ripser
+from ringity.ring_scores import ring_score_from_sequence
 from ringity.gtda import vietoris_rips_from_point_cloud
 from ringity.centralities import net_flow, resistance
 from ringity.classes.diagram import PersistenceDiagram
 from ringity.readwrite.prompts import _yes_or_no, _assertion_statement
 from ringity.classes.exceptions import UnknownGraphType
+from gtda.homology import VietorisRipsPersistence
 
 import os
 import time
@@ -14,27 +15,20 @@ import numpy as np
 import networkx as nx
 
 
-def ring_score_from_persistence_diagram(dgm, flavour = 'geometric'):
-    if flavour == 'geometric':
-        return dgm.ring_score
-    elif flavour == 'amplitude':
-        return dgm.sequence[0] / np.sum(dgm.sequence)
-    elif flavour == 'entropy':
-        # Needs to be checked / adapted
-        if base is None:
-            base = np.e
+def ring_score_from_persistence_diagram(dgm,
+                                        flavour = 'geometric',
+                                        nb_pers = np.inf,
+                                        base = None):
+    return ring_score_from_sequence(dgm.sequence,
+                                    flavour = flavour,
+                                    nb_pers = nb_pers,
+                                    base = None)
 
-        # Normalize by uniform distribution on non-zero persistences.
-
-        # dgm.trimmed() reduces the diagram to points with positive length.
-        # This should usually be the case anyways but since this can have an effect on
-        # entropy it's explicitly ensured.
-        normalisation = np.log(len(dgm.trimmed()))
-        return 1 - np.log(base)*ss.entropy(dgm.sequence, base = base) / normalisation
-    else:
-        raise Exception(f"Flavour {flavour} unknown.")
-
-def ring_score(arg, argtype = 'pointcloud', flavour = 'geometric'):
+def ring_score(arg,
+               argtype = 'pointcloud',
+               flavour = 'geometric',
+               base = None,
+               nb_pers = None):
     """Calculates ring score from various data structures and of different
     flavours.
 
@@ -63,7 +57,10 @@ def ring_score(arg, argtype = 'pointcloud', flavour = 'geometric'):
     else:
         raise Error
 
-    score = ring_score_from_persistence_diagram(dgm=dgm, flavour=flavour)
+    score = ring_score_from_persistence_diagram(dgm = dgm,
+                                                flavour = flavour,
+                                                base = base,
+                                                nb_pers = nb_pers)
     return score
 
 
@@ -103,8 +100,10 @@ def diagram(arg1 = None,
                                 verbose=verbose)
 
     t1 = time.time()
-    ripser_output = ripser(np.array(D), maxdim=p, distance_matrix=True)
-    dgm = PersistenceDiagram(ripser_output['dgms'][p])
+    VR = VietorisRipsPersistence(metric = 'precomputed',
+                                 homology_dimensions = list(range(p+1)))
+    dgm = VR.fit_transform([np.array(D)])[0]
+    dgm = PersistenceDiagram.from_gtda(dgm)
     t2 = time.time()
 
     if verbose:
