@@ -3,20 +3,20 @@ ringity
 
 |DOI| |license| |version|
 
-ringity is a Python package to analyze networks in their global ring structure.
+ringity is a Python package to analyze various data structures with respect to their ring structure.
 
-- **Source:** https://github.com/kiri93/ringity
-- **Bug reports:** https://github.com/kiri93/ringity/issues
+- **Source:** https://github.com/ClusterDuck123/ringity
+- **Bug reports:** https://github.com/ClusterDuck123/ringity/issues
 - **Contact Person:** mk.youssef@hotmail.com
 - **Documentation:** Not available yet.
 
 Notes
 -----
 
-This package is still under construction.
+This package is still under construction!
 
-Simple example
---------------
+Simple network example
+----------------------
 
 Calculate ring score as described in [1]:
 
@@ -32,6 +32,22 @@ Calculate ring score as described in [1]:
 
 [1]: Paper not available yet.
 
+Simple point cloud example
+--------------------------
+
+Calculate ring score as described in [2]:
+
+.. code:: python
+
+    >>> import numpy as np
+    >>> import ringity as rng
+    >>> t = np.linspace(0, 2*np.pi, 100)
+    >>> X = np.array((np.cos(t),np.sin(t))).T
+    >>> rng.ring_score(X)
+    1
+    
+[2]: Paper not available yet.
+
 Install
 -------
 
@@ -42,8 +58,8 @@ Install the latest version of ringity::
 Bugs
 ----
 
-Please report any bugs that you find `here <https://github.com/kiri93/ringity/issues>`_.
-Or, even better, fork the repository on `GitHub <https://github.com/kiri93/ringity/>`_
+Please report any bugs that you find `here <https://github.com/ClusterDuck123/ringity/issues>`_.
+Or, even better, fork the repository on `GitHub <https://github.com/ClusterDuck123/ringity/>`_
 and create a pull request. All inputs, suggestions and changes are more than welcome!
 
 License
