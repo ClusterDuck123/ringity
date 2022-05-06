@@ -129,8 +129,8 @@ class PersistenceDiagram(list):
         self.dim = dim
 
     @classmethod
-    def from_gtda(cls, arr, dim = 1):
-        dgm = arr[arr[:,2] == dim][:,:2]
+    def from_gtda(cls, arr, homology_dim = 1):
+        dgm = arr[arr[:,2] == homology_dim][:,:2]
         return cls(dgm)
 
 # -------------------------------- Proerties ---------------------------------
