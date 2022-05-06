@@ -129,8 +129,8 @@ class PersistenceDiagram(list):
         self.dim = dim
 
     @classmethod
-    def from_gtda(cls, arr, dim = 1):
-        dgm = arr[arr[:,2] == dim][:,:2]
+    def from_gtda(cls, arr, homology_dim = 1):
+        dgm = arr[arr[:,2] == homology_dim][:,:2]
         return cls(dgm)
 
 # -------------------------------- Proerties ---------------------------------
@@ -155,8 +155,10 @@ class PersistenceDiagram(list):
 
     @property
     def sequence(self, length = None):
-        return tuple(p / self.signal for p in self.persistences)
-
+        if self.signal > 0:
+            return tuple(p / self.signal for p in self.persistences)
+        else:
+            return ()
     @property
     def score(self):
         warnings.warn("The property `score` is depricated! "
