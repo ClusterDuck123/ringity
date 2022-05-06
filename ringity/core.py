@@ -63,7 +63,7 @@ def ring_score_from_point_cloud(X,
                                 metric='euclidean',
                                 metric_params={},
                                 homology_dim = 1,
-                                **kwargs)
+                                **kwargs):
     dgm = pdiagram_from_point_cloud(X,
                                     persistence = persistence,
                                     metric = metric,
