@@ -2,7 +2,7 @@ name = "ringity"
 __author__ = "Markus K. Youssef"
 __version__ = "0.2a7"
 
-from ringity.core          import ring_score, diagram, pdiagram_from_point_cloud
+from ringity.core          import ring_score, diagram, pdiagram_from_point_cloud, ring_score_from_point_cloud
 from ringity.centralities  import *
 from ringity.plots         import *
 #from ringity.distribution_functions import *

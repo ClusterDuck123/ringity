@@ -53,7 +53,28 @@ def ring_score(arg,
     return score
                                     
                                     
-# -----------------------------------------------------------------------------             
+# -----------------------------------------------------------------------------     
+        
+def ring_score_from_point_cloud(X,
+                                flavour = 'geometric',
+                                base = None,
+                                nb_pers = np.inf,
+                                persistence = 'VietorisRipsPersistence',
+                                metric='euclidean',
+                                metric_params={},
+                                homology_dim = 1,
+                                **kwargs):
+    dgm = pdiagram_from_point_cloud(X,
+                                    persistence = persistence,
+                                    metric = metric,
+                                    metric_params = metric_params,
+                                    homology_dim = homology_dim,
+                                    **kwargs)
+    return ring_score_from_persistence_diagram(dgm,
+                                               flavour = flavour,
+                                               base = base,
+                                               nb_pers = nb_pers)
+
 
 def pdiagram_from_point_cloud(X,
                               persistence = 'VietorisRipsPersistence',
