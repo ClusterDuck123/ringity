@@ -168,6 +168,9 @@ class PersistenceDiagram(list):
 
 # -------------------------------- Methods ---------------------------------
 
+    def copy(self):
+        return type(self)(super().copy())
+    
     def append(self, item):
         list.append(self, PersistenceDiagramPoint(item))
         self.sort(reverse=True)
