@@ -169,7 +169,7 @@ class PersistenceDiagram(list):
 # -------------------------------- Methods ---------------------------------
 
     def copy(self):
-        return type(self)(super().copy())
+        return type(self)(self)
     
     def append(self, item):
         list.append(self, PersistenceDiagramPoint(item))
