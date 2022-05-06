@@ -1,15 +1,19 @@
 import numpy as np
 import ringity as rng
+      
+      
+X = np.random.uniform(size = (2**4,2))
+dgm = rng.pdiagram_from_point_cloud(X)
 
-seq1 = (1, 0, 0, 0, 0)
-seq2 = (1, 1, 0, 0, 0)
 
-print("Geometric ring score of circle: "
-      f"{rng.ring_score_from_sequence(seq1, 'geometric'):.3f}")
-print("Geometric ring score of figure-eight: "
-      f"{rng.ring_score_from_sequence(seq2, 'geometric'):.3f}")
+dgm2 = dgm.copy()
+dgm2.append((3,4))
 
-print("Gap ring score of circle: "
-      f"{rng.ring_score_from_sequence(seq1, 'gap'):.3f}")
-print("Gap ring score of figure-eight: "
-      f"{rng.ring_score_from_sequence(seq2, 'gap'):.3f}")
+print(type(dgm))
+print(type(dgm2))
+
+print(dgm)
+print(dgm2)
+
+print(repr(dgm))
+print(str(dgm))

@@ -169,7 +169,8 @@ class PersistenceDiagram(list):
 # -------------------------------- Methods ---------------------------------
 
     def copy(self):
-        return type(self)(self)
+        other = type(self)(self)
+        return other
     
     def append(self, item):
         list.append(self, PersistenceDiagramPoint(item))
@@ -228,10 +229,10 @@ class PersistenceDiagram(list):
         return list(pt >= item for pt in self)
 
     def __str__(self):
-        return str(self.copy()).replace(', (', ',\n (')
+        return str(list(self)).replace(', (', ',\n (')
 
     def __repr__(self):
-        return f"{type(self).__name__}({self.copy()})"
+        return f"{type(self).__name__}({list(self)})"
 
 # =============================================================================
 #  ------------------------------ FullDgm CLASS ------------------------------
