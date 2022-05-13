@@ -58,9 +58,7 @@ Install the latest version of ringity::
 Latest Changes
 --------------
 
-- The persistent diagram class `PersistenceDiagram` has `ring_score` now as a method, not as a property. 
-As a result, the function is now called via `dgm.ring_score()` insted of `dgm.ring_score`! (**Notice the change in brackets**)
-We appologize if this is breaking old code; such changes will be avoided in the future.
+- The persistent diagram class `PersistenceDiagram` has `ring_score` now as a method, not as a property. As a result, the function is now called via `dgm.ring_score()` insted of `dgm.ring_score`! (**Notice the change in brackets**) We appologize if this is breaking old code; such changes will be avoided in the future.
 - Integration of various ring-score "flavours".
 - Extended usage for point clouds.
 
