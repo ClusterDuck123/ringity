@@ -27,7 +27,7 @@ Calculate ring score as described in [1]:
     >>> G = nx.Graph()
     >>> G.add_edges_from([(i%100,(i+1)%100) for i in range(100)])
     >>> dgm = rng.diagram(G)
-    >>> dgm.ring_score
+    >>> dgm.ring_score()
     1
 
 [1]: Paper not available yet.
@@ -54,6 +54,16 @@ Install
 Install the latest version of ringity::
 
     $ pip install ringity
+
+Latest Changes
+--------------
+
+- The persistent diagram class `PersistenceDiagram` has `ring_score` now as a method, not as a property. 
+As a result, the function is now called via `dgm.ring_score()` insted of `dgm.ring_score`! (**Notice the change in brackets**)
+We appologize if this is breaking old code; such changes will be avoided in the future.
+- Integration of various ring-score "flavours".
+- Extended usage for point clouds.
+
 
 Bugs
 ----
