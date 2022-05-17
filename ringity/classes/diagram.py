@@ -129,8 +129,8 @@ class PersistenceDiagram(list):
         self.dim = dim
 
     @classmethod
-    def from_gtda(cls, arr, dim = 1):
-        dgm = arr[arr[:,2] == dim][:,:2]
+    def from_gtda(cls, arr, homology_dim = 1):
+        dgm = arr[arr[:,2] == homology_dim][:,:2]
         return cls(dgm)
 
 # -------------------------------- Proerties ---------------------------------
@@ -155,8 +155,10 @@ class PersistenceDiagram(list):
 
     @property
     def sequence(self, length = None):
-        return tuple(p / self.signal for p in self.persistences)
-
+        if self.signal > 0:
+            return tuple(p / self.signal for p in self.persistences)
+        else:
+            return ()
     @property
     def score(self):
         warnings.warn("The property `score` is depricated! "
@@ -166,6 +168,10 @@ class PersistenceDiagram(list):
 
 # -------------------------------- Methods ---------------------------------
 
+    def copy(self):
+        other = type(self)(self)
+        return other
+    
     def append(self, item):
         list.append(self, PersistenceDiagramPoint(item))
         self.sort(reverse=True)
@@ -223,10 +229,10 @@ class PersistenceDiagram(list):
         return list(pt >= item for pt in self)
 
     def __str__(self):
-        return str(self.copy()).replace(', (', ',\n (')
+        return str(list(self)).replace(', (', ',\n (')
 
     def __repr__(self):
-        return f"{type(self).__name__}({self.copy()})"
+        return f"{type(self).__name__}({list(self)})"
 
 # =============================================================================
 #  ------------------------------ FullDgm CLASS ------------------------------

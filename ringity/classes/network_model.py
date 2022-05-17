@@ -15,16 +15,22 @@ def network_model(N,
                   rate = None,
                   K = None, 
                   random_state = None,
-                  return_positions = False):
+                  return_positions = False,
+                  verbose = False):
     
     rate = get_rate_parameter(rate = rate, beta = beta)
+    scale = 1/rate if rate > 0 else np.inf
     K = get_interaction_parameter(K=K, rho=rho, rate=rate, a=a)
+    
+    if verbose:
+        print(f"Rate parameter was calculated as:   lambda = {rate}")
+        print(f"Interaction parameter was calculated as: K = {rate}")
     
     assert rate >= 0
     assert 0 <= K <= 1
     
     network_builder = NetworkBuilder(random_state = random_state)
-    network_builder.set_distribution('exponential', scale = 1/rate)
+    network_builder.set_distribution('exponential', scale = scale)
     network_builder.instantiate_positions(N)
     network_builder.calculate_distances(metric = 'euclidean', circular = True)
     network_builder.calculate_similarities(alpha = a, sim_func = 'box_cosine')
@@ -72,6 +78,13 @@ def mean_similarity(rate, a):
     This function assumies a (wrapped) exponential function and a cosine similarity 
     of box functions.
     """
+    
+    if np.isclose(rate, 0):
+        return a
+    # Python can't handle that properly; maybe the analytical expression can be simplified...
+    if rate > 200:
+        return 1.
+    
     plamb = np.pi * rate
     
     # Alternatively:
@@ -141,6 +154,10 @@ def string_to_distribution(distn_name,
     See function ``get_canonical_distn_name`` for details on name conversion. 
     """
     
+    # Check for edge cases
+    if ('scale', np.inf) in kwargs.items():
+        return ss.uniform(scale = 2*np.pi)
+        
     distn_name = get_canonical_distn_name(distn_name)
     try:
         rv_gen = getattr(ss, distn_name)
@@ -171,6 +188,8 @@ def get_rate_parameter(rate, beta):
     elif rate is not None:
         return rate
     elif beta is not None:
+        if np.isclose(beta,0):
+            return np.inf
         return np.tan(np.pi * (1-beta) / 2)      
     else:
         return ValueError("Unknown error. Please contact the developers "
@@ -300,6 +319,7 @@ class NetworkBuilder:
         will be used to specify the parameters of the distribution.
         """
             
+        # Check if string or scipy distribution
         if isinstance(distn_arg, str):
             distn_arg =  string_to_distribution(distn_name = distn_arg, **kwargs)
         elif not isinstance(distn_arg, ss._distn_infrastructure.rv_frozen):
