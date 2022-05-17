@@ -3,6 +3,48 @@ import scipy.stats as ss
 
 from itertools import islice
 
+def ring_score_from_persistence_diagram(dgm,
+                                        flavour = 'geometric',
+                                        nb_pers = np.inf,
+                                        base = None):
+    """Calculates ring score from a PersistenceDiagram object."""
+    return ring_score_from_sequence(dgm.sequence,
+                                    flavour = flavour,
+                                    nb_pers = nb_pers,
+                                    base = None)
+                                    
+                                    
+def ring_score_from_sequence(seq,
+                             flavour = 'geometric',
+                             nb_pers = None,
+                             base = None):
+    """Calculates ring score from sequence of positive numbers.
+
+    ``seq`` can be any iterator containing numbers and will be sorted.
+    
+    Caution: there are no checks to test if the sequence is non-negative."""
+    if len(seq) == 0:
+        return 0
+    if flavour in 'geometric':
+        return geometric_ring_score(seq, nb_pers = nb_pers, base = base)
+    elif flavour == 'gap':
+        return gap_ring_score(seq)
+    elif flavour == 'amplitude':
+        return amplitude_ring_score(seq, nb_pers = nb_pers)
+    elif flavour == 'entropy':
+        return entropy_ring_score(seq, nb_pers = nb_pers, base = base)
+    elif flavour == 'linear':
+        return linear_ring_score(seq, nb_pers = nb_pers)
+    else:
+        raise Exception(f"Ring score flavour {flavour} unknown.")
+        
+        
+# =============================================================================
+#  -------------------------- RING SCORE FLAVOURS ----------------------------
+# =============================================================================
+                                    
+                                    
+
 def gap_ring_score(seq):
     """"Calculates gap ring score from sequence of positive numbers.
 
@@ -133,27 +175,3 @@ def entropy_ring_score(seq, nb_pers = 2, base = np.e):
     max_score = np.log(nb_pers) / np.log(base)
     score = 1 - noise_score/max_score
     return score
-
-
-def ring_score_from_sequence(seq,
-                             flavour = 'geometric',
-                             nb_pers = None,
-                             base = None):
-    """Calculates ring score of different flavours from sequence of positive numbers.
-
-    ``seq`` can be any interator and will be sorted.
-    However, there are no checks to test if the sequence is non-negative."""
-    if len(seq) == 0:
-        return 0
-    if flavour in 'geometric':
-        return geometric_ring_score(seq, nb_pers = nb_pers, base = base)
-    elif flavour == 'gap':
-        return gap_ring_score(seq)
-    elif flavour == 'amplitude':
-        return amplitude_ring_score(seq, nb_pers = nb_pers)
-    elif flavour == 'entropy':
-        return entropy_ring_score(seq, nb_pers = nb_pers, base = base)
-    elif flavour == 'linear':
-        return linear_ring_score(seq, nb_pers = nb_pers)
-    else:
-        raise Exception(f"Ring score flavour {flavour} unknown.")
