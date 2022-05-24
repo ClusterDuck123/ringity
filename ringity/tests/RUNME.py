@@ -5,6 +5,7 @@ from test_classes import *
 from test_score import *
 from test_methods import *
 from test_ring_score_flavours import *
+from test_network_model import *
 
 if __name__ == '__main__':
     unittest.main()
