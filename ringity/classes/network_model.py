@@ -9,8 +9,12 @@ import numpy as np
 import networkx as nx
 import scipy.stats as ss
 
+DEFAULT_RESPONSE_PARAMETER = 0.25
+DEFAULT_COUPLING_PARAMETER = 1.00
+DEFAULR_DISTRIBUTION_PARAMETER = 1.00
+
 def network_model(N,
-                  a = 0.25,
+                  a = None,
                   r = None,
                   c = None,
                   alpha = None,
@@ -23,6 +27,7 @@ def network_model(N,
                   verbose = False):
 
     r = _get_response_parameter(a=a, alpha=alpha, r=r)
+
     rate = _get_rate_parameter(rate = rate, beta = beta)
     scale = 1/rate if rate > 0 else np.inf
     c = _get_interaction_parameter(K=K, rho=rho, c=c, rate=rate, r=r)
@@ -35,11 +40,16 @@ def network_model(N,
     assert 0 <= c <= 1
 
     network_builder = NetworkBuilder(random_state = random_state)
-    network_builder.set_distribution('exponential', scale = scale)
+    network_builder.set_distribution('exponential',
+                                     scale = scale)
     network_builder.instantiate_positions(N)
-    network_builder.calculate_distances(metric = 'euclidean', circular = True)
-    network_builder.calculate_similarities(r = r, sim_func = 'box_cosine')
-    network_builder.calculate_probabilities(prob_func = 'linear', slope = c, intercept = 0)
+    network_builder.calculate_distances(metric = 'euclidean',
+                                        circular = True)
+    network_builder.calculate_similarities(r = r,
+                                           sim_func = 'box_cosine')
+    network_builder.calculate_probabilities(prob_func = 'linear',
+                                            slope = c,
+                                            intercept = 0)
     network_builder.instantiate_network()
 
     G = nx.from_numpy_array(squareform(network_builder.network))
@@ -101,7 +111,7 @@ def mean_similarity(rate, a):
 
 
 def density_to_interaction_strength(rho, a, rate = None, beta = None):
-    rate = get_rate_parameter(rate = rate, beta = beta)
+    rate = _get_rate_parameter(rate = rate, beta = beta)
 
     mu_S = mean_similarity(rate = rate, a = a)
     if rho <= mu_S:
@@ -110,7 +120,7 @@ def density_to_interaction_strength(rho, a, rate = None, beta = None):
         raise ValueError("Please provide a lower density!")
 
 def interaction_strength_to_density(K, a, rate = None, beta = None):
-    rate = get_rate_parameter(rate = rate, beta = beta)
+    rate = _get_rate_parameter(rate = rate, beta = beta)
     rho = mean_similarity(a=a, rate = rate) * K
     return rho
 
@@ -185,7 +195,7 @@ def string_to_probability_function(prob_name):
 
 def _get_response_parameter(a, alpha, r):
     if a is None and alpha is None and r is None:
-        raise ValueError("Please provide a response parameter! (e.g. `r`)")
+        return DEFAULT_RESPONSE_PARAMETER
     elif a is not None:
         warn("Using the parameter `a` for the response length is depricated. "
              "Please use the paramter `r` instead!",
@@ -221,7 +231,7 @@ def _get_rate_parameter(rate, beta):
         return ValueError("Unknown error. Please contact the developers "
                           "if you encounter this in the wild.")
 
-def _get_interaction_parameter(K, rho, a, c, rate):
+def _get_interaction_parameter(K, rho, c, rate, r):
     if rho is None and K is None and c is None:
         raise ValueError(f"Please provide a coupling parameter: "
                          f"rho = {rho}, K = {K}")
