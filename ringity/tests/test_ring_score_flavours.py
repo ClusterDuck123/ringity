@@ -2,6 +2,7 @@ import inspect
 import unittest
 import numpy as np
 
+from numpy.testing import assert_allclose
 from ringity.ring_scores import (
                             gap_ring_score,
                             geometric_ring_score,
@@ -120,7 +121,7 @@ class TestInfiniteCases(unittest.TestCase):
             msg = generate_message(seq, ring_score, np.inf, self.rand_base)
             self.assertAlmostEqual(ring_score(seq, **kwargs), 0., msg=msg)
 
-    def test_noiseless_seq(self):
+    def test_delta_seq(self):
         seq = [self.rand_p0]
         for ring_score in inf_ring_scores:
             kwargs = {}
@@ -177,6 +178,51 @@ class TestInfiniteCases(unittest.TestCase):
                                 **kwargs)
 
             self.assertAlmostEqual(score1, score2, msg=msg)
+
+class TestTwoPersistenceIdentities(unittest.TestCase):
+    def setUp(self):
+        pseq_list = [np.random.uniform(size = N)
+                                for _ in range(2**2)
+                                        for N in range(2, 2**2)]
+
+        self.p0_list = [sorted(pseq)[-1] for pseq in pseq_list]
+        self.p1_list = [sorted(pseq)[-2] for pseq in pseq_list]
+
+        self.gap_scores = [gap_ring_score(pseq) for pseq in pseq_list]
+        self.amp_scores = [amplitude_ring_score(pseq, nb_pers = 2) for pseq in pseq_list]
+        self.ent_scores = [entropy_ring_score(pseq, nb_pers = 2) for pseq in pseq_list]
+
+    def test_gap_identities(self):
+        test_scores1 = [1-p1/p0 for (p0,p1) in zip(self.p0_list, self.p1_list)]
+
+        self.assertIsNone(assert_allclose(self.gap_scores, test_scores1))
+
+
+    def test_amp_identities(self):
+        test_scores1 = [(p0-p1)/(p0+p1) for (p0,p1) in zip(self.p0_list, self.p1_list)]
+        test_scores2 = [gap/(2-gap) for gap in self.gap_scores]
+
+        self.assertIsNone(assert_allclose(self.amp_scores, test_scores1))
+        self.assertIsNone(assert_allclose(self.amp_scores, test_scores2))
+
+    def test_ent_identities(self):
+        def p1_over_p0_identity(p):
+            numer = (p+1)*np.log(p+1) - p*np.log(p)
+            denom = (p+1)*np.log(2)
+            return 1 - numer/denom
+
+        def amp_identity(x):
+            numer = (2*x*np.arctanh(x) + np.log(1 - x**2))
+            denom = np.log(4)
+            return numer / denom
+
+        test_scores1 = [p1_over_p0_identity(p0/p1)
+                            for (p0,p1) in zip(self.p0_list, self.p1_list)]
+        test_scores2 = [amp_identity(amp) for amp in self.amp_scores]
+
+        self.assertIsNone(assert_allclose(self.ent_scores, test_scores1))
+        self.assertIsNone(assert_allclose(self.ent_scores, test_scores2))
+
 
 if __name__ == '__main__':
     unittest.main()
