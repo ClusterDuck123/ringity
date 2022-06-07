@@ -2,6 +2,7 @@ from ringity.classes._distns import _get_rv
 from ringity.classes.exceptions import ConflictingParametersError, ProvideParameterError, NotImplementedYetError
 from scipy.spatial.distance import pdist, squareform
 from scipy.optimize import newton
+from scipy.optimize import bisect
 from warnings import warn
 
 import scipy
@@ -33,8 +34,9 @@ def network_model(N,
     scale = 1/rate if rate > 0 else np.inf
 
     if verbose:
+        print(f"Response parameter was calculated as: r = {r}")
         print(f"Rate parameter was calculated as:   lambda = {rate}")
-        print(f"Coupling parameter was calculated as: c = {rate}")
+        print(f"Coupling parameter was calculated as: c = {c}")
 
     assert rate >= 0
     assert 0 <= c <= 1
@@ -96,7 +98,9 @@ def mean_similarity(rate, response):
 
     if np.isclose(rate, 0):
         return response
-    # Python can't handle that properly; maybe the analytical expression can be simplified...
+    
+    # Python can't handle this case properly; 
+    #maybe the analytical expression can be simplified...
     if rate > 200:
         return 1.
 
@@ -256,6 +260,29 @@ def _get_interaction_parameter(K, rho, c, rate, r):
     else:
         return ValueError("Unknown error. Please contact the developers "
                           "if you encounter this in the wild.")
+                          
+def _get_response_parameter_from_density(rho, rate, c):
+    if np.isclose(rate, 0):
+        return rho / c
+
+    if rate > 200:
+        return None
+
+    def density_constraint(r):
+        
+        if r == 0:
+            return -rho
+        
+        plamb = np.pi * rate
+
+        # Alternatively:
+        # numerator = 2*(np.sinh(plamb*(1-a)) * np.sinh(plamb*a))
+        numerator = (np.cosh(plamb) - np.cosh(plamb*(1 - r*2)))
+        denominator = (r*2*plamb * np.sinh(plamb))
+
+        return c - rho - c * numerator / denominator
+    
+    return bisect(density_constraint, 0, 1)
 
 
 # =============================================================================
