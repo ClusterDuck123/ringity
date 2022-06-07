@@ -12,31 +12,45 @@ class TestExponentialNetworkModel(unittest.TestCase):
         self.r = np.random.uniform()
         self.c = np.random.uniform()
 
-        self.a = self.r
-        self.alpha = self.r
-        self.K = self.c
+        self.G = rng.network_model(
+                                N = self.N,
+                                r = self.r ,
+                                beta = self.beta,
+                                c = self.c,
+                                random_state = self.random_state)
 
-        self.G = rng.network_model(N = self.N,
-                                  r = self.r ,
-                                  beta = self.beta,
-                                  K = self.K,
-                                  random_state = self.random_state)
+        self.G_a = rng.network_model(
+                                N = self.N,
+                                a = self.r ,
+                                beta = self.beta,
+                                c = self.c,
+                                random_state = self.random_state)
 
-        self.G_a = rng.network_model(N = self.N,
-                                     a = self.a ,
-                                     beta = self.beta,
-                                     K = self.K,
-                                     random_state = self.random_state)
-
-        self.G_alpha = rng.network_model(N = self.N,
-                                        alpha = self.alpha ,
-                                        beta = self.beta,
-                                        K = self.K,
-                                        random_state = self.random_state)
+        self.G_alpha = rng.network_model(
+                                N = self.N,
+                                alpha = self.r ,
+                                beta = self.beta,
+                                c = self.c,
+                                random_state = self.random_state)
+                                
+        self.G_K = rng.network_model(
+                                N = self.N,
+                                alpha = self.r ,
+                                beta = self.beta,
+                                K = self.c,
+                                random_state = self.random_state)
 
     def test_response_parameter_consistency(self):
         self.assertTrue(nx.is_isomorphic(self.G, self.G_a))
         self.assertTrue(nx.is_isomorphic(self.G, self.G_alpha))
+        
+    def test_coupling_parameter_consistency(self):
+        self.assertTrue(nx.is_isomorphic(self.G, self.G_K))
+        
+    def test_implicit_parameter_consistency(self):
+        # response parameter
+        # coupling parameter
+        pass
 
 
 

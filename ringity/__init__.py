@@ -2,12 +2,14 @@ name = "ringity"
 __author__ = "Markus K. Youssef"
 __version__ = "0.2a8"
 
+import ringity.classes as classes
+
 from ringity.core          import ring_score, diagram, pdiagram_from_point_cloud, ring_score_from_point_cloud
 from ringity.centralities  import *
 from ringity.plots         import *
 #from ringity.distribution_functions import *
 from ringity.graphlet_coefficients import *
-from ringity.classes.network_model import network_model, interaction_strength_to_density, density_to_interaction_strength
+from ringity.network_models.core import network_model
 from ringity.gtda import vietoris_rips_from_point_cloud
 from ringity.single_cell import get_cell_cycle_genes
 
