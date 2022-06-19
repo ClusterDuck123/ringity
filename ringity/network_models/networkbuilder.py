@@ -8,6 +8,7 @@ from ringity.network_models.trafo_utils import (
 import numpy as np
 import scipy.stats as ss
 
+from ringity.network_models.defaults import ARITHMETIC_PRECISION
 
 # =============================================================================
 #  ---------------------------- NETWORK BUILDER ------------------------------
@@ -46,15 +47,38 @@ class NetworkBuilder:
         self._N = value
 
     @property
-    def r(self):
-        return self._r
+    def response(self):
+        return self._response
 
-    @r.setter
-    def r(self, value):
-        if hasattr(self, 'r') and self.r != value:
+    @response.setter
+    def response(self, value):
+        if hasattr(self, 'response') and self.response != value:
             raise AttributeError(f"Trying to set conflicting values "
-                                 f"for r: {value} != {self.r}")
-        self._r = value
+                                 f"for response: {value} != {self.response}")
+        self._response = round(value, ARITHMETIC_PRECISION)
+
+    @property
+    def rate(self):
+        return self._rate
+
+    @rate.setter
+    def rate(self, value):
+        if hasattr(self, 'rate') and self.rate != value:
+            raise AttributeError(f"Trying to set conflicting values "
+                                 f"for rate: {value} != {self.rate}")
+        self._rate = round(value, ARITHMETIC_PRECISION)
+
+
+    @property
+    def coupling(self):
+        return self._coupling
+
+    @coupling.setter
+    def coupling(self, value):
+        if hasattr(self, 'coupling') and self.coupling != value:
+            raise AttributeError(f"Trying to set conflicting values "
+                                 f"for coupling: {value} != {self.coupling}")
+        self._coupling = round(value, ARITHMETIC_PRECISION)
 
 # -------------------------- NETWORK DATA --------------------------
 
@@ -159,7 +183,7 @@ class NetworkBuilder:
             raise TypeError(f"Type of {distn_arg} unknown.")
 
         self.similarities = sim_func(squareform(self.distances),
-                                     box_length = 2*np.pi*self.r)
+                                     box_length = 2*np.pi*self.response)
 
     def calculate_probabilities(self,
                                 prob_func = 'linear',
