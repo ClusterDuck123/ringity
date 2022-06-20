@@ -61,7 +61,7 @@ def get_coupling_parameter(K, rho, c, rate, r):
     else:
         return ValueError("Unknown error. Please contact the developers "
                           "if you encounter this in the wild.")
-                          
+
 def get_response_parameter_from_density(rho, rate, c):
     if np.isclose(rate, 0):
         return rho / c
@@ -70,10 +70,10 @@ def get_response_parameter_from_density(rho, rate, c):
         return None
 
     def density_constraint(r):
-        
+
         if r == 0:
             return -rho
-        
+
         plamb = np.pi * rate
 
         # Alternatively:
@@ -82,9 +82,9 @@ def get_response_parameter_from_density(rho, rate, c):
         denominator = (r*2*plamb * np.sinh(plamb))
 
         return c - rho - c * numerator / denominator
-    
+
     return bisect(density_constraint, 0, 1)
-    
+
 def mean_similarity(rate, response):
     """Calculate expected mean similarity (equivalently maximal expected density).
 
@@ -94,8 +94,8 @@ def mean_similarity(rate, response):
 
     if np.isclose(rate, 0):
         return response
-    
-    # Python can't handle this case properly; 
+
+    # Python can't handle this case properly;
     #maybe the analytical expression can be simplified...
     if rate > 200:
         return 1.
@@ -128,3 +128,42 @@ def coupling_strength_to_density(K = None, a = None, c = None, r = None, rate = 
 
     rho = mean_similarity(response=r, rate = rate) * c
     return rho
+
+def density_to_interaction_strength(rho, a = None, alpha = None, rate = None, beta = None, r = None):
+    r = get_response_parameter(a=a, alpha=alpha, r=r)
+    rate = get_rate_parameter(rate = rate, beta = beta)
+
+    mu_S = mean_similarity(rate = rate, response = r)
+    if rho <= mu_S:
+        return rho/mu_S
+    else:
+        raise ValueError("Please provide a lower density!")
+
+def interaction_strength_to_density(K = None, a = None, c = None, r = None, rate = None, beta = None, alpha = None):
+    r = get_response_parameter(a=a, alpha=alpha, r=r)
+    rate = get_rate_parameter(rate = rate, beta = beta)
+    c = get_interaction_parameter(K=K, rho=None, c=c, rate=rate, r=r)
+
+    rho = mean_similarity(response=r, rate = rate) * c
+    return rho
+
+def get_interaction_parameter(K, rho, c, rate, r):
+    if rho is None and K is None and c is None:
+        raise ValueError(f"Please provide a coupling parameter: "
+                         f"rho = {rho}, K = {K}")
+    elif rho is not None and K is not None:
+        raise ValueError(f"Conflicting coupling parameters given: "
+                         f"rho = {rho}, K = {K}")
+    elif rho is not None:
+        return density_to_interaction_strength(rho=rho, r=r, rate=rate)
+    elif K is not None:
+        warn("Using the parameter `K` for the coupling strength is depricated. "
+             "Please use the paramter `c` instead!",
+             DeprecationWarning,
+             stacklevel=2)
+        return K
+    elif c is not None:
+        return c
+    else:
+        return ValueError("Unknown error. Please contact the developers "
+                          "if you encounter this in the wild.")
