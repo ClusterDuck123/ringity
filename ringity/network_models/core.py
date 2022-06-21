@@ -4,15 +4,17 @@ import networkx as nx
 from scipy.spatial.distance import squareform
 from ringity.network_models.networkbuilder import NetworkBuilder
 from ringity.network_models.param_utils import (
-                                get_response_parameter,
-                                get_rate_parameter,
-                                get_coupling_parameter
+                                parse_response_parameter,
+                                parse_rate_parameter,
+                                parse_coupling_parameter
                                 )
 
 def network_model(N,
                   a = None,
                   r = None,
                   c = None,
+                  response = None,
+                  coupling = None,
                   alpha = None,
                   beta = None,
                   rho = None,
@@ -25,15 +27,21 @@ def network_model(N,
     network_builder = NetworkBuilder(random_state = random_state)
 
     network_builder.N = N
-    network_builder.response = get_response_parameter(a=a, alpha=alpha, r=r)
-    network_builder.rate = get_rate_parameter(rate=rate, beta=beta)
-    network_builder.coupling = get_coupling_parameter(
-                            K = K,
-                            rho = rho,
-                            c = c,
-                            rate = network_builder.rate,
-                            r = network_builder.response
-                            )
+    network_builder.rate = parse_rate_parameter(
+                                    rate = rate,
+                                    beta = beta
+                                    )
+    network_builder.response = parse_response_parameter(
+                                    r = r,
+                                    a = a,
+                                    alpha = alpha,
+                                    response = response
+                                    )
+    network_builder.coupling = parse_coupling_parameter(
+                                    c = c,
+                                    K = K,
+                                    coupling = coupling
+                                    )
 
     scale = 1/network_builder.rate if network_builder.rate > 0 else np.inf
 

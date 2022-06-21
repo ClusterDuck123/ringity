@@ -3,76 +3,20 @@ import numpy as np
 from warnings import warn
 from ringity.network_models.defaults import DEFAULT_RESPONSE_PARAMETER
 
-def get_response_parameter(a, alpha, r):
-    if a is None and alpha is None and r is None:
-        return DEFAULT_RESPONSE_PARAMETER
-    elif a is not None:
-        warn("Using the parameter `a` for the response length is depricated. "
-             "Please use the paramter `r` instead!",
-             DeprecationWarning,
-             stacklevel=2)
-        return a
-    elif alpha is not None:
-        warn("Using the parameter `alpha` for the response length is depricated. "
-             "Please use the paramter `r` instead!",
-             DeprecationWarning,
-             stacklevel=2)
-        return alpha
-    elif r is not None:
-        return r
-    else:
-        return ValueError("Unknown error. Please contact the developers "
-                          "if you encounter this in the wild.")
+# =============================================================================
+#  -------------------------- PARAMETER INFERENCE ----------------------------
+# =============================================================================
 
-def get_rate_parameter(rate, beta):
-    if beta is None and rate is None:
-        raise ValueError(f"Please provide a distribution parameter: "
-                         f"beta = {beta}, rate = {rate}")
-    elif beta is not None and rate is not None:
-        raise ValueError(f"Conflicting distribution parameters given: "
-                         f"beta = {beta}, rate = {rate}")
-    elif rate is not None:
-        return rate
-    elif beta is not None:
-        if np.isclose(beta,0):
-            return np.inf
-        return np.tan(np.pi * (1-beta) / 2)
-    else:
-        return ValueError("Unknown error. Please contact the developers "
-                          "if you encounter this in the wild.")
-
-def get_coupling_parameter(K, rho, c, rate, r):
-    if rho is None and K is None and c is None:
-        raise ValueError(f"Please provide a coupling parameter: "
-                         f"rho = {rho}, K = {K}")
-    elif rho is not None and K is not None:
-        raise ValueError(f"Conflicting coupling parameters given: "
-                         f"rho = {rho}, K = {K}")
-    elif rho is not None:
-        return density_to_coupling_strength(rho=rho, r=r, rate=rate)
-    elif K is not None:
-        warn("Using the parameter `K` for the coupling strength is depricated. "
-             "Please use the paramter `c` instead!",
-             DeprecationWarning,
-             stacklevel=2)
-        return K
-    elif c is not None:
-        return c
-    else:
-        return ValueError("Unknown error. Please contact the developers "
-                          "if you encounter this in the wild.")
-
-def get_response_parameter_from_density(rho, rate, c):
+def denisty_to_response(density, coupling, response, rate):
     if np.isclose(rate, 0):
-        return rho / c
+        return density / coupling
 
     if rate > 200:
         return None
 
     def density_constraint(r):
-
         if r == 0:
-            return -rho
+            return -density
 
         plamb = np.pi * rate
 
@@ -81,9 +25,23 @@ def get_response_parameter_from_density(rho, rate, c):
         numerator = (np.cosh(plamb) - np.cosh(plamb*(1 - r*2)))
         denominator = (r*2*plamb * np.sinh(plamb))
 
-        return c - rho - c * numerator / denominator
+        return coupling - density - coupling * numerator / denominator
 
     return bisect(density_constraint, 0, 1)
+
+
+def density_to_coupling(density, response, rate):
+    mu_S = mean_similarity(rate = rate, response = response)
+    if rho <= mu_S:
+        return density/mu_S
+    else:
+        raise ValueError("Please provide a lower density!")
+
+
+def coupling_to_density(coupling, response, rate):
+    density = coupling * mean_similarity(response = response, rate = rate)
+    return density
+
 
 def mean_similarity(rate, response):
     """Calculate expected mean similarity (equivalently maximal expected density).
@@ -109,61 +67,99 @@ def mean_similarity(rate, response):
 
     return 1 - numerator / denominator
 
+# =============================================================================
+#  --------------------------- PARAMETER PARSERS -----------------------------
+# =============================================================================
 
-def density_to_coupling_strength(rho, a = None, alpha = None, rate = None, beta = None, r = None):
+def parse_response_parameter(r = None,
+                             a = None,
+                             alpha = None,
+                             response = None):
 
-    r = get_response_parameter(a=a, alpha=alpha, r=r)
-    rate = get_rate_parameter(rate = rate, beta = beta)
+    nb_parms = sum(1 for parm in (r, a, alpha, response) if parm is not None)
 
-    mu_S = mean_similarity(rate = rate, response = r)
-    if rho <= mu_S:
-        return rho/mu_S
-    else:
-        raise ValueError("Please provide a lower density!")
+    if nb_parms == 0:
+        response = None
 
-def coupling_strength_to_density(K = None, a = None, c = None, r = None, rate = None, beta = None, alpha = None):
-    r = get_response_parameter(a=a, alpha=alpha, r=r)
-    rate = get_rate_parameter(rate = rate, beta = beta)
-    c = get_coupling_parameter(K=K, rho=None, c=c, rate=rate, r=r)
+    elif nb_parms > 1:
+        raise ValueError(f"Please provide only one response parameter! " \
+                         f"r = {r}, a = {a}, alpha = {alpha}, " \
+                         f"response = {response}")
 
-    rho = mean_similarity(response=r, rate = rate) * c
-    return rho
+    elif a is not None:
+        warning_message = "Using the parameter `a` for the response length " \
+                          "is depricated. Please use the paramter `r` instead!"
+        warn(warning_message, DeprecationWarning, stacklevel = 2)
+        response = a
 
-def density_to_interaction_strength(rho, a = None, alpha = None, rate = None, beta = None, r = None):
-    r = get_response_parameter(a=a, alpha=alpha, r=r)
-    rate = get_rate_parameter(rate = rate, beta = beta)
+    elif alpha is not None:
+        warning_message = "Using the parameter `alpha` for the response length " \
+                         "is depricated. Please use the paramter `r` instead!"
+        warn(warning_message, DeprecationWarning, stacklevel = 2)
+        response = alpha
 
-    mu_S = mean_similarity(rate = rate, response = r)
-    if rho <= mu_S:
-        return rho/mu_S
-    else:
-        raise ValueError("Please provide a lower density!")
+    elif r is not None:
+        response = r
 
-def interaction_strength_to_density(K = None, a = None, c = None, r = None, rate = None, beta = None, alpha = None):
-    r = get_response_parameter(a=a, alpha=alpha, r=r)
-    rate = get_rate_parameter(rate = rate, beta = beta)
-    c = get_interaction_parameter(K=K, rho=None, c=c, rate=rate, r=r)
+    elif response is not None:
+        response = response
 
-    rho = mean_similarity(response=r, rate = rate) * c
-    return rho
-
-def get_interaction_parameter(K, rho, c, rate, r):
-    if rho is None and K is None and c is None:
-        raise ValueError(f"Please provide a coupling parameter: "
-                         f"rho = {rho}, K = {K}")
-    elif rho is not None and K is not None:
-        raise ValueError(f"Conflicting coupling parameters given: "
-                         f"rho = {rho}, K = {K}")
-    elif rho is not None:
-        return density_to_interaction_strength(rho=rho, r=r, rate=rate)
-    elif K is not None:
-        warn("Using the parameter `K` for the coupling strength is depricated. "
-             "Please use the paramter `c` instead!",
-             DeprecationWarning,
-             stacklevel=2)
-        return K
-    elif c is not None:
-        return c
     else:
         return ValueError("Unknown error. Please contact the developers "
                           "if you encounter this in the wild.")
+    return response
+
+
+def parse_rate_parameter(rate, beta):
+    if beta is None and rate is None:
+        raise ValueError(f"Please provide a distribution parameter: "
+                         f"beta = {beta}, rate = {rate}")
+
+    elif beta is not None and rate is not None:
+        raise ValueError(f"Conflicting distribution parameters given: "
+                         f"beta = {beta}, rate = {rate}")
+
+    elif beta is not None:
+        if np.isclose(beta,0):
+            rate = np.inf
+        else:
+            rate = np.tan(np.pi * (1-beta) / 2)
+
+    elif rate is not None:
+        rate = rate
+
+    else:
+        return ValueError("Unknown error. Please contact the developers "
+                          "if you encounter this in the wild.")
+    return rate
+
+
+def parse_coupling_parameter(c = None,
+                             K = None,
+                             coupling = None):
+
+    nb_parms = sum(1 for parm in (c, K, coupling) if parm is not None)
+
+    if nb_parms == 0:
+        coupling = None
+
+    elif nb_parms > 1:
+        raise ValueError(f"Please provide only one coupling parameter! " \
+                         f"r = {r}, a = {a}, alpha = {alpha}, " \
+                         f"response = {response}")
+
+    elif c is not None:
+        coupling = c
+
+    elif K is not None:
+        warning_message = "Using the parameter `K` for the coupling strength " \
+                          "is depricated. Please use the paramter `c` instead!"
+        warn(warning_message, DeprecationWarning, stacklevel=2)
+        coupling = K
+
+    elif coupling is not None:
+        coupling = coupling
+    else:
+        return ValueError("Unknown error. Please contact the developers "
+                          "if you encounter this in the wild.")
+    return coupling

@@ -80,6 +80,17 @@ class NetworkBuilder:
                                  f"for coupling: {value} != {self.coupling}")
         self._coupling = round(value, ARITHMETIC_PRECISION)
 
+    @property
+    def density(self):
+        return self._density
+
+    @density.setter
+    def density(self, value):
+        if hasattr(self, 'density') and self.density != value:
+            raise AttributeError(f"Trying to set conflicting values "
+                                 f"for density: {value} != {self.density}")
+        self._density = round(value, ARITHMETIC_PRECISION)
+
 # -------------------------- NETWORK DATA --------------------------
 
     @property
