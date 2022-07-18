@@ -42,16 +42,18 @@ def network_model(N,
                                     K = K,
                                     coupling = coupling
                                     )
-
-    scale = 1/network_builder.rate if network_builder.rate > 0 else np.inf
+    network_builder.rho = rho
 
     if verbose:
-        print(f"Response parameter was calculated as: r = {network_builder.response}")
-        print(f"Rate parameter was calculated as:   lambda = {network_builder.rate}")
-        print(f"Coupling parameter was calculated as: c = {network_builder.coupling}")
-
+        print(f"Response parameter was calculated as:  r = {network_builder.response}")
+        print(f"Rate parameter was calculated as: lambda = {network_builder.rate}")
+        print(f"Coupling parameter was calculated as:  c = {network_builder.coupling}")
+        print(f"Density parameter was calculated as: rho = {network_builder.rho}")
+    
     assert network_builder.rate >= 0
     assert 0 <= network_builder.coupling <= 1
+    
+    scale = 1/network_builder.rate if network_builder.rate > 0 else np.inf
 
     network_builder.set_distribution('exponential',
                                      scale = scale)

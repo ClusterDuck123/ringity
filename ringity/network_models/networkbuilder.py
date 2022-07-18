@@ -29,6 +29,11 @@ class NetworkBuilder:
     """
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
+        self._N = None
+        self._rate = None
+        self._response = None
+        self._coupling = None
+        self._density = None
 
 # ------------------------------------------------------------------
 # --------------------------- PROPERTIES ---------------------------
@@ -41,7 +46,7 @@ class NetworkBuilder:
 
     @N.setter
     def N(self, value):
-        if hasattr(self, 'N') and self.N != value:
+        if self._N and self.N != value:
             raise AttributeError(f"Trying to set conflicting values "
                                  f"for N: {value} != {self.N}")
         self._N = value
@@ -52,10 +57,10 @@ class NetworkBuilder:
 
     @response.setter
     def response(self, value):
-        if hasattr(self, 'response') and self.response != value:
+        if self._response and self.response != value:
             raise AttributeError(f"Trying to set conflicting values "
                                  f"for response: {value} != {self.response}")
-        self._response = round(value, ARITHMETIC_PRECISION)
+        self._response = value
 
     @property
     def rate(self):
@@ -63,11 +68,10 @@ class NetworkBuilder:
 
     @rate.setter
     def rate(self, value):
-        if hasattr(self, 'rate') and self.rate != value:
+        if self._rate and self.rate != value:
             raise AttributeError(f"Trying to set conflicting values "
                                  f"for rate: {value} != {self.rate}")
-        self._rate = round(value, ARITHMETIC_PRECISION)
-
+        self._rate = value
 
     @property
     def coupling(self):
@@ -75,10 +79,10 @@ class NetworkBuilder:
 
     @coupling.setter
     def coupling(self, value):
-        if hasattr(self, 'coupling') and self.coupling != value:
+        if self._coupling and self.coupling != value:
             raise AttributeError(f"Trying to set conflicting values "
                                  f"for coupling: {value} != {self.coupling}")
-        self._coupling = round(value, ARITHMETIC_PRECISION)
+        self._coupling = value
 
     @property
     def density(self):
@@ -89,7 +93,7 @@ class NetworkBuilder:
         if hasattr(self, 'density') and self.density != value:
             raise AttributeError(f"Trying to set conflicting values "
                                  f"for density: {value} != {self.density}")
-        self._density = round(value, ARITHMETIC_PRECISION)
+        self._density = value
 
 # -------------------------- NETWORK DATA --------------------------
 
