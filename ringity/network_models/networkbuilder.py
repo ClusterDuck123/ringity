@@ -95,7 +95,7 @@ class NetworkBuilder:
                                  f"for density: {value} != {self.density}")
         self._density = value
 
-# -------------------------- NETWORK DATA --------------------------
+# -------------------------- NETWORK META DATA --------------------------
 
     @property
     def distribution(self):
@@ -143,9 +143,41 @@ class NetworkBuilder:
         self._probabilities = value
 
 # ------------------------------------------------------------------
-# ---------------------------- METHODS ----------------------------
+#  --------------------------- METHODS ----------------------------
 # ------------------------------------------------------------------
-
+    def infer_parameters(self):
+        """Completes the set of network paramters, if possible.
+        
+        Besides of the network size (e.g. number of nodes), each 
+        network model consistes of the following set of parameters:
+        - distribution parameter (e.g. rate)
+        - response window size (e.g. r)
+        - coupling strength (e.g. c)
+        - density (e.g. rho)
+        
+        However, a network model does only require 3 degrees of freedom, 
+        so the abovementioned set is redundant. This function completes 
+        the missing parameter if it is missing, or checks if the given 
+        set is consistent with the model constraints.
+        """
+        
+        params = [self.rate, self.response, self.coupling, self.density]
+        
+        if all(params):
+            CHECK_PARAMS_CONSISTENCY
+        elif sum(params) < 3:
+            raise AttributeError("Not enough parameters given to infer "
+                                 "redundant ones.")
+        else:
+            if not self.rate:
+                pass
+            if not self.response:
+                pass
+            if not self.coupling:
+                pass
+            if not self.density:
+                pass
+        
     def set_distribution(self,
                          distn_arg,
                          **kwargs):

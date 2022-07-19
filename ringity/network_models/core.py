@@ -18,6 +18,7 @@ def network_model(N,
                   alpha = None,
                   beta = None,
                   rho = None,
+                  denisty = None,
                   rate = None,
                   K = None,
                   random_state = None,
@@ -42,7 +43,9 @@ def network_model(N,
                                     K = K,
                                     coupling = coupling
                                     )
-    network_builder.rho = rho
+    network_builder.density = rho
+    
+    network_builder.infer_parameters()
 
     if verbose:
         print(f"Response parameter was calculated as:  r = {network_builder.response}")
