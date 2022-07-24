@@ -48,10 +48,10 @@ def network_model(N,
     network_builder.infer_parameters()
 
     if verbose:
-        print(f"Response parameter was calculated as:  r = {network_builder.response}")
-        print(f"Rate parameter was calculated as: lambda = {network_builder.rate}")
-        print(f"Coupling parameter was calculated as:  c = {network_builder.coupling}")
-        print(f"Density parameter was calculated as: rho = {network_builder.rho}")
+        print(f"Response parameter was set to:  r = {network_builder.response}")
+        print(f"Rate parameter was set to: rate = {network_builder.rate}")
+        print(f"Coupling parameter was set to:  c = {network_builder.coupling}")
+        print(f"Density parameter was set to: rho = {network_builder.density}")
     
     assert network_builder.rate >= 0
     assert 0 <= network_builder.coupling <= 1

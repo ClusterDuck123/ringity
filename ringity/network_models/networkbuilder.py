@@ -9,13 +9,18 @@ import numpy as np
 import scipy.stats as ss
 
 from ringity.network_models.defaults import ARITHMETIC_PRECISION
+from ringity.network_models.param_utils import (
+                                    infer_response_parameter,
+                                    infer_coupling_parameter,
+                                    infer_rate_parameter,
+                                    infer_density_parameter)
 
 # =============================================================================
 #  ---------------------------- NETWORK BUILDER ------------------------------
 # =============================================================================
 
 class NetworkBuilder:
-    """General use class to build a network model.
+    """General class to build a network model.
 
     Tailored to standard network model with parameters:
     - N ...... network parameter: network size.
@@ -90,7 +95,7 @@ class NetworkBuilder:
 
     @density.setter
     def density(self, value):
-        if hasattr(self, 'density') and self.density != value:
+        if self._density and self.density != value:
             raise AttributeError(f"Trying to set conflicting values "
                                  f"for density: {value} != {self.density}")
         self._density = value
@@ -162,21 +167,34 @@ class NetworkBuilder:
         """
         
         params = [self.rate, self.response, self.coupling, self.density]
+        nb_params = sum(1 for _ in params if _)
         
-        if all(params):
+        if nb_params == 4:
             CHECK_PARAMS_CONSISTENCY
-        elif sum(params) < 3:
+        elif nb_params < 3:
             raise AttributeError("Not enough parameters given to infer "
                                  "redundant ones.")
         else:
             if not self.rate:
-                pass
+                self.rate = infer_rate_parameter(
+                                        density = self.density, 
+                                        coupling = self.coupling, 
+                                        response = self.response)
             if not self.response:
-                pass
+                self.response = infer_response_parameter(
+                                        density = self.density, 
+                                        coupling = self.coupling, 
+                                        rate = self.rate)
             if not self.coupling:
-                pass
+                self.coupling = infer_coupling_parameter(
+                                        density = self.density, 
+                                        response = self.response, 
+                                        rate = self.rate)
             if not self.density:
-                pass
+                self.density = infer_density_parameter(
+                                        response = self.response, 
+                                        coupling = self.coupling, 
+                                        rate = self.rate)
         
     def set_distribution(self,
                          distn_arg,

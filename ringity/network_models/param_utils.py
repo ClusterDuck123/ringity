@@ -1,11 +1,57 @@
 import numpy as np
 
 from warnings import warn
+from scipy.optimize import bisect
 from ringity.network_models.defaults import DEFAULT_RESPONSE_PARAMETER
 
 # =============================================================================
 #  -------------------------- PARAMETER INFERENCE ----------------------------
 # =============================================================================
+
+# WRITE DOWN GOVERNING EQUATION!
+
+def infer_response_parameter(density, coupling, rate):
+    if np.isclose(rate, 0):
+        response = density / coupling
+        
+    elif rate > 200:
+        response = None
+        
+    else:
+        pass
+
+    def density_constraint(r):
+        if r == 0:
+            constraint = -density
+        else:
+            plamb = np.pi * rate
+
+            # Alternatively:
+            # numerator = 2*(np.sinh(plamb*(1-a)) * np.sinh(plamb*a))
+            numerator = (np.cosh(plamb) - np.cosh(plamb*(1 - r*2)))
+            denominator = (r*2*plamb * np.sinh(plamb))
+
+            constraint = coupling - density - coupling * numerator / denominator
+        return constrain
+
+    return bisect(density_constraint, 0, 1)
+    
+    
+def infer_coupling_parameter(density, response, rate):
+    mu_S = max_density(rate = rate, response = response)
+    if density <= mu_S:
+        return density/mu_S
+    else:
+        raise ValueError("Please provide a lower density!")
+            
+def infer_density_parameter(response, rate, coupling):
+        density = coupling * max_density(response = response, rate = rate)
+        return density
+        
+def infer_rate_parameter(response, density, coupling):
+        pass
+            
+#  -------------------------- OLD INFERENCE FUNCTIONS ----------------------------
 
 def denisty_to_response(density, coupling, response, rate):
     if np.isclose(rate, 0):
@@ -43,6 +89,30 @@ def coupling_to_density(coupling, response, rate):
     return density
 
 
+def max_density(rate, response):
+    """Calculate maximal allowed density (equivalently expected mean similarity).
+
+    This function assumes a (wrapped) exponential function and a cosine similarity
+    of box functions.
+    """
+
+    if np.isclose(rate, 0):
+        return response
+
+    # Python can't handle this case properly;
+    # maybe the analytical expression can be simplified...
+    if rate > 200:
+        return 1.
+
+    plamb = np.pi * rate
+
+    # Alternatively:
+    # numerator = 2*(np.sinh(plamb*(1-a)) * np.sinh(plamb*a))
+    numerator = (np.cosh(plamb) - np.cosh(plamb*(1 - response*2)))
+    denominator = (response*2*plamb * np.sinh(plamb))
+
+    return 1 - numerator / denominator
+
 def mean_similarity(rate, response):
     """Calculate expected mean similarity (equivalently maximal expected density).
 
@@ -54,7 +124,7 @@ def mean_similarity(rate, response):
         return response
 
     # Python can't handle this case properly;
-    #maybe the analytical expression can be simplified...
+    # maybe the analytical expression can be simplified...
     if rate > 200:
         return 1.
 
