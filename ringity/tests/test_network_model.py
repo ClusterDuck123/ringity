@@ -3,54 +3,188 @@ import numpy as np
 import ringity as rng
 import networkx as nx
 
+from ringity.network_models.param_utils import (infer_density_parameter,
+                                                beta_to_rate)
+
 class TestExponentialNetworkModel(unittest.TestCase):
     def setUp(self):
         self.random_state = np.random.randint(2**10)
         self.N = 2**7
 
         self.beta = np.random.uniform()
-        self.r = np.random.uniform()
-        self.c = np.random.uniform()
+        self.response = np.random.uniform()
+        self.coupling = np.random.uniform()
+        
+        self.density = infer_density_parameter(
+                                rate = beta_to_rate(self.beta),
+                                response = self.response,                                
+                                coupling = self.coupling,
+        )
 
         self.G = rng.network_model(
                                 N = self.N,
-                                r = self.r ,
+                                response = self.response ,
                                 beta = self.beta,
-                                c = self.c,
-                                random_state = self.random_state)
-
-        self.G_a = rng.network_model(
-                                N = self.N,
-                                a = self.r ,
-                                beta = self.beta,
-                                c = self.c,
-                                random_state = self.random_state)
-
-        self.G_alpha = rng.network_model(
-                                N = self.N,
-                                alpha = self.r ,
-                                beta = self.beta,
-                                c = self.c,
-                                random_state = self.random_state)
-                                
-        self.G_K = rng.network_model(
-                                N = self.N,
-                                alpha = self.r ,
-                                beta = self.beta,
-                                K = self.c,
-                                random_state = self.random_state)
+                                coupling = self.coupling,
+                                random_state = self.random_state,
+                                )
 
     def test_response_parameter_consistency(self):
-        self.assertTrue(nx.is_isomorphic(self.G, self.G_a))
-        self.assertTrue(nx.is_isomorphic(self.G, self.G_alpha))
+        G_r = rng.network_model(
+                                N = self.N,
+                                r = self.response,
+                                beta = self.beta,
+                                c = self.coupling,
+                                random_state = self.random_state)
+                                
+        G_a = rng.network_model(
+                                N = self.N,
+                                a = self.response,
+                                beta = self.beta,
+                                c = self.coupling,
+                                random_state = self.random_state)
+
+        G_alpha = rng.network_model(
+                                N = self.N,
+                                alpha = self.response,
+                                beta = self.beta,
+                                c = self.coupling,
+                                random_state = self.random_state)
+        
+        self.assertTrue(nx.is_isomorphic(self.G, G_r))
+        self.assertTrue(nx.is_isomorphic(self.G, G_a))
+        self.assertTrue(nx.is_isomorphic(self.G, G_alpha))
         
     def test_coupling_parameter_consistency(self):
-        self.assertTrue(nx.is_isomorphic(self.G, self.G_K))
+        G_c = rng.network_model(
+                                N = self.N,
+                                alpha = self.response,
+                                beta = self.beta,
+                                c = self.coupling,
+                                random_state = self.random_state)
         
-    def test_implicit_parameter_consistency(self):
-        # response parameter
-        # coupling parameter
-        pass
+        G_K = rng.network_model(
+                                N = self.N,
+                                alpha = self.response,
+                                beta = self.beta,
+                                K = self.coupling,
+                                random_state = self.random_state)
+        self.assertTrue(nx.is_isomorphic(self.G, G_c))
+        self.assertTrue(nx.is_isomorphic(self.G, G_K))
+        
+    def test_density_parameter_consistency(self):
+        G_density = rng.network_model(
+                                N = self.N,
+                                alpha = self.response,
+                                beta = self.beta,
+                                density = self.density,
+                                random_state = self.random_state)
+        
+        G_rho = rng.network_model(
+                                N = self.N,
+                                alpha = self.response,
+                                beta = self.beta,
+                                rho = self.density,
+                                random_state = self.random_state)
+        self.assertTrue(nx.is_isomorphic(G_density, G_rho))
+        
+    def test_density_calculation(self):
+        G_gen = (rng.network_model(
+                                N = self.N,
+                                response = self.response ,
+                                beta = self.beta,
+                                coupling = self.coupling,
+                          ) for _ in range(2**5))
+                          
+        mean_density = np.mean(list(map(nx.density, G_gen)))
+        
+        self.assertTrue(np.isclose(
+                                mean_density, 
+                                self.density, 
+                                rtol=1e-01))
+        
+        G_rho = rng.network_model(
+                                N = self.N,
+                                alpha = self.response,
+                                beta = self.beta,
+                                rho = self.density,
+                                random_state = self.random_state)
+        self.assertTrue(nx.is_isomorphic(G_density, G_rho))
+        
+    def test_density_calculation(self):
+        G_gen = (rng.network_model(
+                                N = self.N,
+                                response = self.response ,
+                                beta = self.beta,
+                                coupling = self.coupling,
+                          ) for _ in range(2**5))
+                          
+        mean_density = np.mean(list(map(nx.density, G_gen)))
+        
+        self.assertTrue(np.isclose(
+                                mean_density, 
+                                self.density, 
+                                rtol=1e-01))
+        
+        G_K = rng.network_model(
+                                N = self.N,
+                                alpha = self.response,
+                                beta = self.beta,
+                                K = self.coupling,
+                                random_state = self.random_state)
+        self.assertTrue(nx.is_isomorphic(self.G, G_c))
+        self.assertTrue(nx.is_isomorphic(self.G, G_K))
+        
+    def test_density_parameter_consistency(self):
+        G_density = rng.network_model(
+                                N = self.N,
+                                alpha = self.response,
+                                beta = self.beta,
+                                density = self.density,
+                                random_state = self.random_state)
+        
+        G_rho = rng.network_model(
+                                N = self.N,
+                                alpha = self.response,
+                                beta = self.beta,
+                                rho = self.density,
+                                random_state = self.random_state)
+        self.assertTrue(nx.is_isomorphic(G_density, G_rho))
+        
+    def test_density_calculation(self):
+        G_gen = (rng.network_model(
+                                N = self.N,
+                                response = self.response ,
+                                beta = self.beta,
+                                coupling = self.coupling,
+                          ) for _ in range(2**5))
+                          
+        mean_density = np.mean(list(map(nx.density, G_gen)))
+        
+        self.assertTrue(np.isclose(
+                                a = mean_density, 
+                                b = self.density, 
+                                rtol = 1e-01))
+        
+    def test_parameter_inference(self):
+        response = infer_response_parameter(
+                                rate = self.rate,
+                                coupling = self.coupling,
+                                density = self.density)
+                                
+        coupling = infer_coupling_parameter(
+                                rate = self.rate,
+                                response = self.response,
+                                density = self.density)
+                                
+        #rate = infer_rate_parameter(
+    #                            response = self.response,
+    #                            coupling = self.coupling,
+    #                            density = self.density)
+                                
+        #self.assertAlmostEqual(rate, self.rate)
+        #self.assertAlmostEqual(response, self.response)
+        self.assertAlmostEqual(coupling, self.coupling)
 
 
 

@@ -170,6 +170,7 @@ class NetworkBuilder:
         nb_params = sum(1 for _ in params if _)
         
         if nb_params == 4:
+            print(params)
             CHECK_PARAMS_CONSISTENCY
         elif nb_params < 3:
             raise AttributeError("Not enough parameters given to infer "

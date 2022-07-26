@@ -193,11 +193,8 @@ def parse_rate_parameter(rate, beta):
                          f"beta = {beta}, rate = {rate}")
 
     elif beta is not None:
-        if np.isclose(beta,0):
-            rate = np.inf
-        else:
-            rate = np.tan(np.pi * (1-beta) / 2)
-
+        rate = beta_to_rate(beta)
+        
     elif rate is not None:
         rate = rate
 
@@ -233,6 +230,32 @@ def parse_coupling_parameter(c = None,
     elif coupling is not None:
         coupling = coupling
     else:
-        return ValueError("Unknown error. Please contact the developers "
+        raise ValueError("Unknown error. Please contact the developers "
                           "if you encounter this in the wild.")
     return coupling
+    
+def parse_density_parameter(rho = None,
+                            density = None):
+
+    if rho is not None and density is not None:
+        if rho != density:
+            raise ValueError(f"Conflicting distribution parameters given: "
+                             f"rho = {rho}, density = {density}")
+
+    elif rho is not None:
+        density = rho
+    else:
+        density = density
+
+    return density
+
+
+def rate_to_beta(rate):
+    raise Exception("Not implemented yet!")
+    
+def beta_to_rate(beta):
+    if np.isclose(beta,0):
+        rate = np.inf
+    else:
+        rate = np.tan(np.pi * (1-beta) / 2)
+    return rate

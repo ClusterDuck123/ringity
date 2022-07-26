@@ -6,24 +6,26 @@ from ringity.network_models.networkbuilder import NetworkBuilder
 from ringity.network_models.param_utils import (
                                 parse_response_parameter,
                                 parse_rate_parameter,
-                                parse_coupling_parameter
+                                parse_coupling_parameter,
+                                parse_density_parameter,
                                 )
 
 def network_model(N,
+                  response = None,
+                  coupling = None,
+                  density = None,
+                  rate = None,
+                  beta = None,
+                  random_state = None,
+                  return_positions = False,
+                  verbose = False,
                   a = None,
                   r = None,
                   c = None,
-                  response = None,
-                  coupling = None,
                   alpha = None,
-                  beta = None,
                   rho = None,
-                  denisty = None,
-                  rate = None,
                   K = None,
-                  random_state = None,
-                  return_positions = False,
-                  verbose = False):
+                  ):
 
     network_builder = NetworkBuilder(random_state = random_state)
 
@@ -43,7 +45,10 @@ def network_model(N,
                                     K = K,
                                     coupling = coupling
                                     )
-    network_builder.density = rho
+    network_builder.density = parse_density_parameter(
+                                    rho = rho,
+                                    density = density
+                                    )
     
     network_builder.infer_parameters()
 
@@ -61,6 +66,7 @@ def network_model(N,
     network_builder.set_distribution('exponential',
                                      scale = scale)
     network_builder.instantiate_positions(N)
+    
     network_builder.calculate_distances(metric = 'euclidean',
                                         circular = True)
     network_builder.calculate_similarities(r = network_builder.response,
