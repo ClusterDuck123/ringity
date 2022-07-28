@@ -4,6 +4,9 @@ import ringity as rng
 import networkx as nx
 
 from ringity.network_models.param_utils import (infer_density_parameter,
+                                                infer_rate_parameter,
+                                                infer_response_parameter,
+                                                infer_coupling_parameter,
                                                 beta_to_rate)
 
 class TestExponentialNetworkModel(unittest.TestCase):
@@ -15,8 +18,9 @@ class TestExponentialNetworkModel(unittest.TestCase):
         self.response = np.random.uniform()
         self.coupling = np.random.uniform()
         
+        self.rate = beta_to_rate(self.beta)
         self.density = infer_density_parameter(
-                                rate = beta_to_rate(self.beta),
+                                rate = self.rate,
                                 response = self.response,                                
                                 coupling = self.coupling,
         )
@@ -177,16 +181,14 @@ class TestExponentialNetworkModel(unittest.TestCase):
                                 response = self.response,
                                 density = self.density)
                                 
-        #rate = infer_rate_parameter(
-    #                            response = self.response,
-    #                            coupling = self.coupling,
-    #                            density = self.density)
+        rate = infer_rate_parameter(
+                                response = self.response,
+                                coupling = self.coupling,
+                                density = self.density)
                                 
-        #self.assertAlmostEqual(rate, self.rate)
-        #self.assertAlmostEqual(response, self.response)
+        self.assertAlmostEqual(rate, self.rate)
+        self.assertAlmostEqual(response, self.response)
         self.assertAlmostEqual(coupling, self.coupling)
-
-
 
 if __name__ == '__main__':
     unittest.main()

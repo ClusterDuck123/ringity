@@ -23,7 +23,7 @@ def infer_response_parameter(density, coupling, rate):
                             coupling = coupling,
                             rate = rate
                             )
-        response = bisect(response_equation, 0, 1)
+        response = bisect(response_equation, 0.0001, 1)
 
     return response
     
@@ -48,7 +48,7 @@ def infer_rate_parameter(response, density, coupling):
                         coupling = coupling,
                         rate = lamb
                         )
-    rate = bisect(rate_equation, 0, 1)
+    rate = bisect(rate_equation, 0, 200)
     return rate
         
 def governing_equation(response, density, coupling, rate):
