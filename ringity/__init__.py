@@ -9,7 +9,7 @@ from ringity.centralities  import *
 from ringity.plots         import *
 #from ringity.distribution_functions import *
 from ringity.graphlet_coefficients import *
-from ringity.network_models.core import network_model
+from ringity.generators.network_models import network_model
 from ringity.gtda import vietoris_rips_from_point_cloud
 from ringity.single_cell import get_cell_cycle_genes
 
