@@ -167,7 +167,7 @@ class NetworkBuilder:
         """
         
         params = [self.rate, self.response, self.coupling, self.density]
-        nb_params = sum(1 for _ in params if _)
+        nb_params = sum(1 for _ in params if _ is not None)
         
         if nb_params == 4:
             print(params)
@@ -176,22 +176,22 @@ class NetworkBuilder:
             raise AttributeError("Not enough parameters given to infer "
                                  "redundant ones.")
         else:
-            if not self.rate:
+            if self.rate is None:
                 self.rate = infer_rate_parameter(
                                         density = self.density, 
                                         coupling = self.coupling, 
                                         response = self.response)
-            if not self.response:
+            if self.response is None:
                 self.response = infer_response_parameter(
                                         density = self.density, 
                                         coupling = self.coupling, 
                                         rate = self.rate)
-            if not self.coupling:
+            if self.coupling is None:
                 self.coupling = infer_coupling_parameter(
                                         density = self.density, 
                                         response = self.response, 
                                         rate = self.rate)
-            if not self.density:
+            if self.density is None:
                 self.density = infer_density_parameter(
                                         response = self.response, 
                                         coupling = self.coupling, 
