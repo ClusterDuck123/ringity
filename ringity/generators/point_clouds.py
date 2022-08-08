@@ -77,13 +77,13 @@ def cylinder(N,
              seed = None):
     """Generates sample points of a cylinder in 3D with unit radius and height `height`."""
     np.random.seed(seed=seed)
-    u,v = np.random.uniform(0,1,[2,N])
+    u,v = np.random.uniform(0, 1, [2,N])
     
     phi = 2*np.pi*u
     
     x = np.cos(phi)
     y = np.sin(phi)
-    z = np.random.uniform(0,height,N)
+    z = np.random.uniform(0, height, N)
     
     return np.vstack((x,y,z)).T
 
@@ -95,7 +95,7 @@ def torus(N = 100,
     "Generates sample points of a cylinder in 3D with radius of revolution being 1 and outer radius 'r'"
     
     np.random.seed(seed=seed)
-    u,v = np.random.uniform(0,2*np.pi,[2,N])
+    u,v = np.random.uniform(0, 2*np.pi, [2,N])
     
     x = (1 + r*np.cos(v))*np.cos(u)
     y = (1 + r*np.cos(v))*np.sin(u)
