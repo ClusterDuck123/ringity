@@ -84,8 +84,11 @@ def get_canonical_prob_name(prob_name):
 
 def box_cosine_similarity(dists, box_length):
     """Calculate the normalized overlap of two boxes on the circle."""
+    
+    if box_length == 0:
+        return np.where(dists == 0, 1, 0)
+        
     x1 = (box_length - dists).clip(0)
-
     # For box lengths larger than half of the circle there is a second overlap
     if box_length <= np.pi:
         x2 = 0

@@ -212,7 +212,7 @@ class NetworkBuilder:
         elif not isinstance(distn_arg, ss._distn_infrastructure.rv_frozen):
             raise TypeError(f"Type of {distn_arg} unknown.")
 
-        self.distribution = self.distribution = distn_arg
+        self.distribution = distn_arg
 
     def instantiate_positions(self, N, random_state = None):
         """Draws `N` elements on a circle from the distribution specified in

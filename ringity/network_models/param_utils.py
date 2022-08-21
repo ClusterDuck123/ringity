@@ -63,6 +63,9 @@ def max_density(rate, response):
 
     if np.isclose(rate, 0):
         return response
+        
+    if np.isclose(response, 0):
+        return 0
 
     # Python can't handle this case properly;
     # maybe the analytical expression can be simplified...
