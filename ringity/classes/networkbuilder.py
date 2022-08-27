@@ -99,6 +99,17 @@ class NetworkBuilder:
             raise AttributeError(f"Trying to set conflicting values "
                                  f"for density: {value} != {self.density}")
         self._density = value
+        
+    @property
+    def model(self):
+        return self._model
+        
+    @model.setter
+    def model(self, value):
+        if hasattr(self, 'model'):
+            raise AttributeError(f"Trying to set conflicting models"
+                                 f"{value} != {self.model}")
+        self._model = value
 
 # -------------------------- NETWORK META DATA --------------------------
 
@@ -146,7 +157,7 @@ class NetworkBuilder:
     def probabilities(self, value):
         assert len(value.shape) == 1
         self._probabilities = value
-
+        
 # ------------------------------------------------------------------
 #  --------------------------- METHODS ----------------------------
 # ------------------------------------------------------------------
@@ -197,6 +208,26 @@ class NetworkBuilder:
                                         coupling = self.coupling, 
                                         rate = self.rate)
         
+    def set_model(self):
+        if self.rate > 200:
+            self.model = "ER_1"
+        if self.rate == 0:
+            self.model = "GRGG"
+        if self.response == 1:
+            self.model = "ER_2"
+        if self.response == 0:
+            self.model = "empty1"
+        if self.density == 0:
+            self.model = "empty2"
+        if self.density == 1:
+            self.model = "complete"
+        if self.coupling == 0:
+            self.model = "empty3"
+        
+        if not hasattr(self, 'model'):
+            self.model = "general"
+                
+                
     def set_distribution(self,
                          distn_arg,
                          **kwargs):
@@ -282,6 +313,7 @@ class NetworkBuilder:
         coinflips = np_rng.uniform(size = (self.N * (self.N - 1)) // 2)
 
         self.network = self._probabilities >= coinflips
+        
 
 
 # =============================================================================

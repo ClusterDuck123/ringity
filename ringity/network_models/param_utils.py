@@ -13,7 +13,7 @@ def infer_response_parameter(density, coupling, rate):
         response = density / coupling
         
     elif rate > 200:
-        response = None
+        response = np.nan
         
     else:
         def response_equation(r):

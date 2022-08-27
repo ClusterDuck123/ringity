@@ -2,7 +2,7 @@ import numpy as np
 import networkx as nx
 
 from scipy.spatial.distance import squareform
-from ringity.network_models.networkbuilder import NetworkBuilder
+from ringity.classes.networkbuilder import NetworkBuilder
 from ringity.network_models.param_utils import (
                                 parse_response_parameter,
                                 parse_rate_parameter,
@@ -51,12 +51,14 @@ def network_model(N,
                                     )
     
     network_builder.infer_parameters()
+    network_builder.set_model()
 
     if verbose:
         print(f"Response parameter was set to:  r = {network_builder.response}")
         print(f"Rate parameter was set to: rate = {network_builder.rate}")
         print(f"Coupling parameter was set to:  c = {network_builder.coupling}")
         print(f"Density parameter was set to: rho = {network_builder.density}")
+        print(f"{network_builder.model} model detected.")
     
     assert network_builder.rate >= 0
     assert 0 <= network_builder.coupling <= 1
