@@ -251,6 +251,30 @@ def parse_density_parameter(rho = None,
         density = density
 
     return density
+    
+    
+def parse_canonical_parameters(params):
+    rate = parse_rate_parameter(
+                            rate = params['rate'],
+                            beta = params['beta'])
+    response = parse_response_parameter(
+                            r = params['r'],
+                            a = params['a'],
+                            alpha = params['alpha'],
+                            response = params['response'])
+    coupling = parse_coupling_parameter(
+                            c = params['c'],
+                            K = params['K'],
+                            coupling = params['coupling'])
+    density = parse_density_parameter(
+                            rho = params['rho'],
+                            density = params['density'])
+    model_params = {
+        'rate' : rate,
+        'response' : response,
+        'coupling' : coupling,
+        'density': density}
+    return model_params
 
 
 def rate_to_beta(rate):

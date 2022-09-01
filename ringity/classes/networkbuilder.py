@@ -160,8 +160,8 @@ class NetworkBuilder:
         
 # ------------------------------------------------------------------
 #  --------------------------- METHODS ----------------------------
-# ------------------------------------------------------------------
-    def infer_parameters(self):
+# ------------------------------------------------------------------        
+    def infer_missing_parameters(self):
         """Completes the set of network paramters, if possible.
         
         Besides of the network size (e.g. number of nodes), each 
@@ -216,16 +216,35 @@ class NetworkBuilder:
         if self.response == 1:
             self.model = "ER_2"
         if self.response == 0:
-            self.model = "empty1"
+            self.model = "Empty1"
         if self.density == 0:
-            self.model = "empty2"
+            self.model = "Empty2"
         if self.density == 1:
-            self.model = "complete"
+            self.model = "Complete"
         if self.coupling == 0:
-            self.model = "empty3"
+            self.model = "Empty3"
         
         if not hasattr(self, 'model'):
-            self.model = "general"
+            self.model = "General"
+            
+    def build_model(self):
+        scale = 1/self.rate if self.rate > 0 else np.inf
+        self.set_distribution(
+                            distn_arg = 'exponential',
+                            scale = scale)
+                            
+        self.instantiate_positions(self.N)
+        
+        self.calculate_distances(
+                            metric = 'euclidean', 
+                            circular = True)
+        self.calculate_similarities(
+                            r = self.response,
+                            sim_func = 'box_cosine')
+        self.calculate_probabilities(
+                            prob_func = 'linear',
+                            slope = self.coupling,
+                            intercept = 0)
                 
                 
     def set_distribution(self,
