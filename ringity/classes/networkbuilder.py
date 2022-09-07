@@ -8,12 +8,17 @@ from ringity.network_models.transformations import (
 import numpy as np
 import scipy.stats as ss
 
-from ringity.network_models.defaults import ARITHMETIC_PRECISION
-from ringity.network_models.param_utils import (
-                                    infer_response_parameter,
-                                    infer_coupling_parameter,
-                                    infer_rate_parameter,
-                                    infer_density_parameter)
+from ringity.classes.modelparameterbuilder import ModelParameterBuilder
+
+"""This module describes the NetworkBuilder class.
+
+
+We follow the "Builder desing principle".
+Builder methods are sometimes called
+ - "build", as in `build_model`
+ - "infer", as in `infer_missing_parameters`
+ - "instantiate", as in`instantiate_positions`
+"""
 
 # =============================================================================
 #  ---------------------------- NETWORK BUILDER ------------------------------
@@ -39,6 +44,7 @@ class NetworkBuilder:
         self._response = None
         self._coupling = None
         self._density = None
+        self.model_parameters = ModelParameterBuilder()
 
 # ------------------------------------------------------------------
 # --------------------------- PROPERTIES ---------------------------
@@ -47,67 +53,32 @@ class NetworkBuilder:
 # ----------------------- NETWORK PARAMETERS -----------------------
     @property
     def N(self):
-        return self._N
-
-    @N.setter
-    def N(self, value):
-        if self._N and self.N != value:
-            raise AttributeError(f"Trying to set conflicting values "
-                                 f"for N: {value} != {self.N}")
-        self._N = value
-
+        return self.model_parameters.size
     @property
     def response(self):
-        return self._response
-
-    @response.setter
-    def response(self, value):
-        if self._response and self.response != value:
-            raise AttributeError(f"Trying to set conflicting values "
-                                 f"for response: {value} != {self.response}")
-        self._response = value
-
+        return self.model_parameters.response
     @property
     def rate(self):
-        return self._rate
-
-    @rate.setter
-    def rate(self, value):
-        if self._rate and self.rate != value:
-            raise AttributeError(f"Trying to set conflicting values "
-                                 f"for rate: {value} != {self.rate}")
-        self._rate = value
-
+        return self.model_parameters.rate
     @property
     def coupling(self):
-        return self._coupling
-
-    @coupling.setter
-    def coupling(self, value):
-        if self._coupling and self.coupling != value:
-            raise AttributeError(f"Trying to set conflicting values "
-                                 f"for coupling: {value} != {self.coupling}")
-        self._coupling = value
-
+        return self.model_parameters.coupling
     @property
     def density(self):
-        return self._density
+        return self.model_parameters.density
+    
+    @property    
+    def pwN(self):
+        return (self.N * (self.N - 1)) // 2
 
-    @density.setter
-    def density(self, value):
-        if self._density and self.density != value:
-            raise AttributeError(f"Trying to set conflicting values "
-                                 f"for density: {value} != {self.density}")
-        self._density = value
-        
     @property
     def model(self):
         return self._model
-        
+
     @model.setter
     def model(self, value):
         if hasattr(self, 'model'):
-            raise AttributeError(f"Trying to set conflicting models"
+            raise AttributeError(f"Trying to set conflicting models "
                                  f"{value} != {self.model}")
         self._model = value
 
@@ -137,8 +108,15 @@ class NetworkBuilder:
 
     @distances.setter
     def distances(self, value):
-        assert len(value.shape) == 1
-        self._distances = value
+        
+        if value.shape == (self.pwN, ):
+            self._distances = value
+        elif value.shape == (self.N, self.N):
+            self._distances = squareform(value, checks = False)
+        else:
+            raise ValueError(f"Trying to set invalid distances!"
+                             f"{value.shape, self.pwN}")
+        
 
     @property
     def similarities(self):
@@ -146,8 +124,12 @@ class NetworkBuilder:
 
     @similarities.setter
     def similarities(self, value):
-        assert len(value.shape) == 1
-        self._similarities = value
+        if value.shape == (self.pwN, ):
+            self._similarities = value
+        elif value.shape == (self.N, self.N):
+            self._similarities = squareform(value, checks = False)
+        else:
+            raise ValueError(f"Trying to set invalid similarities! {value.shape}")
 
     @property
     def probabilities(self):
@@ -155,88 +137,52 @@ class NetworkBuilder:
 
     @probabilities.setter
     def probabilities(self, value):
-        assert len(value.shape) == 1
-        self._probabilities = value
-        
+        if value.shape == (self.pwN, ):
+            self._probabilities = value
+        elif value.shape == (self.N, self.N):
+            self._probabilities = squareform(value, checks = False)
+        else:
+            raise ValueError(f"Trying to set invalid probabilities! {value.shape}")
+
 # ------------------------------------------------------------------
 #  --------------------------- METHODS ----------------------------
-# ------------------------------------------------------------------        
-    def infer_missing_parameters(self):
-        """Completes the set of network paramters, if possible.
-        
-        Besides of the network size (e.g. number of nodes), each 
-        network model consistes of the following set of parameters:
-        - distribution parameter (e.g. rate)
-        - response window size (e.g. r)
-        - coupling strength (e.g. c)
-        - density (e.g. rho)
-        
-        However, a network model does only require 3 degrees of freedom, 
-        so the abovementioned set is redundant. This function completes 
-        the missing parameter if it is missing, or checks if the given 
-        set is consistent with the model constraints.
-        """
-        
-        params = [self.rate, self.response, self.coupling, self.density]
-        nb_params = sum(1 for _ in params if _ is not None)
-        
-        if nb_params == 4:
-            print(params)
-            CHECK_PARAMS_CONSISTENCY
-        elif nb_params < 3:
-            raise AttributeError("Not enough parameters given to infer "
-                                 "redundant ones.")
-        else:
-            if self.rate is None:
-                self.rate = infer_rate_parameter(
-                                        density = self.density, 
-                                        coupling = self.coupling, 
-                                        response = self.response)
-            if self.response is None:
-                self.response = infer_response_parameter(
-                                        density = self.density, 
-                                        coupling = self.coupling, 
-                                        rate = self.rate)
-            if self.coupling is None:
-                self.coupling = infer_coupling_parameter(
-                                        density = self.density, 
-                                        response = self.response, 
-                                        rate = self.rate)
-            if self.density is None:
-                self.density = infer_density_parameter(
-                                        response = self.response, 
-                                        coupling = self.coupling, 
-                                        rate = self.rate)
-        
-    def set_model(self):
-        if self.rate > 200:
-            self.model = "ER_1"
-        if self.rate == 0:
-            self.model = "GRGG"
-        if self.response == 1:
+# ------------------------------------------------------------------
+    def build_model(self):
+        if self.model_parameters.rate > 200:
+            self.model = "Zero-distance (ER)"
+            self._build_zero_distance_model()
+        if self.model_parameters.rate == 0:
+            self.model = "Uniform (GRGG)"
+            self._build_GRGG_model()
+        if self.model_parameters.response == 1:
             self.model = "ER_2"
-        if self.response == 0:
+            self._build_general_model()
+        if (self.model_parameters.response == 0) and (self.model_parameters.rate <= 200):
+            assert self.density == 0
             self.model = "Empty1"
-        if self.density == 0:
-            self.model = "Empty2"
-        if self.density == 1:
+            self._build_general_model()
+        if self.model_parameters.density == 1:
             self.model = "Complete"
-        if self.coupling == 0:
-            self.model = "Empty3"
-        
+            self._build_general_model()
+        if self.model_parameters.coupling == 0:
+            assert self.density == 0
+            self.model = "Empty2"
+            self._build_general_model()
         if not hasattr(self, 'model'):
             self.model = "General"
-            
-    def build_model(self):
-        scale = 1/self.rate if self.rate > 0 else np.inf
+            self._build_general_model()
+
+    # THINK ABOUT MOVING THESE METHODS OUTSIDE OF THE CLASS
+    def _build_general_model(self):
+        assert self.rate > 0
         self.set_distribution(
                             distn_arg = 'exponential',
-                            scale = scale)
-                            
-        self.instantiate_positions(self.N)
-        
+                            scale = 1/self.rate)
+
+        self.instantiate_positions()
+
         self.calculate_distances(
-                            metric = 'euclidean', 
+                            metric = 'euclidean',
                             circular = True)
         self.calculate_similarities(
                             r = self.response,
@@ -245,8 +191,35 @@ class NetworkBuilder:
                             prob_func = 'linear',
                             slope = self.coupling,
                             intercept = 0)
-                
-                
+
+    def _build_zero_distance_model(self):
+        # SET DELTA DISTRIBUTION
+        # self.set_distribution(
+        #                     distn_arg = 'exponential',
+        #                     scale = scale)
+
+        # self.instantiate_positions(self.N)
+        self.positions = np.zeros(self.N)
+        self.distances = squareform(np.zeros([self.N, self.N]))
+        self.similarities = 1 - self.distances
+        self.probabilities = self.density * self.similarities
+
+    def _build_GRGG_model(self):
+        assert self.rate == 0
+
+        self.set_distribution(distn_arg = 'uniform')
+        self.instantiate_positions()
+        self.calculate_distances(
+                            metric = 'euclidean',
+                            circular = True)
+        self.calculate_similarities(
+                            r = self.response,
+                            sim_func = 'box_cosine')
+        self.calculate_probabilities(
+                            prob_func = 'linear',
+                            slope = self.coupling,
+                            intercept = 0)
+
     def set_distribution(self,
                          distn_arg,
                          **kwargs):
@@ -264,18 +237,17 @@ class NetworkBuilder:
 
         self.distribution = distn_arg
 
-    def instantiate_positions(self, N, random_state = None):
+    def instantiate_positions(self, random_state = None):
         """Draws `N` elements on a circle from the distribution specified in
         self.distribution.
 
 
         `random_state` is an attribute that can be overwritten."""
-        self.N = N
 
         if random_state is None:
             random_state = self.__dict__.get('random_state', None)
 
-        positions = self.distribution.rvs(N, random_state = random_state)
+        positions = self.distribution.rvs(self.N, random_state = random_state)
         self.positions = positions % (2*np.pi)
 
 
@@ -332,7 +304,7 @@ class NetworkBuilder:
         coinflips = np_rng.uniform(size = (self.N * (self.N - 1)) // 2)
 
         self.network = self._probabilities >= coinflips
-        
+
 
 
 # =============================================================================

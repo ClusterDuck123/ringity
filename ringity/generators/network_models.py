@@ -22,41 +22,42 @@ def network_model(N,
                   K = None,
                   ):
     """Constructs and instantiates a network according to the network model.
+
+    Can be seen as the "Director" of the builder class `NetworkBuilder`.
     """
 
     network_builder = NetworkBuilder(random_state = random_state)
 
-    network_builder.N = N
-    
     params = {
         'rate': rate, 'beta': beta,
         'response': response, 'r': r, 'a': a, 'alpha': alpha,
         'coupling': coupling, 'c': c, 'K': K,
         'density': density, 'rho': rho}
-        
+
     model_params = parse_canonical_parameters(params)
     
+    network_builder.model_parameters.size = N
+    network_builder.model_parameters.rate = model_params['rate']
+    network_builder.model_parameters.response = model_params['response']
+    network_builder.model_parameters.coupling = model_params['coupling']
+    network_builder.model_parameters.density = model_params['density']
+
     # THIS NEEDS TO BE MOVED TO NETWORKBUILDER CLASS: E.G. set_parameters()
     # network_builder.set_parameters()
-    network_builder.rate = model_params['rate']
-    network_builder.response = model_params['response']
-    network_builder.coupling = model_params['coupling']
-    network_builder.density = model_params['density']
-    
-    network_builder.infer_missing_parameters()
-    network_builder.set_model()
+
+    network_builder.model_parameters.infer_missing_parameters()
 
     if verbose:
-        print(f"Response parameter was set to:  r = {network_builder.response}")
-        print(f"Rate parameter was set to: rate = {network_builder.rate}")
-        print(f"Coupling parameter was set to:  c = {network_builder.coupling}")
-        print(f"Density parameter was set to: rho = {network_builder.density}")
-        print(f"{network_builder.model} model detected.")
-    
-    assert network_builder.rate >= 0
-    assert 0 <= network_builder.coupling <= 1
-    
+        print(f"Response parameter was set  to: r = {network_builder.model_parameters.response}")
+        print(f"Rate parameter was set to:   rate = {network_builder.model_parameters.rate}")
+        print(f"Coupling parameter was set to:  c = {network_builder.model_parameters.coupling}")
+        print(f"Density parameter was set to: rho = {network_builder.model_parameters.density}")
+
     network_builder.build_model()
+
+    if verbose:
+        print(f"{network_builder.model} model detected.")
+
     network_builder.instantiate_network()
 
     G = nx.from_numpy_array(squareform(network_builder.network))
