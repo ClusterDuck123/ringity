@@ -15,6 +15,7 @@ class TestSyntheticExamples(unittest.TestCase):
                    self.noise + multiple_signals + \
                    self.noise
         self.assertAlmostEqual(ringity.
+                                    core.
                                     ring_scores.
                                     ring_score_from_sequence(sequence),
                                0, places=8)
@@ -22,6 +23,7 @@ class TestSyntheticExamples(unittest.TestCase):
     def test_score_of_zero2(self):
         sequence = ()
         self.assertAlmostEqual(ringity.
+                                    core.
                                     ring_scores.
                                     ring_score_from_sequence(sequence),
                                0, places=8)
@@ -29,6 +31,7 @@ class TestSyntheticExamples(unittest.TestCase):
     def test_score_of_one(self):
         sequence = self.noise + [self.signal] + self.noise
         self.assertAlmostEqual(ringity.
+                                    core.
                                     ring_scores.
                                     ring_score_from_sequence(sequence),
                                1, places=8)
@@ -38,6 +41,7 @@ class TestSyntheticExamples(unittest.TestCase):
                    self.noise + [self.signal] + \
                    self.noise
         self.assertAlmostEqual(ringity.
+                                    core.
                                     ring_scores.
                                     ring_score_from_sequence(sequence),
                                0.5, places=8)
@@ -53,6 +57,7 @@ class TestSyntheticExamples(unittest.TestCase):
                    self.noise + [noise2] + \
                    self.noise
         self.assertAlmostEqual(ringity.
+                                    core.
                                     ring_scores.
                                     ring_score_from_sequence(sequence),
                                1-noise_ratio1/2 - noise_ratio2/4,

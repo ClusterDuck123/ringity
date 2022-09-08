@@ -3,7 +3,7 @@ import networkx as nx
 
 from scipy.spatial.distance import squareform
 from ringity.classes.networkbuilder import NetworkBuilder
-from ringity.network_models.param_utils import parse_canonical_parameters
+from ringity.generators.utils.param_utils import parse_canonical_parameters
 
 def network_model(N,
                   response = None,

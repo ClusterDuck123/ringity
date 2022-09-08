@@ -2,7 +2,7 @@ import numpy as np
 
 from warnings import warn
 from scipy.optimize import bisect
-from ringity.network_models.defaults import DEFAULT_RESPONSE_PARAMETER
+from ringity.generators.utils.defaults import DEFAULT_RESPONSE_PARAMETER
 
 # =============================================================================
 #  -------------------------- PARAMETER INFERENCE ----------------------------

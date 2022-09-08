@@ -1,4 +1,4 @@
-from ringity.network_models.param_utils import (
+from ringity.generators.utils.param_utils import (
                                     infer_response_parameter,
                                     infer_coupling_parameter,
                                     infer_rate_parameter,

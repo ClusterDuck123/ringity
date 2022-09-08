@@ -4,18 +4,17 @@ __version__ = "0.2a8"
 
 import ringity.classes as classes
 
-from ringity.core          import ring_score, diagram, pdiagram_from_point_cloud, ring_score_from_point_cloud
-from ringity.centralities  import *
-from ringity.plots         import *
-#from ringity.distribution_functions import *
-from ringity.graphlet_coefficients import *
+from ringity.core.core          import ring_score, diagram, pdiagram_from_point_cloud, ring_score_from_point_cloud
+from ringity.core.centralities  import *
+from ringity.core.plots         import *
+from ringity.core.graphlet_coefficients import *
 from ringity.generators.network_models import network_model
-from ringity.gtda import vietoris_rips_from_point_cloud
-from ringity.single_cell import get_cell_cycle_genes
+from ringity.core.gtda import vietoris_rips_from_point_cloud
+from ringity.core.single_cell import get_cell_cycle_genes
 
 from ringity.readwrite.diagram import *
 from ringity.generators.diagram import *
-from ringity.ring_scores import ring_score_from_sequence
+from ringity.core.ring_scores import ring_score_from_sequence
 
 import sys
 

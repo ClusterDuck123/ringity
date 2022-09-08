@@ -1,5 +1,5 @@
 from scipy.spatial.distance import pdist, squareform
-from ringity.network_models.transformations import (
+from ringity.generators.utils.transformations import (
                                     string_to_distribution,
                                     string_to_similarity_function,
                                     string_to_probability_function

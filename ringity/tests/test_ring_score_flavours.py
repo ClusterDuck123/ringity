@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from numpy.testing import assert_allclose
-from ringity.ring_scores import (
+from ringity.core.ring_scores import (
                             gap_ring_score,
                             geometric_ring_score,
                             linear_ring_score,
