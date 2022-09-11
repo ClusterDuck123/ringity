@@ -199,6 +199,9 @@ class NetworkBuilder:
         #                     scale = scale)
 
         # self.instantiate_positions(self.N)
+        if not np.isclose(self.density, self.coupling):
+            raise ValueError(f"Conflicting values for zero-distance model found: "
+                             f"density ({self.density}) != coupling ({self.coupling}).")
         self.positions = np.zeros(self.N)
         self.distances = squareform(np.zeros([self.N, self.N]))
         self.similarities = 1 - self.distances
@@ -207,7 +210,7 @@ class NetworkBuilder:
     def _build_GRGG_model(self):
         assert self.rate == 0
 
-        self.set_distribution(distn_arg = 'uniform')
+        self.set_distribution(distn_arg = 'uniform', scale = 2*np.pi)
         self.instantiate_positions()
         self.calculate_distances(
                             metric = 'euclidean',

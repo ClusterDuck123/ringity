@@ -1,3 +1,4 @@
+import numpy as np
 from ringity.generators.utils.param_utils import (
                                     infer_response_parameter,
                                     infer_coupling_parameter,
@@ -38,7 +39,7 @@ class ModelParameterBuilder:
     def size(self, value):
         if value is not None:
             if not (0 <= value):
-                raise AttributeError(f"Size value f{value} is invalid!")
+                raise AttributeError(f"Size value {value} is invalid!")
         self._size = value
         
     @property
@@ -48,7 +49,7 @@ class ModelParameterBuilder:
     def rate(self, value):
         if value is not None:
             if not (0 <= value):
-                raise AttributeError(f"Rate value f{value} is invalid!")
+                raise AttributeError(f"Rate value {value} is invalid!")
         self._rate = value
 
 
@@ -57,9 +58,9 @@ class ModelParameterBuilder:
         return self._response
     @response.setter
     def response(self, value):
-        if value is not None:
+        if value not in {None, np.nan}:
             if not (0 <= value <= 1):
-                raise AttributeError(f"Response value f{value} is invalid!")
+                raise AttributeError(f"Response value {value} is invalid!")
         self._response = value
 
     @property
@@ -69,7 +70,7 @@ class ModelParameterBuilder:
     def coupling(self, value):
         if value is not None:
             if not (0 <= value <= 1):
-                raise AttributeError(f"Density value f{value} is invalid!") 
+                raise AttributeError(f"Density value {value} is invalid!") 
         self._coupling = value
 
     @property
@@ -79,7 +80,7 @@ class ModelParameterBuilder:
     def density(self, value):
         if value is not None:
             if not (0 <= value <= 1):
-                raise AttributeError(f"Density value f{value} is invalid!")
+                raise AttributeError(f"Density value {value} is invalid!")
         self._density = value
 
     @property

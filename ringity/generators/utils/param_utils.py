@@ -9,6 +9,10 @@ from ringity.generators.utils.defaults import DEFAULT_RESPONSE_PARAMETER
 # =============================================================================
 
 def infer_response_parameter(density, coupling, rate):
+    if density  > coupling:
+        raise AttributeError(f"Density can't be higher than coupling. "
+                             f"Please decrease density ({density}) or "
+                             f"increase coupling ({coupling}).")
     if np.isclose(rate, 0):
         response = density / coupling
         
