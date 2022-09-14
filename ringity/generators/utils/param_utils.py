@@ -282,7 +282,8 @@ def parse_canonical_parameters(params):
 
 
 def rate_to_beta(rate):
-    raise Exception("Not implemented yet!")
+    beta = 1 - 2/np.pi * np.arctan(rate)
+    return beta
     
 def beta_to_rate(beta):
     if np.isclose(beta,0):

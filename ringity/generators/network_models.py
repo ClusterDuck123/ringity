@@ -13,6 +13,7 @@ def network_model(N,
                   beta = None,
                   random_state = None,
                   return_positions = False,
+                  return_builder = False,
                   verbose = False,
                   a = None,
                   r = None,
@@ -61,8 +62,15 @@ def network_model(N,
     network_builder.instantiate_network()
 
     G = nx.from_numpy_array(squareform(network_builder.network))
+    
+    output = [G]
 
     if return_positions:
-        return G, network_builder.positions
+        output.append(network_builder.positions)
+    if return_builder:
+        output.append(network_builder)
+        
+    if len(output) == 1:
+        return output[0]
     else:
-        return G
+        return output

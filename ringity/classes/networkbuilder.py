@@ -148,29 +148,38 @@ class NetworkBuilder:
 #  --------------------------- METHODS ----------------------------
 # ------------------------------------------------------------------
     def build_model(self):
-        if self.model_parameters.rate > 200:
-            self.model = "Zero-distance (ER)"
+        if self.rate == 0:
+            if (self.response == 1) and (self.density != 1):
+                self.model = "Uniform-ER (beta = 1, r = 1)"
+                self._build_GRGG_model()
+            if self.density == 1:
+                self.model = "Uniform-Complete (beta = 1, rho = 1)"
+                self._build_GRGG_model()
+            if not hasattr(self, 'model'):
+                self.model = "Uniform (beta = 1)"
+                self._build_GRGG_model()
+            
+        elif self.rate > 200:
+            self.model = "ER (beta = 0)"
             self._build_zero_distance_model()
-        if self.model_parameters.rate == 0:
-            self.model = "Uniform (GRGG)"
-            self._build_GRGG_model()
-        if self.model_parameters.response == 1:
-            self.model = "ER_2"
-            self._build_general_model()
-        if (self.model_parameters.response == 0) and (self.model_parameters.rate <= 200):
-            assert self.density == 0
-            self.model = "Empty1"
-            self._build_general_model()
-        if self.model_parameters.density == 1:
-            self.model = "Complete"
-            self._build_general_model()
-        if self.model_parameters.coupling == 0:
-            assert self.density == 0
-            self.model = "Empty2"
-            self._build_general_model()
-        if not hasattr(self, 'model'):
-            self.model = "General"
-            self._build_general_model()
+        else:
+            if self.coupling == 0:
+                assert self.density == 0 # move to builder
+                self.model = "Empty (c = 0)"
+                self._build_general_model()
+            if self.response == 1:
+                self.model = "ER (r = 1)"
+                self._build_general_model()
+            if self.response == 0:
+                assert self.density == 0 # move to builder
+                self.model = "Empty (r = 0)"
+                self._build_general_model()
+            if self.density == 1:
+                self.model = "Complete (rho = 1)"
+                self._build_general_model()
+            if not hasattr(self, 'model'):
+                self.model = "General"
+                self._build_general_model()
 
     # THINK ABOUT MOVING THESE METHODS OUTSIDE OF THE CLASS
     def _build_general_model(self):
