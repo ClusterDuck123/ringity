@@ -36,23 +36,25 @@ def network_model(N,
         'density': density, 'rho': rho}
 
     model_params = parse_canonical_parameters(params)
-    
-    network_builder.model_parameters.size = N
-    network_builder.model_parameters.rate = model_params['rate']
-    network_builder.model_parameters.response = model_params['response']
-    network_builder.model_parameters.coupling = model_params['coupling']
-    network_builder.model_parameters.density = model_params['density']
+
+    model_parameters = network_builder.model_parameters
+
+    model_parameters.size = N
+    model_parameters.rate = model_params['rate']
+    model_parameters.response = model_params['response']
+    model_parameters.coupling = model_params['coupling']
+    model_parameters.density = model_params['density']
 
     # THIS NEEDS TO BE MOVED TO NETWORKBUILDER CLASS: E.G. set_parameters()
     # network_builder.set_parameters()
 
-    network_builder.model_parameters.infer_missing_parameters()
+    model_parameters.infer_missing_parameters()
 
     if verbose:
-        print(f"Response parameter was set  to: r = {network_builder.model_parameters.response}")
-        print(f"Rate parameter was set to:   rate = {network_builder.model_parameters.rate}")
-        print(f"Coupling parameter was set to:  c = {network_builder.model_parameters.coupling}")
-        print(f"Density parameter was set to: rho = {network_builder.model_parameters.density}")
+        print(f"Response parameter was set  to: r = {network_builder.response}")
+        print(f"Rate parameter was set to:   rate = {network_builder.rate}")
+        print(f"Coupling parameter was set to:  c = {network_builder.coupling}")
+        print(f"Density parameter was set to: rho = {network_builder.density}")
 
     network_builder.build_model()
 
@@ -62,14 +64,14 @@ def network_model(N,
     network_builder.instantiate_network()
 
     G = nx.from_numpy_array(squareform(network_builder.network))
-    
+
     output = [G]
 
     if return_positions:
         output.append(network_builder.positions)
     if return_builder:
         output.append(network_builder)
-        
+
     if len(output) == 1:
         return output[0]
     else:

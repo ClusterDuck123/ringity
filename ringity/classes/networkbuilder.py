@@ -66,8 +66,8 @@ class NetworkBuilder:
     @property
     def density(self):
         return self.model_parameters.density
-    
-    @property    
+
+    @property
     def pwN(self):
         return (self.N * (self.N - 1)) // 2
 
@@ -108,7 +108,7 @@ class NetworkBuilder:
 
     @distances.setter
     def distances(self, value):
-        
+
         if value.shape == (self.pwN, ):
             self._distances = value
         elif value.shape == (self.N, self.N):
@@ -116,7 +116,7 @@ class NetworkBuilder:
         else:
             raise ValueError(f"Trying to set invalid distances!"
                              f"{value.shape, self.pwN}")
-        
+
 
     @property
     def similarities(self):
@@ -158,7 +158,7 @@ class NetworkBuilder:
             if not hasattr(self, 'model'):
                 self.model = "Uniform (beta = 1)"
                 self._build_GRGG_model()
-            
+
         elif self.rate > 200:
             self.model = "ER (beta = 0)"
             self._build_zero_distance_model()
@@ -187,9 +187,7 @@ class NetworkBuilder:
         self.set_distribution(
                             distn_arg = 'exponential',
                             scale = 1/self.rate)
-
         self.instantiate_positions()
-
         self.calculate_distances(
                             metric = 'euclidean',
                             circular = True)
