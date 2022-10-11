@@ -3,17 +3,6 @@ import scipy.stats as ss
 
 from itertools import islice
 
-def ring_score_from_persistence_diagram(dgm,
-                                        flavour = 'geometric',
-                                        nb_pers = np.inf,
-                                        base = None):
-    """Calculates ring-score from a PersistenceDiagram object."""
-    return ring_score_from_sequence(dgm.sequence,
-                                    flavour = flavour,
-                                    nb_pers = nb_pers,
-                                    base = None)
-
-
 def ring_score_from_sequence(seq,
                              flavour = 'geometric',
                              nb_pers = None,

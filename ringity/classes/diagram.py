@@ -4,7 +4,7 @@ import numpy as np
 from itertools import compress
 from itertools import starmap, islice
 from collections.abc import MutableMapping
-from ringity.core.ring_scores import ring_score_from_sequence
+from ringity.core.ring_score_flavours import ring_score_from_sequence
 from ringity.classes.exceptions import (
                                     SchroedingersException,
                                     TimeParadoxError,

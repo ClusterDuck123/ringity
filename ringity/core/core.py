@@ -1,4 +1,4 @@
-from ringity.core.ring_scores import ring_score_from_persistence_diagram
+from ringity.core.ring_score_flavours import ring_score_from_sequence
 from ringity.core.centralities import net_flow, resistance
 from ringity.classes.diagram import PersistenceDiagram
 from ringity.readwrite.prompts import _yes_or_no, _assertion_statement
@@ -19,11 +19,18 @@ def ring_score(arg,
                base = None,
                nb_pers = np.inf,
                **kwargs):
-    """Calculates ring score from various data structures.
+    """Calculate ring score from various data structures.
 
-    If X is a numpy array or sparse matrix the paramter ``argtype`` specifies
-    how to interpret the data.
-
+    Generic function to calculate ring score by calling another appropriate
+    ring score function:
+        - If ``arg`` is a networkx graph, it will call ``ring_score_from_graph``.
+        - If ``arg`` is a ringity persistence diagram, it will call 
+        ``ring_score_from_persistence_diagram``.
+        - If ``arg`` is a numpy array or sparse matrix the paramter ``argtype`` 
+        specifies how to interpret the data and which ring-score function to call.
+        
+    All functions eventually call ``ring_score_from_sequence``.
+    
     Parameters
     ----------
     arg : numpy array, sparse matrix, networkx graph or ringity persistence
@@ -51,10 +58,10 @@ def ring_score(arg,
                                                 base = base,
                                                 nb_pers = nb_pers)
     return score
-                                    
-                                    
+                                                        
+# -----------------------------------------------------------------------------    
+# ---------------------------- RING SCORE FUNCTIONS ---------------------------
 # -----------------------------------------------------------------------------     
-        
 def ring_score_from_point_cloud(X,
                                 flavour = 'geometric',
                                 base = None,
@@ -64,6 +71,16 @@ def ring_score_from_point_cloud(X,
                                 metric_params={},
                                 homology_dim = 1,
                                 **kwargs):
+    """Calculate ring score from point cloud.
+
+    Parameters
+    ----------
+    X : numpy array, sparse matrix
+
+    Returns
+    -------
+    score : float, ring-score of given object.
+    """
     dgm = pdiagram_from_point_cloud(X,
                                     persistence = persistence,
                                     metric = metric,
@@ -74,8 +91,60 @@ def ring_score_from_point_cloud(X,
                                                flavour = flavour,
                                                base = base,
                                                nb_pers = nb_pers)
+    
+                                               
+def ring_score_from_network(X,
+                            flavour = 'geometric',
+                            base = None,
+                            nb_pers = np.inf,
+                            persistence = 'VietorisRipsPersistence',
+                            metric='euclidean',
+                            metric_params={},
+                            homology_dim = 1,
+                            **kwargs):
+    """Calculate ring score from network.
 
+    Parameters
+    ----------
+    X : networkx graph
 
+    Returns
+    -------
+    score : float, ring-score of given object.
+    """
+    dgm = pdiagram_from_point_cloud(X,
+                                    persistence = persistence,
+                                    metric = metric,
+                                    metric_params = metric_params,
+                                    homology_dim = homology_dim,
+                                    **kwargs)
+    return ring_score_from_pdiagram(dgm,
+                                    flavour = flavour,
+                                    base = base,
+                                    nb_pers = nb_pers)
+                                    
+                                    
+def ring_score_from_distance_matrix(dgm,
+                                    flavour = 'geometric',
+                                    nb_pers = np.inf,
+                                    base = None):
+    """Calculates ring-score from a PersistenceDiagram object."""
+    pass
+                            
+                                    
+def ring_score_from_pdiagram(dgm,
+                             flavour = 'geometric',
+                             nb_pers = np.inf,
+                             base = None):
+    """Calculates ring-score from a PersistenceDiagram object."""
+    return ring_score_from_sequence(dgm.sequence,
+                                    flavour = flavour,
+                                    nb_pers = nb_pers,
+                                    base = None)
+                                               
+# -----------------------------------------------------------------------------    
+# ----------------------- PERSISTENCE DIAGRAM FUNCTIONS -----------------------
+# ----------------------------------------------------------------------------- 
 def pdiagram_from_point_cloud(X,
                               persistence = 'VietorisRipsPersistence',
                               metric='euclidean',
@@ -96,17 +165,24 @@ def pdiagram_from_point_cloud(X,
     return PersistenceDiagram.from_gtda(dgm, homology_dim = homology_dim)   
     
     
-def pdiagram_from_networkx(X, metric = 'net_flow', **kwargs):
-    """Constructs a PersistenceDiagram object from a networkx object.
+def pdiagram_from_graph(X, metric = 'net_flow', **kwargs):
+    """Constructs a PersistenceDiagram object from a networkx graph.
     
     This function is not available yet."""
-    pass                    
+    pass           
     
+    
+def pdiagram_from_distance_matrix(dgm,):
+    """Constructs a PersistenceDiagram object from a distance matrix.
+    
+    This function is not available yet."""
+    pass         
     
 # =============================================================================
 #  -------------------------------- LEGACY ----------------------------------
 # =============================================================================
 
+# This code will be removed in future versions
 
 def diagram(arg1 = None,
             verbose = False,
@@ -122,6 +198,12 @@ def diagram(arg1 = None,
     'metric'. If no edge attribute with this name is found, the function
     'get_distance_matrix' is invoked.
     """
+    # warning_message = "The function ``diagram`` is depricated. Please use instead one " +
+    #                   "of the diagram functions, like  ``persistence_diagram``,  "+
+    #                   "``persistence_diagram_from_graph``, " +
+    #                   "``persistence_diagram_from_point_cloud`` " +
+    #                   "etc. "
+    # warn(warning_message, DeprecationWarning, stacklevel = 2)
 
     if distance_matrix:
         D = arg1
@@ -140,8 +222,8 @@ def diagram(arg1 = None,
             G.remove_edges_from(nx.selfloop_edges(G))
 
         D = get_distance_matrix(G,
-                                metric=metric,
-                                verbose=verbose)
+                                metric = metric,
+                                verbose = verbose)
 
     t1 = time.time()
     VR = VietorisRipsPersistence(metric = 'precomputed',

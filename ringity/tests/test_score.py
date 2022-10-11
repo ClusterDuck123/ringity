@@ -4,6 +4,8 @@ import ringity
 import unittest
 import numpy as np
 
+from ringity.core.ring_score_flavours import ring_score_from_sequence
+
 class TestSyntheticExamples(unittest.TestCase):
     def setUp(self):
         self.signal = random.random()
@@ -14,36 +16,24 @@ class TestSyntheticExamples(unittest.TestCase):
         sequence = self.noise + multiple_signals + \
                    self.noise + multiple_signals + \
                    self.noise
-        self.assertAlmostEqual(ringity.
-                                    core.
-                                    ring_scores.
-                                    ring_score_from_sequence(sequence),
+        self.assertAlmostEqual(ring_score_from_sequence(sequence),
                                0, places=8)
 
     def test_score_of_zero2(self):
         sequence = ()
-        self.assertAlmostEqual(ringity.
-                                    core.
-                                    ring_scores.
-                                    ring_score_from_sequence(sequence),
+        self.assertAlmostEqual(ring_score_from_sequence(sequence),
                                0, places=8)
 
     def test_score_of_one(self):
         sequence = self.noise + [self.signal] + self.noise
-        self.assertAlmostEqual(ringity.
-                                    core.
-                                    ring_scores.
-                                    ring_score_from_sequence(sequence),
+        self.assertAlmostEqual(ring_score_from_sequence(sequence),
                                1, places=8)
 
     def test_score_of_half(self):
         sequence = self.noise + [self.signal] + \
                    self.noise + [self.signal] + \
                    self.noise
-        self.assertAlmostEqual(ringity.
-                                    core.
-                                    ring_scores.
-                                    ring_score_from_sequence(sequence),
+        self.assertAlmostEqual(ring_score_from_sequence(sequence),
                                0.5, places=8)
 
     def test_score_of_two_high_noises(self):
@@ -56,10 +46,7 @@ class TestSyntheticExamples(unittest.TestCase):
                    self.noise + [noise1] + \
                    self.noise + [noise2] + \
                    self.noise
-        self.assertAlmostEqual(ringity.
-                                    core.
-                                    ring_scores.
-                                    ring_score_from_sequence(sequence),
+        self.assertAlmostEqual(ring_score_from_sequence(sequence),
                                1-noise_ratio1/2 - noise_ratio2/4,
                                places = 8)
 

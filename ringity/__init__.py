@@ -14,7 +14,7 @@ from ringity.core.single_cell import get_cell_cycle_genes
 
 from ringity.readwrite.diagram import *
 from ringity.generators.diagram import *
-from ringity.core.ring_scores import ring_score_from_sequence
+from ringity.core.ring_score_flavours import ring_score_from_sequence
 
 import sys
 
