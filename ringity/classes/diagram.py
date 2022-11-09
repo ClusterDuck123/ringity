@@ -9,7 +9,8 @@ from ringity.classes.exceptions import (
                                     SchroedingersException,
                                     TimeParadoxError,
                                     BeginningOfTimeError,
-                                    EndOfTimeError)
+                                    EndOfTimeError,
+                                    SettingPersistenceError)
 
 # =============================================================================
 #  ------------------------------- DgmPt CLASS -------------------------------
@@ -240,7 +241,7 @@ class PersistenceDiagram(list):
 
 class FullPDgm(MutableMapping):
     def __init__(self, data = ()):
-        if isinstance(data, (collections.abc.MutableMapping, dict)):
+        if isinstance(data, (MutableMapping, dict)):
             self.dimensions = tuple(sorted(data.keys()))
             self.mapping = {}
             # needs more checking
@@ -295,22 +296,15 @@ class FullPDgm(MutableMapping):
 # =============================================================================
 #  ---------------------------------- Legacy --------------------------------
 # =============================================================================
+
+# This code will be removed in future versions
 def load_dgm(fname=None, **kwargs):
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         dgm_array = np.genfromtxt(fname, **kwargs)
         if len(w) == 0:
-            return Dgm(dgm_array)
+            return PersistenceDiagram(dgm_array)
         elif issubclass(w[-1].category, UserWarning):
-            return Dgm()
+            return PersistenceDiagram()
         else:
             raise Exception
-
-
-def indexify_dgm(dgm, inplace=False):
-    values = set.union(*map(set,dgm))
-    value2index = {value:index for index,value in enumerate(sorted(values))}
-    if inplace:
-        dgm._values = [DgmPt(*map(value2index.get,pt)) for pt in dgm]
-    else:
-        return Dgm(DgmPt(*map(value2index.get,pt)) for pt in dgm)

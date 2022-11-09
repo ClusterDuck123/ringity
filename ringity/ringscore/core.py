@@ -49,14 +49,15 @@ def ring_score(arg,
         if argtype == 'pointcloud':
             dgm = pdiagram_from_point_cloud(arg, **kwargs)
         else:
-            raise Error
+            raise Exception
     else:
-        raise Error
+        raise Exception
 
-    score = ring_score_from_persistence_diagram(dgm = dgm,
-                                                flavour = flavour,
-                                                base = base,
-                                                nb_pers = nb_pers)
+    score = ring_score_from_pdiagram(
+                                    dgm = dgm,
+                                    flavour = flavour,
+                                    base = base,
+                                    nb_pers = nb_pers)
     return score
                                                         
 # -----------------------------------------------------------------------------    
@@ -87,10 +88,10 @@ def ring_score_from_point_cloud(X,
                                     metric_params = metric_params,
                                     homology_dim = homology_dim,
                                     **kwargs)
-    return ring_score_from_persistence_diagram(dgm,
-                                               flavour = flavour,
-                                               base = base,
-                                               nb_pers = nb_pers)
+    return ring_score_from_pdiagram(dgm,
+                                    flavour = flavour,
+                                    base = base,
+                                    nb_pers = nb_pers)
     
                                                
 def ring_score_from_network(X,

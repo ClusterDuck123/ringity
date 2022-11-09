@@ -1,6 +1,5 @@
 from numpy import pi as PI
 
-import scipy
 import numpy as np
 
 def get_rate_parameter(parameter, parameter_type):

@@ -10,3 +10,4 @@ E-GEOD-*
 E-MTAB-*
 **/.DS_Store
 doc/data/
+.vscode
