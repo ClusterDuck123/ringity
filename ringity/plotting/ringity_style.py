@@ -1,6 +1,8 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
+"""TODO: Rewrite this part to a proper matplotlib style sheet API."""
+
 CEMM_COL1 = (  0/255,  85/255, 100/255)
 CEMM_COL2 = (  0/255, 140/255, 160/255)
 CEMM_COL3 = ( 64/255, 185/255, 212/255)
@@ -10,7 +12,6 @@ DARK_CEMM_COL1 = (0/255, 43/255, 50/255)
 BAR_COL = (0.639, 0.639, 0.639)
 
 def set():
-    #sns.set()  <--- costumize rc!
     plt.rc('axes', labelsize=24, titlesize=28)
     plt.rc('xtick', labelsize=24)
     plt.rc('ytick', labelsize=24)
@@ -90,7 +91,7 @@ def plot_dgm(dgm, ax=None, **kwargs):
     ax.set_xlim([-hw, d*1.1])
     ax.set_ylim([-hw, d*1.1])
 
-    ax.plot(x, y, '*', markersize=5, color=CEMM_COL2);
+    ax.plot(x, y, '*', markersize = 5, color = CEMM_COL2);
     ax.plot([0,d],[0,d], color=DARK_CEMM_COL1,
                          linewidth=1,
                          linestyle='dashed');

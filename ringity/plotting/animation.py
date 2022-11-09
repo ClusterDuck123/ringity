@@ -7,6 +7,7 @@ import networkx as nx
 import numpy as np
 import warnings
 
+"""This is legacy code and is in dire need to be updated."""
 
 
 def get_edges(X,i,j):
