@@ -6,7 +6,7 @@ import ringity.classes as classes
 
 from ringity.ringscore.core import ring_score, diagram, pdiagram_from_point_cloud, ring_score_from_point_cloud
 from ringity.networkmeasures.centralities import *
-from ringity.plotting.ringity_style import *
+from ringity.plotting.plot_functions import *
 from ringity.networkmeasures.graphlet_coefficients import *
 from ringity.generators.network_models import network_model
 from ringity.ringscore.gtda import vietoris_rips_from_point_cloud

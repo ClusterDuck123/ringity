@@ -1,7 +1,8 @@
+import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
-"""TODO: Rewrite this part to a proper matplotlib style sheet API."""
+from ringity.plotting.styling import ax_setup
 
 CEMM_COL1 = (  0/255,  85/255, 100/255)
 CEMM_COL2 = (  0/255, 140/255, 160/255)
@@ -11,25 +12,12 @@ CEMM_COL4 = (212/255, 236/255, 242/255)
 DARK_CEMM_COL1 = (0/255, 43/255, 50/255)
 BAR_COL = (0.639, 0.639, 0.639)
 
-def set():
-    plt.rc('axes', labelsize=24, titlesize=28)
-    plt.rc('xtick', labelsize=24)
-    plt.rc('ytick', labelsize=24)
 
-def ax_setup(ax, labelsize=24):
+def plot(arg, ax = None):
+    if isinstance(arg, np.ndarray):
+        plot_X(arg, ax=ax)
 
-    ax.tick_params(axis='both', which='major', labelsize=labelsize)
-
-    ax.patch.set_alpha(0)
-
-    ax.spines['left'].set_linewidth(2.5)
-    ax.spines['left'].set_color('k')
-
-    ax.spines['bottom'].set_linewidth(2.5)
-    ax.spines['bottom'].set_color('k')
-
-# -------------------------------- ACTUAL PLOTS --------------------------------
-def plot_seq(dgm, crop=None, ax=None, **kwargs):
+def plot_seq(dgm, crop = None, ax = None, **kwargs):
     if ax is None:
         fig, ax = plt.subplots()
         fig.patch.set_alpha(0)
@@ -41,7 +29,7 @@ def plot_seq(dgm, crop=None, ax=None, **kwargs):
 
     ax_setup(ax)
     bar = list(dgm_plot.sequence)
-    ax.bar(range(len(bar)), bar, color=BAR_COL);
+    ax.bar(range(len(bar)), bar, color = BAR_COL);
 
 
 def plot_nx(G,
@@ -95,3 +83,18 @@ def plot_dgm(dgm, ax=None, **kwargs):
     ax.plot([0,d],[0,d], color=DARK_CEMM_COL1,
                          linewidth=1,
                          linestyle='dashed');
+
+
+def plot_X(X, ax = None):
+    n_obs, n_vars = X.shape
+    
+    if ax is None:
+        fig, ax = plt.subplots()
+        fig.patch.set_alpha(0)
+    
+    if n_vars == 2:
+        x, y = X.T
+        plt.scatter(x, y)
+    
+    ax_setup(ax)
+    ax.axis('off');
