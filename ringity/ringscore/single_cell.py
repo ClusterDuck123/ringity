@@ -15,7 +15,7 @@ def get_canonical_gene_id(gene_id):
     return gene_id
 
 def get_cell_cycle_genes(gene_id = 'symbol', geneset = 'tirosh_cc'):
-    """Returns list of cell cycle genes stored in ringity/data.
+    """Returns list of cell cycle genes stored in ringity/_data.
 
     Returns
     -------
@@ -38,7 +38,7 @@ def get_cell_cycle_genes(gene_id = 'symbol', geneset = 'tirosh_cc'):
 
     # TODO: Include UNIPRO ID and extend data tables.
 
-    gs_table_path = Path(__file__).parent / "data" / (geneset.lower() + ".csv")
+    gs_table_path = Path(__file__).parent.parent / "_data" / (geneset.lower() + ".csv")
     with open(gs_table_path, 'r') as csv_file:
         reader = csv.reader(csv_file)
         header = next(reader)
