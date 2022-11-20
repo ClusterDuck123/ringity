@@ -4,6 +4,7 @@ import numpy as np
 from itertools import compress
 from itertools import starmap, islice
 from collections.abc import MutableMapping
+from ringity.plotting.plot_functions import plot_dgm
 from ringity.ringscore.ring_score_flavours import ring_score_from_sequence
 from ringity.classes.exceptions import (
                                     SchroedingersException,
@@ -168,7 +169,6 @@ class PersistenceDiagram(list):
         return self.ring_score()
 
 # -------------------------------- Methods ---------------------------------
-
     def copy(self):
         other = type(self)(self)
         return other
@@ -196,11 +196,18 @@ class PersistenceDiagram(list):
     def to_array(self):
         return np.array(self)
 
-    def ring_score(self, flavour = 'geometric', nb_pers = np.inf, base = 2):
+# ---------------------------- Function calls -----------------------------
+    def ring_score(self, 
+                flavour = 'geometric', 
+                nb_pers = np.inf, 
+                base = 2):
         return ring_score_from_sequence(self.sequence,
                                         flavour = flavour,
                                         nb_pers = nb_pers,
                                         base = base)
+
+    def plot(self, ax = None, **kwargs):
+        return plot_dgm(self, ax = ax, **kwargs)
 
 # ----------------------------- Dunder Method ------------------------------
 

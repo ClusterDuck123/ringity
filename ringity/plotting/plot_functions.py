@@ -64,7 +64,7 @@ def plot_nx(G,
     ax.axis('off');
 
 
-def plot_dgm(dgm, ax=None, **kwargs):
+def plot_dgm(dgm, ax = None, **kwargs):
     x,y = zip(*[(k.birth,k.death) for k in dgm])
     d = max(y)
 
