@@ -13,7 +13,7 @@ from ringity.ringscore.gtda import vietoris_rips_from_point_cloud
 from ringity.ringscore.single_cell import get_cell_cycle_genes
 
 from ringity.readwrite.diagram import *
-from ringity.generators.diagram import *
+from ringity.generators.pdiagrams import *
 from ringity.ringscore.ring_score_flavours import ring_score_from_sequence
 
 import sys

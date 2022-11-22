@@ -1,6 +1,6 @@
 from ringity.ringscore.ring_score_flavours import ring_score_from_sequence
 from ringity.networkmeasures.centralities import net_flow, resistance
-from ringity.classes.diagram import PersistenceDiagram
+from ringity.classes.pdiagram import PersistenceDiagram
 from ringity.readwrite.prompts import _yes_or_no, _assertion_statement
 from ringity.classes.exceptions import UnknownGraphType
 from gtda.homology import VietorisRipsPersistence

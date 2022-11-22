@@ -2,7 +2,7 @@ import numpy as np
 import scipy.stats as ss
 
 def add_noise(X, noise):
-    """Adds noise to a point cloud."""
+    """Adds Gaussian noise to a point cloud."""
     X_noise = np.random.normal(scale = noise, size = X.shape)
     return X + X_noise
 
@@ -34,7 +34,7 @@ def circle(
         noise = 0,
         seed = None):
     """Generates sample points of circle with 
-    radius 1 and gaussian noise standard deviation `scale`."""
+    radius 1 and gaussian noise with of scale `scale`."""
     
     np.random.seed(seed=seed)
     
@@ -53,8 +53,8 @@ def vonmises_circles(
                 kappa = 1, 
                 noise = 0,
                 seed = None):
-    """Generates sample points of two circles with 
-    radius `r` and `1-r`."""
+    """Generates von Mises distributed sample points on 
+    the of circle."""
     
     np.random.seed(seed = seed)
     
@@ -149,5 +149,37 @@ def torus(
     z = r*np.sin(v)
     
     X = np.vstack((x,y,z)).T
+    X_noise = add_noise(X, noise)
+    return X_noise
+
+
+# ===============================================================
+#  ---------------- N-DIMENSIONAL SHAPES  ----------------------
+# ===============================================================
+def box(N,
+        dim = 2, 
+        noise = 0,
+        seed = None):
+    """Generates sample points of a unit-box in dimenseion `dim`.
+    """
+    
+    np.random.seed(seed=seed)
+    X = np.random.uniform(0, 2*np.pi, [N, dim])
+    X_noise = add_noise(X, noise)
+    return X_noise
+
+def sphere(N,
+        dim = 2, 
+        noise = 0,
+        seed = None):
+    """Generates sample points of a unit sphere in dimenseion `dim`.
+    
+    CAUTION: The parameter `dim` referes to the embedding dimension, 
+    not the intrinsic dimension of the sphere!
+    """
+    
+    np.random.seed(seed=seed)
+    pre_X = np.random.normal(size = (N, dim))
+    X = (pre_X.T / np.linalg.norm(pre_X, axis=1)).T
     X_noise = add_noise(X, noise)
     return X_noise

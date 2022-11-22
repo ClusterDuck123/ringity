@@ -1,5 +1,5 @@
 import numpy as np
-from ringity.classes.diagram import PersistenceDiagram
+from ringity.classes.pdiagram import PersistenceDiagram
 
 def read_pdiagram(fname, **kwargs):
     """

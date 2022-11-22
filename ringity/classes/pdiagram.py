@@ -148,6 +148,14 @@ class PersistenceDiagram(list):
         return deaths
 
     @property
+    def lengths(self):
+        return self.persistences
+
+    @property
+    def ratios(self):
+        return tuple(pt.death / pt.birth for pt in self)
+
+    @property
     def persistences(self):
         return tuple(pt.persistence for pt in self)
 

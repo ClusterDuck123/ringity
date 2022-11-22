@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.stats as ss
 
-from ringity.classes.diagram import PersistenceDiagram
+from ringity.classes.pdiagram import PersistenceDiagram
 from gtda.homology import VietorisRipsPersistence
 
 def vietoris_rips_from_point_cloud(X,
