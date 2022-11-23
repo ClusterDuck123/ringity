@@ -27,3 +27,6 @@ def ax_setup(ax, labelsize=24):
 
     ax.spines['bottom'].set_linewidth(2.5)
     ax.spines['bottom'].set_color('k')
+
+    ax.spines.right.set_visible(False)
+    ax.spines.top.set_visible(False)

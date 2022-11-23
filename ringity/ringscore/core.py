@@ -166,14 +166,14 @@ def pdiagram_from_point_cloud(X,
     return PersistenceDiagram.from_gtda(dgm, homology_dim = homology_dim)   
     
     
-def pdiagram_from_graph(X, metric = 'net_flow', **kwargs):
+def pdiagram_from_network(X, metric = 'net_flow', **kwargs):
     """Constructs a PersistenceDiagram object from a networkx graph.
     
     This function is not available yet."""
     pass           
     
     
-def pdiagram_from_distance_matrix(dgm,):
+def pdiagram_from_distance_matrix(D, ):
     """Constructs a PersistenceDiagram object from a distance matrix.
     
     This function is not available yet."""

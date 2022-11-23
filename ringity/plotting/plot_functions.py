@@ -2,6 +2,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
+from collections import Counter
 from ringity.plotting.styling import ax_setup
 
 CEMM_COL1 = (  0/255,  85/255, 100/255)
@@ -80,9 +81,9 @@ def plot_dgm(dgm, ax = None, **kwargs):
     ax.set_ylim([-hw, d*1.1])
 
     ax.plot(x, y, '*', markersize = 5, color = CEMM_COL2);
-    ax.plot([0,d],[0,d], color=DARK_CEMM_COL1,
-                         linewidth=1,
-                         linestyle='dashed');
+    ax.plot([0,d],[0,d], color = DARK_CEMM_COL1,
+                         linewidth = 1,
+                         linestyle = 'dashed');
 
 
 def plot_X(X, ax = None):
@@ -98,3 +99,29 @@ def plot_X(X, ax = None):
     
     ax_setup(ax)
     ax.axis('off');
+
+def plot_degree_distribution(G, 
+                        ax = None, 
+                        figsize = None,
+                        return_fig = False):
+    degree_sequence = sorted([d for n, d in G.degree()])
+    degreeCount = Counter(degree_sequence)
+    degs, cnts = zip(*degreeCount.items())
+
+    if ax is None:
+        if figsize is None:
+            figsize = (8,6)
+        fig, ax = plt.subplots(figsize = figsize)
+        fig.patch.set_alpha(0)
+    ax.patch.set_alpha(0)
+
+    ax.bar(degs, cnts, 
+        width = 1, 
+        color = CEMM_COL2, 
+        linewidth = 0.75, 
+        edgecolor = CEMM_COL4);
+
+    ax_setup(ax)
+
+    if return_fig:
+        return fig
