@@ -4,7 +4,7 @@ __version__ = "0.2a8"
 
 import ringity.classes as classes
 
-from ringity.ringscore.core import ring_score, diagram, pdiagram_from_point_cloud, ring_score_from_point_cloud
+from ringity.ringscore.core import *
 from ringity.networkmeasures.centralities import *
 from ringity.plotting.plot_functions import *
 from ringity.networkmeasures.graphlet_coefficients import *

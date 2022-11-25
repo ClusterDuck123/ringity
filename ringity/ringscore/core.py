@@ -14,11 +14,11 @@ import numpy as np
 import networkx as nx
 
 def ring_score(arg,
-               argtype = 'pointcloud',
-               flavour = 'geometric',
-               base = None,
-               nb_pers = np.inf,
-               **kwargs):
+            argtype = 'pointcloud',
+            flavour = 'geometric',
+            base = None,
+            nb_pers = np.inf,
+            **kwargs):
     """Calculate ring score from various data structures.
 
     Generic function to calculate ring score by calling another appropriate
@@ -54,24 +54,24 @@ def ring_score(arg,
         raise Exception
 
     score = ring_score_from_pdiagram(
-                                    dgm = dgm,
-                                    flavour = flavour,
-                                    base = base,
-                                    nb_pers = nb_pers)
+                                dgm = dgm,
+                                flavour = flavour,
+                                base = base,
+                                nb_pers = nb_pers)
     return score
                                                         
 # -----------------------------------------------------------------------------    
 # ---------------------------- RING SCORE FUNCTIONS ---------------------------
 # -----------------------------------------------------------------------------     
 def ring_score_from_point_cloud(X,
-                                flavour = 'geometric',
-                                base = None,
-                                nb_pers = np.inf,
-                                persistence = 'VietorisRipsPersistence',
-                                metric='euclidean',
-                                metric_params={},
-                                homology_dim = 1,
-                                **kwargs):
+                            flavour = 'geometric',
+                            base = None,
+                            nb_pers = np.inf,
+                            persistence = 'VietorisRipsPersistence',
+                            metric='euclidean',
+                            metric_params={},
+                            homology_dim = 1,
+                            **kwargs):
     """Calculate ring score from point cloud.
 
     Parameters
@@ -83,26 +83,26 @@ def ring_score_from_point_cloud(X,
     score : float, ring-score of given object.
     """
     dgm = pdiagram_from_point_cloud(X,
-                                    persistence = persistence,
-                                    metric = metric,
-                                    metric_params = metric_params,
-                                    homology_dim = homology_dim,
-                                    **kwargs)
+                                persistence = persistence,
+                                metric = metric,
+                                metric_params = metric_params,
+                                homology_dim = homology_dim,
+                                **kwargs)
     return ring_score_from_pdiagram(dgm,
-                                    flavour = flavour,
-                                    base = base,
-                                    nb_pers = nb_pers)
+                                flavour = flavour,
+                                base = base,
+                                nb_pers = nb_pers)
     
                                                
 def ring_score_from_network(X,
-                            flavour = 'geometric',
-                            base = None,
-                            nb_pers = np.inf,
-                            persistence = 'VietorisRipsPersistence',
-                            metric='euclidean',
-                            metric_params={},
-                            homology_dim = 1,
-                            **kwargs):
+                        flavour = 'geometric',
+                        base = None,
+                        nb_pers = np.inf,
+                        persistence = 'VietorisRipsPersistence',
+                        metric='euclidean',
+                        metric_params={},
+                        homology_dim = 1,
+                        **kwargs):
     """Calculate ring score from network.
 
     Parameters
@@ -125,12 +125,22 @@ def ring_score_from_network(X,
                                     nb_pers = nb_pers)
                                     
                                     
-def ring_score_from_distance_matrix(dgm,
-                                    flavour = 'geometric',
-                                    nb_pers = np.inf,
-                                    base = None):
+def ring_score_from_distance_matrix(D,
+                                persistence = 'VietorisRipsPersistence',
+                                homology_dim = 1,
+                                nb_pers = np.inf,
+                                base = None,
+                                flavour = 'geometric',
+                                **kwargs):
     """Calculates ring-score from a PersistenceDiagram object."""
-    pass
+    dgm = pdiagram_from_distance_matrix(D,
+                                    persistence = persistence,
+                                    homology_dim = homology_dim,
+                                    **kwargs)
+    return ring_score_from_pdiagram(dgm,
+                                    flavour = flavour,
+                                    base = base,
+                                    nb_pers = nb_pers)
                             
                                     
 def ring_score_from_pdiagram(dgm,
@@ -148,8 +158,8 @@ def ring_score_from_pdiagram(dgm,
 # ----------------------------------------------------------------------------- 
 def pdiagram_from_point_cloud(X,
                               persistence = 'VietorisRipsPersistence',
-                              metric='euclidean',
-                              metric_params={},
+                              metric = 'euclidean',
+                              metric_params = {},
                               homology_dim = 1,
                               **kwargs):
     """Constructs a PersistenceDiagram object from a point cloud.
@@ -166,19 +176,55 @@ def pdiagram_from_point_cloud(X,
     return PersistenceDiagram.from_gtda(dgm, homology_dim = homology_dim)   
     
     
-def pdiagram_from_network(X, metric = 'net_flow', **kwargs):
+def pdiagram_from_network(G, 
+                        metric = 'net_flow', 
+                        store_weights = True,
+                        new_weight_name = None,
+                        verbose = False,
+                        **kwargs):
     """Constructs a PersistenceDiagram object from a networkx graph.
     
     This function is not available yet."""
-    pass           
+
+
+    if not nx.get_edge_attributes(G, metric):
+        calculate_weights(G, metric,
+                    verbose = verbose)
+        
+        if verbose:
+            print(
+                f"No weight named {metric} detected. " 
+                f"New weights will be calculcated.")
+
+    t1 = time.time()
+    D  = nx.floyd_warshall_numpy(G, weight = metric)
+    t2 = time.time()
+
+    if verbose:
+        print(f'Time for SPL calculation: {t2-t1:.6f} sec')
     
     
-def pdiagram_from_distance_matrix(D, ):
+def pdiagram_from_distance_matrix(D, 
+                                persistence = 'VietorisRipsPersistence',
+                                homology_dim = 1,
+                                **kwargs):
     """Constructs a PersistenceDiagram object from a distance matrix.
-    
-    This function is not available yet."""
-    pass         
-    
+    """
+    if persistence == 'VietorisRipsPersistence':
+        VR = VietorisRipsPersistence(metric = "precomputed",
+                                     homology_dimensions = tuple(range(homology_dim+1)),
+                                     **kwargs)
+        dgm = VR.fit_transform([D])[0]
+    return PersistenceDiagram.from_gtda(dgm, homology_dim = homology_dim)         
+
+# =============================================================================
+#  -------------------------- AUXILIARY FUNCTIONS ----------------------------
+# =============================================================================
+
+def calculate_weights():
+    pass
+
+
 # =============================================================================
 #  -------------------------------- LEGACY ----------------------------------
 # =============================================================================
