@@ -3,7 +3,9 @@ from ringity.networkmeasures.centralities import net_flow, resistance
 from ringity.classes.pdiagram import PersistenceDiagram
 from ringity.readwrite.prompts import _yes_or_no, _assertion_statement
 from ringity.classes.exceptions import UnknownGraphType
+
 from gtda.homology import VietorisRipsPersistence
+from scipy.spatial.distance import is_valid_dm
 
 import os
 import time
@@ -14,22 +16,23 @@ import numpy as np
 import networkx as nx
 
 def ring_score(arg,
-            argtype = 'pointcloud',
+            argtype = 'suggest',
             flavour = 'geometric',
             base = None,
             nb_pers = np.inf,
+            verbose = False,
             **kwargs):
-    """Calculate ring score from various data structures.
+    """Calculate pdiagram from various data structures.
 
     Generic function to calculate ring score by calling another appropriate
     ring score function:
-        - If ``arg`` is a networkx graph, it will call ``ring_score_from_graph``.
+        - If ``arg`` is a networkx graph, it will call ``ring_score_from_network``.
         - If ``arg`` is a ringity persistence diagram, it will call 
         ``ring_score_from_persistence_diagram``.
         - If ``arg`` is a numpy array or sparse matrix the paramter ``argtype`` 
         specifies how to interpret the data and which ring-score function to call.
         
-    All functions eventually call ``ring_score_from_sequence``.
+    Note: All functions eventually call ``ring_score_from_sequence``.
     
     Parameters
     ----------
@@ -40,25 +43,68 @@ def ring_score(arg,
     -------
     score : float, ring-score of given object.
     """
-
-    if isinstance(arg, nx.Graph):
-        dgm = diagram(arg)
-    elif isinstance(arg, PersistenceDiagram):
-        dgm = arg
-    elif isinstance(arg, np.ndarray) or isinstance(arg, scipy.sparse.spmatrix):
-        if argtype == 'pointcloud':
-            dgm = pdiagram_from_point_cloud(arg, **kwargs)
-        else:
-            raise Exception
-    else:
-        raise Exception
+    pdgm = pdiagram(arg,
+            argtype = argtype,
+            verbose = verbose,
+            **kwargs)
 
     score = ring_score_from_pdiagram(
-                                dgm = dgm,
+                                dgm = pdgm,
                                 flavour = flavour,
                                 base = base,
                                 nb_pers = nb_pers)
     return score
+
+def pdiagram(arg,
+            argtype = 'suggest',
+            verbose = False,
+            **kwargs):
+    """Calculate ring score from various data structures.
+
+    Generic function to calculate persistence diagram by calling another appropriate
+    pdiagram function:
+        - If ``arg`` is a networkx graph, it will call ``pdiagram_from_network``.
+        - If ``arg`` is a ringity persistence diagram, it will call 
+        ``pdiagram_from_persistence_diagram``.
+        - If ``arg`` is a numpy array or sparse matrix the paramter ``argtype`` 
+        specifies how to interpret the data and which ring-score function to call. 
+        ``suggest`` will try to guess weather the ``arg`` looks like a ``point cloud`` or a
+        ``distance matrix``. 
+        
+    Note: All functions eventually call ``pdiagram_from_sequence``.
+    
+    Parameters
+    ----------
+    arg : numpy array, sparse matrix, networkx graph or ringity persistence
+    diagram.
+
+    Returns
+    -------
+    pdgm : PDiagram, persistence diagram of given object.
+    """
+
+    if isinstance(arg, nx.Graph):
+        pdgm = diagram(arg)
+    elif isinstance(arg, PersistenceDiagram):
+        pdgm = arg
+    elif isinstance(arg, np.ndarray) or isinstance(arg, scipy.sparse.spmatrix):
+        if argtype == 'suggest':
+            if is_valid_dm(arg):
+                argtype = 'distance matrix'
+            else:
+                argtype = 'point cloud'
+            if verbose:
+                print(f"`argtype` was set to {argtype}")
+        if argtype == 'point cloud':
+            pdgm = pdiagram_from_point_cloud(arg, **kwargs)
+        elif argtype == 'distance matrix':
+            pdgm  = pdiagram_from_distance_matrix(arg, **kwargs)
+        else:
+            raise Exception(f"Argtype `{argtype} unknown")
+    else:
+        raise Exception
+
+    return pdgm
                                                         
 # -----------------------------------------------------------------------------    
 # ---------------------------- RING SCORE FUNCTIONS ---------------------------
