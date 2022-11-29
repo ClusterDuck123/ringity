@@ -31,7 +31,10 @@ def _current_flow_loop(C, row_idx, col_idx):
                     for (u,v) in zip(row_idx, col_idx)
                             if u <= v]
 
-def net_flow(G, verbose=False):
+def net_flow(G, 
+        inplace = False,
+        new_weight_name = None,
+        verbose = False):
     """Calculate edge dictionary corresponding to a weighted adjacency matrices
     of absorbing random-walk based centrality measure on graphs.
 
@@ -53,6 +56,11 @@ def net_flow(G, verbose=False):
     current flow." Annual symposium on theoretical aspects of computer science.
     Springer, Berlin, Heidelberg, 2005.
     """
+
+    if new_weight_name is None:
+        new_weight_name = 'net_flow'
+        # TO-DO: WHAT HAPPENS WHEN WEIGHT NAME ALREADY EXISTS?
+
     node_label = dict(enumerate(G.nodes))
     if not nx.is_connected(G):
         raise DisconnectedGraphError
@@ -88,7 +96,10 @@ def net_flow(G, verbose=False):
     edge_values = _current_flow_loop(C, row_idx, col_idx )
     edge_dict = {(node_label[i], node_label[j]) : edge_values
                         for (i,j,edge_values) in zip(row_idx, col_idx, edge_values)}
-    return edge_dict
+    if inplace:
+        Exception("Not implemented yet!")
+    else:
+        return edge_dict
 
 
 def resistance(G):
@@ -97,7 +108,7 @@ def resistance(G):
     diag = np.diag(Gamm)
     return (-2*Gamm + diag).T + diag
 
-# ----------------------------- ONLY FOR TESTING -----------------------------
+# -------------------- ONLY FOR LEGACY AND TESTING --------------------
 
 def edge_extractor(A):
     N = A.shape[0]

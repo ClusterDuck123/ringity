@@ -3,6 +3,7 @@ from ringity.networkmeasures.centralities import net_flow, resistance
 from ringity.classes.pdiagram import PersistenceDiagram
 from ringity.readwrite.prompts import _yes_or_no, _assertion_statement
 from ringity.classes.exceptions import UnknownGraphType
+from ringity.networkmeasures import centralities
 
 from gtda.homology import VietorisRipsPersistence
 from scipy.spatial.distance import is_valid_dm
@@ -224,30 +225,45 @@ def pdiagram_from_point_cloud(X,
     
 def pdiagram_from_network(G, 
                         metric = 'net_flow', 
+                        use_weights = True,
                         store_weights = True,
                         new_weight_name = None,
+                        overwrite_weights = False,
                         verbose = False,
                         **kwargs):
     """Constructs a PersistenceDiagram object from a networkx graph.
     
-    This function is not available yet."""
+    This function is not available yet. NEEDS TESTING!!!! """
 
-
-    if not nx.get_edge_attributes(G, metric):
-        calculate_weights(G, metric,
+    if nx.get_edge_attributes(G, metric) and use_weights:
+        weight = metric
+    else:
+        if not store_weights:
+            new_weight_name = '-'.join(str(np.random.randint(2**20)) for _ in range(10))
+        
+        calculate_weights(G, metric, 
+                    inplace = True,
+                    new_weight_name = new_weight_name,
                     verbose = verbose)
         
+        weight = metric if new_weight_name is None else new_weight_name
+
         if verbose:
             print(
                 f"No weight named {metric} detected. " 
                 f"New weights will be calculcated.")
 
+
     t1 = time.time()
-    D  = nx.floyd_warshall_numpy(G, weight = metric)
+    D  = nx.floyd_warshall_numpy(G, weight = weight)
     t2 = time.time()
+
+    if not store_weights:
+        DELETE_WEIGHTS
 
     if verbose:
         print(f'Time for SPL calculation: {t2-t1:.6f} sec')
+    return pdiagram_from_distance_matrix(D)
     
     
 def pdiagram_from_distance_matrix(D, 
@@ -267,7 +283,21 @@ def pdiagram_from_distance_matrix(D,
 #  -------------------------- AUXILIARY FUNCTIONS ----------------------------
 # =============================================================================
 
-def calculate_weights():
+def calculate_weights(G, metric,
+                inplace = False,
+                new_weight_name = None,
+                verbose = False):
+    
+    if new_weight_name is None:
+        new_weight_name = metric
+
+    # TO-DO: WHAT HAPPENS WHEN WEIGHT NAME ALREADY EXISTS?
+    
+    if metric == 'net_flow':
+        return centralities.net_flow(G, 
+                                inplace = inplace,
+                                new_weight_name = new_weight_name)
+
     pass
 
 
