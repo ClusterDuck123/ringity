@@ -96,8 +96,11 @@ def net_flow(G,
     edge_values = _current_flow_loop(C, row_idx, col_idx )
     edge_dict = {(node_label[i], node_label[j]) : edge_values
                         for (i,j,edge_values) in zip(row_idx, col_idx, edge_values)}
+
     if inplace:
-        Exception("Not implemented yet!")
+        nx.set_edge_attributes(G, 
+                            values = edge_dict, 
+                            name = new_weight_name)
     else:
         return edge_dict
 

@@ -237,7 +237,13 @@ def pdiagram_from_network(G,
 
     if nx.get_edge_attributes(G, metric) and use_weights:
         weight = metric
+        if verbose and use_weights:
+            print(f"Weights named `{metric}` detected. " 
+                  f"They will be used for distance calculation.")
     else:
+        if verbose and use_weights:
+            print(f"No weights named `{metric}` detected. " 
+                  f"New weights will be calculcated.")
         if not store_weights:
             new_weight_name = '-'.join(str(np.random.randint(2**20)) for _ in range(10))
         
@@ -247,11 +253,6 @@ def pdiagram_from_network(G,
                     verbose = verbose)
         
         weight = metric if new_weight_name is None else new_weight_name
-
-        if verbose:
-            print(
-                f"No weight named {metric} detected. " 
-                f"New weights will be calculcated.")
 
 
     t1 = time.time()
@@ -278,6 +279,7 @@ def pdiagram_from_distance_matrix(D,
                                      **kwargs)
         dgm = VR.fit_transform([D])[0]
     return PersistenceDiagram.from_gtda(dgm, homology_dim = homology_dim)         
+
 
 # =============================================================================
 #  -------------------------- AUXILIARY FUNCTIONS ----------------------------
