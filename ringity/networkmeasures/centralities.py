@@ -3,7 +3,6 @@ from scipy.sparse import csgraph
 from scipy.stats import rankdata
 from numba import njit
 
-import time
 import scipy.sparse
 import scipy.stats
 import numpy as np

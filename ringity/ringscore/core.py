@@ -1,20 +1,17 @@
 from ringity.ringscore.ring_score_flavours import ring_score_from_sequence
 from ringity.networkmeasures.centralities import net_flow, resistance
 from ringity.classes.pdiagram import PersistenceDiagram
-from ringity.readwrite.prompts import _yes_or_no, _assertion_statement
+from ringity.readwrite.prompts import _yes_or_no
 from ringity.classes.exceptions import UnknownGraphType
 from ringity.networkmeasures import centralities
 
 from gtda.homology import VietorisRipsPersistence
 from scipy.spatial.distance import is_valid_dm
 
-import os
 import time
-import subprocess
-import scipy.sparse
-
 import numpy as np
 import networkx as nx
+import scipy.sparse
 
 def ring_score(arg,
             argtype = 'suggest',

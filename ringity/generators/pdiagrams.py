@@ -1,5 +1,3 @@
-import scipy.stats as ss
-
 from ringity.classes._distns import _get_frozen_random_variable
 from ringity.classes.pdiagram import PersistenceDiagramPoint, PersistenceDiagram
 

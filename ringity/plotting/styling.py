@@ -1,4 +1,3 @@
-import networkx as nx
 import matplotlib.pyplot as plt
 
 """TODO: Rewrite this part to a proper matplotlib style sheet API."""

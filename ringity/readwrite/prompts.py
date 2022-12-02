@@ -1,3 +1,5 @@
+"""THIS MODULE IS OUTDATED AND NEEDS TO BE REMOVED IN FUTURE VERSIONS."""
+
 def _yes_or_no(answer):
     answer = answer.lower()
     while answer not in {*_ringity_parameters['yes'], *_ringity_parameters['no']}:

@@ -1,8 +1,6 @@
 import numpy as np
 import scipy.stats as ss
 
-from itertools import islice
-
 def ring_score_from_sequence(seq,
                              flavour = 'geometric',
                              nb_pers = None,
