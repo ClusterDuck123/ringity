@@ -4,7 +4,7 @@ import networkx as nx
 
 from ringity.networkmeasures.centralities import net_flow
 from ringity.classes.exceptions import DisconnectedGraphError
-from ringity.ringscore.core import diagram
+from ringity.core.ringscore_functions import diagram
 
 """THIS MODULE NEEDS TO BE UPDATED!!"""
 

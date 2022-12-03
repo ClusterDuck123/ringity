@@ -5,7 +5,7 @@ from itertools import compress
 from itertools import starmap, islice
 from collections.abc import MutableMapping
 from ringity.plotting.plot_functions import plot_dgm
-from ringity.ringscore.ring_score_flavours import ring_score_from_sequence
+from ringity.core.ringscore_flavours import ring_score_from_sequence
 from ringity.classes.exceptions import (
                                     SchroedingersException,
                                     TimeParadoxError,
@@ -140,20 +140,20 @@ class PersistenceDiagram(list):
     @property
     def births(self):
         births, deaths = zip(*self)
-        return births
+        return np.array(births)
 
     @property
     def deaths(self):
         births, deaths = zip(*self)
-        return deaths
+        return np.array(deaths)
 
     @property
     def lengths(self):
-        return self.persistences
+        return self.deaths - self.births
 
     @property
     def ratios(self):
-        return tuple(pt.death / pt.birth for pt in self)
+        return self.deaths / self.births
 
     @property
     def persistences(self):
@@ -214,8 +214,14 @@ class PersistenceDiagram(list):
                                         nb_pers = nb_pers,
                                         base = base)
 
-    def plot(self, ax = None, **kwargs):
-        return plot_dgm(self, ax = ax, **kwargs)
+    def plot(self, 
+            ax = None, 
+            return_figure = False, 
+            **kwargs):
+        return plot_dgm(self, 
+                    ax = ax, 
+                    return_figure = return_figure, 
+                    **kwargs)
 
 # ----------------------------- Dunder Method ------------------------------
 

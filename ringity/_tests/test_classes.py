@@ -42,8 +42,8 @@ class TestDgm(unittest.TestCase):
 
     def test_birth_and_death_extractions(self):
         dgm = random_pdgm(100)
-        self.assertEqual(dgm.births,tuple(pt.birth for pt in dgm))
-        self.assertEqual(dgm.deaths,tuple(pt.death for pt in dgm))
+        self.assertEqual(tuple(dgm.births), tuple(pt.birth for pt in dgm))
+        self.assertEqual(tuple(dgm.deaths), tuple(pt.death for pt in dgm))
 
 
 

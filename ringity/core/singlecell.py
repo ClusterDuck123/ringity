@@ -1,5 +1,5 @@
-from ringity.ringscore.ring_score_flavours import ring_score_from_sequence
-from ringity.ringscore.core import pdiagram_from_point_cloud
+from ringity.core.ringscore_flavours import ring_score_from_sequence
+from ringity.core.ringscore_functions import pdiagram_from_point_cloud
 
 import magic
 import numpy as np
@@ -103,6 +103,7 @@ def process_adata_from_counts(adata,
                               diffuse = True,
                               diffuse_t = 1,
                               highly_variable_subset = True,
+                              verbose = False
                               ):
     """Follows Seurat guidelines to preprocess data."""
     
@@ -113,7 +114,7 @@ def process_adata_from_counts(adata,
     sc.pp.highly_variable_genes(adata, inplace = highly_variable_subset)
     
     if diffuse:
-        magic_op = magic.MAGIC(t = 1)
+        magic_op = magic.MAGIC(t = diffuse_t, verbose = verbose)
         adata = magic_op.fit_transform(adata)
         
     return adata

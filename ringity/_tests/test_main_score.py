@@ -4,7 +4,7 @@ import ringity
 import unittest
 import numpy as np
 
-from ringity.ringscore.ring_score_flavours import ring_score_from_sequence
+from ringity.core.ringscore_flavours import ring_score_from_sequence
 
 class TestSyntheticExamples(unittest.TestCase):
     def setUp(self):

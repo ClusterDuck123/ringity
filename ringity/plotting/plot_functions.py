@@ -65,12 +65,23 @@ def plot_nx(G,
     ax.axis('off');
 
 
-def plot_dgm(dgm, ax = None, **kwargs):
+def plot_dgm(dgm, 
+        ax = None, 
+        return_figure = False, 
+        **kwargs):
+    """Plots persistence diagram. 
+    
+    In case `ax` is `None`, a new matplotlib figure will be 
+    created and `**kwargs` will be passed on to `plt.subplots()`"""
+    
     x,y = zip(*[(k.birth,k.death) for k in dgm])
     d = max(y)
 
-    if ax is None:
-        fig, ax = plt.subplots()
+    if ax is not None:
+        return_data = 'Axis'
+    else:
+        return_data = 'Figure'
+        fig, ax = plt.subplots(**kwargs)
         fig.patch.set_alpha(0)
 
     ax_setup(ax)
@@ -80,10 +91,16 @@ def plot_dgm(dgm, ax = None, **kwargs):
     ax.set_xlim([-hw, d*1.1])
     ax.set_ylim([-hw, d*1.1])
 
-    ax.plot(x, y, '*', markersize = 5, color = CEMM_COL2);
+    ax.plot(x, y, '*', markersize = 5, color = CEMM_COL2)
     ax.plot([0,d],[0,d], color = DARK_CEMM_COL1,
                          linewidth = 1,
-                         linestyle = 'dashed');
+                         linestyle = 'dashed')
+
+    if return_figure is True:
+        if return_data == 'Axis':
+            return ax
+        elif return_data == 'Figure':
+            return fig
 
 
 def plot_X(X, ax = None):
@@ -124,4 +141,4 @@ def plot_degree_distribution(G,
     ax_setup(ax)
 
     if return_fig:
-        return fig
+        return plt.close(fig = fig)
