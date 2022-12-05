@@ -1,6 +1,6 @@
 name = "ringity"
 __author__ = "Markus K. Youssef"
-__version__ = "0.2a8"
+__version__ = "1.0a0"
 
 import ringity.classes as classes
 

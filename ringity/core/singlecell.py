@@ -1,5 +1,7 @@
 from ringity.core.ringscore_flavours import ring_score_from_sequence
-from ringity.core.ringscore_functions import pdiagram_from_point_cloud
+from ringity.core.ringscore_functions import (
+                                        pdiagram_from_point_cloud, 
+                                        ring_score_from_point_cloud)
 
 import magic
 import numpy as np
@@ -22,36 +24,15 @@ def ring_score_from_anndata(adata,
     -------
     score : float, ring-score of given object.
     """
-    if var_names is None: 
-        var_names = adata.var_names
-    else:
-        var_names = adata.var_names.intersection(var_names)
+
+    var_names = _parse_var_names(adata, var_names)
+    obs_names = _parse_obs_names(adata, obs_names)
         
-    if obs_names is None: 
-        obs_names = adata.obs_names
-    else:
-        obs_names = adata.obs_names.intersection(obs_names)
-        
-    X = adata[obs_names, var_names].X
-    
-    if type(X) == np.ndarray:
-        dgm = pdiagram_from_point_cloud(X)
-    else:
-        dgm = pdiagram_from_point_cloud(X.toarray())
-        
-    if isinstance(flavour, str):
-        score = ring_score_from_sequence(dgm.sequence, 
-                                            flavour = flavour, 
-                                            base = base)
-        return score
-    else:
-        scores = [ring_score_from_sequence(dgm.sequence, 
-                                               flavour = flav, 
-                                               base = base)
-                              for flav in flavour]
-            
-        
-        return scores
+    X = _parse_X(adata[obs_names, var_names])
+    score = ring_score_from_point_cloud(X, 
+                            flavour = flavour, # NEEDS POTENTIALLY GENERALIZATION FOR LIST OF FLAVOURS
+                            base = base)
+    return score
 
 
 def pdiagram_from_AnnData(
@@ -76,24 +57,11 @@ def pdiagram_from_AnnData(
     score : float, ring-score of given object.
     """
     
-    if var_names is None: 
-        var_names = adata.var_names
-    else:
-        var_names = adata.var_names.intersection(var_names)
-        
-    if obs_names is None: 
-        obs_names = adata.obs_names
-    else:
-        obs_names = adata.obs_names.intersection(obs_names)
-        
-    X = adata[obs_names, var_names].X
-    
-    if type(X) == np.ndarray:
-        dgm = pdiagram_from_point_cloud(X)
-    else:
-        dgm = pdiagram_from_point_cloud(X.toarray())    
-        
-        return dgm
+    var_names = _parse_var_names(adata, var_names)
+    obs_names = _parse_obs_names(adata, obs_names)
+    X = _parse_X(adata[obs_names, var_names])
+    dgm = pdiagram_from_point_cloud(X)
+    return dgm
         
 
 def process_adata_from_counts(adata, 
@@ -118,3 +86,22 @@ def process_adata_from_counts(adata,
         adata = magic_op.fit_transform(adata)
         
     return adata
+
+
+def _parse_var_names(adata, var_names):
+    if var_names is None:
+        return adata.var_names
+    else:
+        return adata.var_names.intersection(var_names)
+    
+def _parse_obs_names(adata, obs_names):
+    if obs_names is None:
+        return adata.obs_names
+    else:
+        return adata.obs_names.intersection(obs_names)
+
+def _parse_X(adata):
+    X = adata.X
+    if not isinstance(X, np.ndarray):
+        X = X.toarray()
+    return X

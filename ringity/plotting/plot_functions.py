@@ -1,5 +1,6 @@
 import numpy as np
 import networkx as nx
+import plotly.express as px
 import matplotlib.pyplot as plt
 
 from collections import Counter
@@ -41,6 +42,26 @@ def plot_nx(G,
             edge_colors = None,
             edge_alpha  = 0.2,
             **kwargs):
+    """Plots a networkx graph.
+
+    Parameters
+    ----------
+    G : NetworkX Graph
+
+    pos : dictionary, optional
+        A dictionary with nodes as keys and positions as values.
+        If not specified a spring layout positioning will be computed.
+    ax : Matplotlib Axes object, optional
+        Draw the graph in specified Matplotlib axes.
+    node_colors : RGB tuple, optional
+        Color of nodes, by default ???.
+    node_alpha : float, optional
+        Transparency parameter for nodes, by default 0.3.
+    edge_colors : RGB tuple, optional
+        Color of edges, by default ???.
+    edge_alpha : float, optional
+        Transparency parameter for nodes, by default 0.2
+    """      
 
     if pos is None:
         pos = nx.spring_layout(G)
@@ -67,20 +88,34 @@ def plot_nx(G,
 
 def plot_dgm(dgm, 
         ax = None, 
-        return_figure = False, 
+        return_artist_obj = False,
         **kwargs):
     """Plots persistence diagram. 
-    
-    In case `ax` is `None`, a new matplotlib figure will be 
-    created and `**kwargs` will be passed on to `plt.subplots()`"""
+
+    Parameters
+    ----------
+    dgm : _type_
+        _description_
+    ax : Matplotlib Axes object, optional
+        Draw the graph in specified Matplotlib axes.
+        In ``None``, a new matplotlib figure will be created and 
+        ``**kwargs`` will be passed on to ``plt.subplots()``.
+    return_artist_obj : bool, optional
+        If `return_artist_obj` is `True`, returns all artist objects that 
+        have been created of modified. If a figure is created from scratch,
+        it will return a pair of ``(fig, ax)``, otherwise it will only return 
+        `ax`.
+
+    Returns
+    -------
+    See parameter ``return_artist_obj``.
+    """
     
     x,y = zip(*[(k.birth,k.death) for k in dgm])
     d = max(y)
 
-    if ax is not None:
-        return_data = 'Axis'
-    else:
-        return_data = 'Figure'
+    fig = None
+    if ax is None:
         fig, ax = plt.subplots(**kwargs)
         fig.patch.set_alpha(0)
 
@@ -96,16 +131,14 @@ def plot_dgm(dgm,
                          linewidth = 1,
                          linestyle = 'dashed')
 
-    if return_figure is True:
-        if return_data == 'Axis':
-            return ax
-        elif return_data == 'Figure':
-            return fig
+    return_data = _parse_return_data(return_artist_obj, fig, ax)
+    return return_data
 
 
-def plot_X(X, ax = None):
+def plot_X(X, ax = None, return_artist_obj = False):
     n_obs, n_vars = X.shape
     
+    fig = None
     if ax is None:
         fig, ax = plt.subplots()
         fig.patch.set_alpha(0)
@@ -115,16 +148,22 @@ def plot_X(X, ax = None):
         plt.scatter(x, y)
     
     ax_setup(ax)
-    ax.axis('off');
+    ax.axis('off')
+
+    return_data = _parse_return_data(return_artist_obj, fig, ax)
+    return return_data
+
 
 def plot_degree_distribution(G, 
                         ax = None, 
                         figsize = None,
-                        return_fig = False):
+                        return_artist_obj = False):
+
     degree_sequence = sorted([d for n, d in G.degree()])
     degreeCount = Counter(degree_sequence)
     degs, cnts = zip(*degreeCount.items())
 
+    fig = None
     if ax is None:
         if figsize is None:
             figsize = (8,6)
@@ -140,5 +179,14 @@ def plot_degree_distribution(G,
 
     ax_setup(ax)
 
-    if return_fig:
-        return plt.close(fig = fig)
+    return_data = _parse_return_data(return_artist_obj, fig, ax)
+    return return_data
+
+
+def _parse_return_data(return_artist_obj, fig, ax):
+    if not return_artist_obj:
+        return None
+    
+    return_data = tuple(obj for obj in (fig, ax) if obj is not None)
+
+    return return_data
