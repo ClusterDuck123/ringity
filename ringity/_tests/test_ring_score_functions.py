@@ -2,6 +2,7 @@ import anndata
 import unittest
 import numpy as np
 import ringity as rng
+import networkx as nx
 
 from scipy.spatial.distance import pdist, squareform
 
@@ -9,6 +10,7 @@ class TestPointCloud(unittest.TestCase):
     def setUp(self):
         self.X = np.random.uniform(size = [2**5, 3])
         self.D = squareform(pdist(self.X))
+        self.G = nx.erdos_renyi_graph(2**5, p = 0.25)
 
     def test_point_cloud_downstreams(self):
         pdgm_X_gen = rng.pdiagram(self.X)
@@ -35,6 +37,25 @@ class TestPointCloud(unittest.TestCase):
         self.assertTrue(score_D_gen == score_D_spe)
         self.assertTrue(score_D_spe == score_pdgm_gen)
         self.assertTrue(score_pdgm_gen == score_pdgm_spe)
+
+    def test_network_downstreams(self):
+        pdgm_G_gen = rng.pdiagram(self.G)
+        pdgm_G_spe = rng.pdiagram_from_network(self.G)
+        pdgm_G_net_gen = rng.pdiagram(self.G, metric = 'net_flow')
+        pdgm_G_net_spe = rng.pdiagram_from_network(self.G, metric = 'net_flow')
+
+        self.assertTrue(pdgm_G_gen == pdgm_G_spe)
+        self.assertTrue(pdgm_G_spe == pdgm_G_net_gen)
+        self.assertTrue(pdgm_G_net_gen == pdgm_G_net_spe)
+
+        score_G_gen = rng.ring_score(self.G)
+        score_G_spe = rng.ring_score_from_network(self.G)
+        score_G_net_gen = rng.ring_score(self.G, metric = 'net_flow')
+        score_G_net_spe = rng.ring_score_from_network(self.G, metric = 'net_flow')
+
+        self.assertTrue(score_G_gen == score_G_spe)
+        self.assertTrue(score_G_spe == score_G_net_gen)
+        self.assertTrue(score_G_net_gen == score_G_net_spe)
     
     def test_anndata(self):
         # adata = anndata.AnnData(self.X)

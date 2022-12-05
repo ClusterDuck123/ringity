@@ -222,7 +222,7 @@ def net_flow_old(G, efficiency='speed'):
 
     N = G.number_of_nodes()
     E = G.number_of_edges()
-    B = nx.incidence_matrix(G, oriented=True).T #shape=(nodes,edges)
+    B = nx.incidence_matrix(G, oriented=True).T # shape -> (nodes,edges)
 
     if   efficiency == 'memory':
         values = np.zeros(G.number_of_edges())

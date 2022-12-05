@@ -126,47 +126,47 @@ def ring_score_from_point_cloud(X,
     -------
     score : float, ring-score of given object.
     """
-    dgm = pdiagram_from_point_cloud(X,
+    pdgm = pdiagram_from_point_cloud(X,
                                 persistence = persistence,
                                 metric = metric,
                                 metric_params = metric_params,
                                 homology_dim = homology_dim,
                                 **kwargs)
-    return ring_score_from_pdiagram(dgm,
+    return ring_score_from_pdiagram(pdgm,
                                 flavour = flavour,
                                 base = base,
                                 nb_pers = nb_pers)
     
                                                
-def ring_score_from_network(X,
+def ring_score_from_network(G,
                         flavour = 'geometric',
                         base = None,
                         nb_pers = np.inf,
                         persistence = 'VietorisRipsPersistence',
-                        metric='euclidean',
-                        metric_params={},
+                        metric = 'net_flow',
+                        metric_params = {},
                         homology_dim = 1,
                         **kwargs):
     """Calculate ring score from network.
 
     Parameters
     ----------
-    X : networkx graph
+    G : networkx graph
 
     Returns
     -------
     score : float, ring-score of given object.
     """
-    dgm = pdiagram_from_point_cloud(X,
-                                    persistence = persistence,
-                                    metric = metric,
-                                    metric_params = metric_params,
-                                    homology_dim = homology_dim,
-                                    **kwargs)
-    return ring_score_from_pdiagram(dgm,
-                                    flavour = flavour,
-                                    base = base,
-                                    nb_pers = nb_pers)
+    pdgm = pdiagram_from_network(G,
+                            persistence = persistence,
+                            metric = metric,
+                            metric_params = metric_params,
+                            homology_dim = homology_dim,
+                            **kwargs)
+    return ring_score_from_pdiagram(pdgm,
+                                flavour = flavour,
+                                base = base,
+                                nb_pers = nb_pers)
                                     
                                     
 def ring_score_from_distance_matrix(D,
