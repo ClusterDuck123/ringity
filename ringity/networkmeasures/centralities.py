@@ -1,5 +1,4 @@
 from ringity.classes.exceptions import DisconnectedGraphError
-from scipy.sparse import csgraph
 from scipy.stats import rankdata
 from numba import njit
 
@@ -64,11 +63,14 @@ def net_flow(G,
     if not nx.is_connected(G):
         raise DisconnectedGraphError
 
-    A = nx.adjacency_matrix(G)
+    # The exact sparse representation is irrelevant from a speed
+    # perspective, but differs in the implementation below.
+    A_coo = nx.to_scipy_sparse_array(G, format = 'coo')
 
     # Inverted Laplacian is going to be dense anyways.
     # So there is no harm in working with dense matrices here.
-    L = csgraph.laplacian(A.astype(float)).toarray()
+    L = -A_coo.toarray()
+    np.fill_diagonal(L, A_coo.sum(axis = 1))
 
     # Removing first (or any other) row and corresponding column from the
     # Laplacian matrix leads to an invertible matrix if the graph is connected.
@@ -87,7 +89,6 @@ def net_flow(G,
 
     # The implementation here is optimized for COO sparse format, converting
     # CSR to COO is cheap.
-    A_coo = A.tocoo()
 
     row_idx, col_idx = map(np.array, zip(*((i,j)
                         for (i,j) in zip(A_coo.row, A_coo.col) if i<j)))

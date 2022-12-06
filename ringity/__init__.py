@@ -12,6 +12,7 @@ from ringity.networkmeasures.graphlet_coefficients import *
 from ringity.generators.network_models import network_model
 from ringity.core.phomology import vietoris_rips_from_point_cloud
 from ringity.core.genesets import get_cell_cycle_genes
+from ringity.core.statistics import *
 
 from ringity.readwrite.diagram import *
 from ringity.generators.pdiagrams import *
