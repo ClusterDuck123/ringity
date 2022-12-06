@@ -28,17 +28,17 @@ class TestDgmPt(unittest.TestCase):
 class TestDgm(unittest.TestCase):
     def setUp(self):
         self.number = random.random()
-        self.signal_pt = classes.pdiagram.PersistenceDiagramPoint((0, self.number))
-        self.noise_pt  = classes.pdiagram.PersistenceDiagramPoint((0, 0))
+        self.signal_pt = classes.pdiagram.PDiagramPoint((0, self.number))
+        self.noise_pt  = classes.pdiagram.PDiagramPoint((0, 0))
 
     def test_score1(self):
-        dgm = classes.pdiagram.PersistenceDiagram(self.signal_pt for _ in range(100))
+        dgm = classes.pdiagram.PDiagram(self.signal_pt for _ in range(100))
         self.assertAlmostEqual(dgm.ring_score(), 0, places = 8)
 
     def test_score2(self):
-        dgm = classes.pdiagram.PersistenceDiagram(self.noise_pt for _ in range(100))
+        dgm = classes.pdiagram.PDiagram(self.noise_pt for _ in range(100))
         dgm.append(self.signal_pt)
-        self.assertAlmostEqual(dgm.ring_score(), 1, places=8)
+        self.assertAlmostEqual(dgm.ring_score(), 1, places = 8)
 
     def test_birth_and_death_extractions(self):
         dgm = random_pdgm(100)

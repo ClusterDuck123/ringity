@@ -2,7 +2,6 @@ import umap
 import pandas as pd
 import plotly.express as px
 
-from ringity.plotting.styling import ax_setup
 from ringity.core.singlecell import _parse_var_names, _parse_obs_names
 
 def plot_dimreduction_from_anndata(adata, 

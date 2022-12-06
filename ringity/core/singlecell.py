@@ -1,11 +1,15 @@
-from ringity.core.ringscore_flavours import ring_score_from_sequence
-from ringity.core.ringscore_functions import (
-                                        pdiagram_from_point_cloud, 
-                                        ring_score_from_point_cloud)
+"""
+Module to deal with single cell data. Collects all related functions 
+from around the ringity package. Will probably become its own 
+subpackage at some point.
+"""
 
 import magic
 import numpy as np
 import scanpy as sc
+import ringity as rng
+
+from ringity.core.genesets import (get_canonical_gene_id, get_cell_cycle_genes)
 
 def ring_score_from_anndata(adata, 
                             var_names = None, 
@@ -29,7 +33,7 @@ def ring_score_from_anndata(adata,
     obs_names = _parse_obs_names(adata, obs_names)
         
     X = _parse_X(adata[obs_names, var_names])
-    score = ring_score_from_point_cloud(X, 
+    score = rng.ring_score_from_point_cloud(X, 
                             flavour = flavour, # NEEDS POTENTIALLY GENERALIZATION FOR LIST OF FLAVOURS
                             base = base)
     return score
@@ -60,8 +64,8 @@ def pdiagram_from_AnnData(
     var_names = _parse_var_names(adata, var_names)
     obs_names = _parse_obs_names(adata, obs_names)
     X = _parse_X(adata[obs_names, var_names])
-    dgm = pdiagram_from_point_cloud(X)
-    return dgm
+    pdgm = rng.pdiagram_from_point_cloud(X)
+    return pdgm
         
 
 def process_adata_from_counts(adata, 

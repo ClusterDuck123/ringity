@@ -26,7 +26,7 @@ class TestCurrentFlowCentrality(unittest.TestCase):
 
         G = nx.convert_node_labels_to_integers(G)
 
-        I = rng.current_flow_betweenness(G)
+        I = rng.networkmeasures.centralities.current_flow_betweenness(G)
         sample = set(np.round(I,3))
 
         self.assertEqual(sample, set([0.269, 0.333, 0.67]))
@@ -48,7 +48,7 @@ class TestCurrentFlowCentrality(unittest.TestCase):
 
         G = nx.convert_node_labels_to_integers(G)
 
-        I = rng.current_flow_betweenness(G)
+        I = rng.networkmeasures.centralities.current_flow_betweenness(G)
         sample = set(np.round(I,3))
 
         self.assertEqual(sample, set([0.194, 0.267, 0.316, 0.321, 0.361, 0.417, 0.471]))
@@ -60,17 +60,17 @@ class TestNetFlowCentrality(unittest.TestCase):
 
     def test_different_current_flow_matrix_calculations(self):
         A = nx.adjacency_matrix(self.G)
-        C = rng.prepotential(self.G)
-        B = rng.oriented_incidence_matrix(A).toarray()
+        C = rng.networkmeasures.centralities.prepotential(self.G)
+        B = rng.networkmeasures.centralities.oriented_incidence_matrix(A).toarray()
         F2 = B@C
-        F1 = rng.current_flow_matrix(A)
+        F1 = rng.networkmeasures.centralities.current_flow_matrix(A)
         equal = np.allclose(F1,F2)
         self.assertTrue(equal)
 
     def test_different_net_flow_calculations(self):
-        bb1 = rng.stupid_current_distance(self.G)
-        bb2 = rng.slow_current_distance(self.G)
-        bb3 = rng.net_flow(self.G)
+        bb1 = rng.networkmeasures.centralities.stupid_current_distance(self.G)
+        bb2 = rng.networkmeasures.centralities.slow_current_distance(self.G)
+        bb3 = rng.networkmeasures.centralities.net_flow(self.G)
 
         self.assertEqual(set(bb1),set(bb2))
         self.assertEqual(set(bb2),set(bb3))

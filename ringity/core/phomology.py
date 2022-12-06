@@ -1,6 +1,6 @@
 import numpy as np
 
-from ringity.classes.pdiagram import PersistenceDiagram
+from ringity.classes.pdiagram import PDiagram
 from gtda.homology import VietorisRipsPersistence
 
 def vietoris_rips_from_point_cloud(X,
@@ -24,4 +24,4 @@ def vietoris_rips_from_point_cloud(X,
                             reduced_homology = reduced_homology,
                             n_jobs = n_jobs)
     dgm = VR.fit_transform([X])[0]
-    return PersistenceDiagram.from_gtda(dgm)
+    return PDiagram.from_gtda(dgm)

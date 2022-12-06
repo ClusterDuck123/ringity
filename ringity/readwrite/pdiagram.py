@@ -1,11 +1,11 @@
 import numpy as np
-from ringity.classes.pdiagram import PersistenceDiagram
+from ringity.classes.pdiagram import PDiagram
 
 def read_pdiagram(fname, **kwargs):
     """
     Wrapper for numpy.genfromtxt.
     """
-    return PersistenceDiagram(np.genfromtxt(fname, **kwargs))
+    return PDiagram(np.genfromtxt(fname, **kwargs))
     
 def write_pdiagram(dgm, fname, **kwargs):
     """

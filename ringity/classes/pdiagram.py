@@ -1,15 +1,13 @@
 import warnings
 import numpy as np
+import ringity as rng
 
 from itertools import compress
-from itertools import starmap, islice
 from collections.abc import MutableMapping
-from ringity.plotting.plot_functions import plot_dgm
 from ringity.core.ringscore_flavours import ring_score_from_sequence
 from ringity.classes.exceptions import (
                                     SchroedingersException,
                                     TimeParadoxError,
-                                    BeginningOfTimeError,
                                     EndOfTimeError,
                                     SettingPersistenceError)
 
@@ -17,7 +15,7 @@ from ringity.classes.exceptions import (
 #  ------------------------------- DgmPt CLASS -------------------------------
 # =============================================================================
 
-class PersistenceDiagramPoint(tuple):
+class PDiagramPoint(tuple):
     def __init__(self, iterable):
 
         self._set_birth_death_pair(iterable)
@@ -60,7 +58,7 @@ class PersistenceDiagramPoint(tuple):
     def death(self, value):
         if value < self.birth:
             raise TimeParadoxError('Homology class cannot die before it was born! '
-                                  f'PersistenceDiagramPoint = ({self.birth}, {value})')
+                                  f'PDiagramPoint = ({self.birth}, {value})')
         self._death = float(value)
 
     @property
@@ -124,10 +122,10 @@ class PersistenceDiagramPoint(tuple):
 # =============================================================================
 #  -------------------------------- Dgm CLASS --------------------------------
 # =============================================================================
-class PersistenceDiagram(list):
+class PDiagram(list):
     def __init__(self, iterable = (), dim = None):
 
-        super().extend(sorted(map(PersistenceDiagramPoint, iterable), reverse=True))
+        super().extend(sorted(map(PDiagramPoint, iterable), reverse=True))
         self.dim = dim
 
     @classmethod
@@ -182,7 +180,7 @@ class PersistenceDiagram(list):
         return other
     
     def append(self, item):
-        list.append(self, PersistenceDiagramPoint(item))
+        list.append(self, PDiagramPoint(item))
         self.sort(reverse=True)
 
     def trimmed(self, length = None):
@@ -216,11 +214,11 @@ class PersistenceDiagram(list):
 
     def plot(self, 
             ax = None, 
-            return_figure = False, 
+            return_artist_obj = False, 
             **kwargs):
-        return plot_dgm(self, 
+        return rng.plot_dgm(self, 
                     ax = ax, 
-                    return_figure = return_figure, 
+                    return_artist_obj = return_artist_obj, 
                     **kwargs)
 
 # ----------------------------- Dunder Method ------------------------------
@@ -231,7 +229,7 @@ class PersistenceDiagram(list):
         try:
             item_iter = iter(item)
         except TypeError:
-            return PersistenceDiagramPoint(super().__getitem__(item))
+            return PDiagramPoint(super().__getitem__(item))
         try:
             return type(self)(super().__getitem__(item_iter))
         except TypeError:
@@ -324,8 +322,8 @@ def load_dgm(fname=None, **kwargs):
         warnings.simplefilter("always")
         dgm_array = np.genfromtxt(fname, **kwargs)
         if len(w) == 0:
-            return PersistenceDiagram(dgm_array)
+            return PDiagram(dgm_array)
         elif issubclass(w[-1].category, UserWarning):
-            return PersistenceDiagram()
+            return PDiagram()
         else:
             raise Exception

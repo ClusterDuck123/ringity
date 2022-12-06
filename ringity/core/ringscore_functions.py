@@ -1,6 +1,6 @@
 from ringity.core.ringscore_flavours import ring_score_from_sequence
 from ringity.networkmeasures.centralities import net_flow, resistance
-from ringity.classes.pdiagram import PersistenceDiagram
+from ringity.classes.pdiagram import PDiagram
 from ringity.readwrite.prompts import _yes_or_no
 from ringity.classes.exceptions import UnknownGraphType
 from ringity.networkmeasures import centralities
@@ -83,7 +83,7 @@ def pdiagram(arg,
 
     if isinstance(arg, nx.Graph):
         pdgm = diagram(arg)
-    elif isinstance(arg, PersistenceDiagram):
+    elif isinstance(arg, PDiagram):
         pdgm = arg
     elif isinstance(arg, np.ndarray) or isinstance(arg, scipy.sparse.spmatrix):
         if argtype == 'suggest':
@@ -176,7 +176,7 @@ def ring_score_from_distance_matrix(D,
                                 base = None,
                                 flavour = 'geometric',
                                 **kwargs):
-    """Calculates ring-score from a PersistenceDiagram object."""
+    """Calculates ring-score from a PDiagram object."""
     dgm = pdiagram_from_distance_matrix(D,
                                     persistence = persistence,
                                     homology_dim = homology_dim,
@@ -191,7 +191,7 @@ def ring_score_from_pdiagram(dgm,
                              flavour = 'geometric',
                              nb_pers = np.inf,
                              base = None):
-    """Calculates ring-score from a PersistenceDiagram object."""
+    """Calculates ring-score from a PDiagram object."""
     return ring_score_from_sequence(dgm.sequence,
                                     flavour = flavour,
                                     nb_pers = nb_pers,
@@ -206,7 +206,7 @@ def pdiagram_from_point_cloud(X,
                               metric_params = {},
                               homology_dim = 1,
                               **kwargs):
-    """Constructs a PersistenceDiagram object from a point cloud.
+    """Constructs a PDiagram object from a point cloud.
     
     This function wraps persistent homolgy calculation from giotto-tda."""
     
@@ -217,7 +217,7 @@ def pdiagram_from_point_cloud(X,
                                      homology_dimensions = tuple(range(homology_dim+1)),
                                      **kwargs)
         dgm = VR.fit_transform([X])[0]
-    return PersistenceDiagram.from_gtda(dgm, homology_dim = homology_dim)   
+    return PDiagram.from_gtda(dgm, homology_dim = homology_dim)   
     
     
 def pdiagram_from_network(G, 
@@ -228,7 +228,7 @@ def pdiagram_from_network(G,
                         overwrite_weights = False,
                         verbose = False,
                         **kwargs):
-    """Constructs a PersistenceDiagram object from a networkx graph.
+    """Constructs a PDiagram object from a networkx graph.
     
     This function is not available yet. NEEDS TESTING!!!! """
 
@@ -268,14 +268,14 @@ def pdiagram_from_distance_matrix(D,
                                 persistence = 'VietorisRipsPersistence',
                                 homology_dim = 1,
                                 **kwargs):
-    """Constructs a PersistenceDiagram object from a distance matrix.
+    """Constructs a PDiagram object from a distance matrix.
     """
     if persistence == 'VietorisRipsPersistence':
         VR = VietorisRipsPersistence(metric = "precomputed",
                                      homology_dimensions = tuple(range(homology_dim+1)),
                                      **kwargs)
         dgm = VR.fit_transform([D])[0]
-    return PersistenceDiagram.from_gtda(dgm, homology_dim = homology_dim)         
+    return PDiagram.from_gtda(dgm, homology_dim = homology_dim)         
 
 
 # =============================================================================
@@ -351,7 +351,7 @@ def diagram(arg1 = None,
     VR = VietorisRipsPersistence(metric = 'precomputed',
                                  homology_dimensions = list(range(p+1)))
     dgm = VR.fit_transform([np.array(D)])[0]
-    dgm = PersistenceDiagram.from_gtda(dgm)
+    dgm = PDiagram.from_gtda(dgm)
     t2 = time.time()
 
     if verbose:
