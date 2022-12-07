@@ -1,5 +1,5 @@
 import scanpy as sc
-import ringity as rng
+import ringity.core.singlecell as rsc
 
 # Single cell RNA-seq of three human melanoma cell lines: Ma-Mel-123, Ma-Mel-108 and Ma-Mel-93
 experiment = "E-GEOD-81383"
@@ -8,10 +8,11 @@ experiment = "E-GEOD-81383"
 adata = sc.datasets.ebi_expression_atlas(experiment)
 
 # Get cell cycle genes
-cc_genes = rng.get_cell_cycle_genes(gene_id = 'ensembl')
+cc_genes = rsc.get_cell_cycle_genes(gene_id = 'ensembl')
 
 # Calculate ring score of subspace
 for cell_line in adata.obs["Sample Characteristic[cell line]"].unique():
     adata_cl = adata[adata.obs["Sample Characteristic[cell line]"] == cell_line]
-    ring_score = rng.ring_score(adata_cl[:,cc_genes].X)
+    ring_score = rsc.ring_score_from_anndata(adata_cl, 
+                                                    var_names = cc_genes)
     print(f"{cell_line}: {ring_score}")
