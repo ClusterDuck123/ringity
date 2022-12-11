@@ -1,6 +1,6 @@
-from ringity.core.ringscore_flavours import ring_score_from_sequence
-from ringity.networkmeasures.centralities import net_flow, resistance
 from ringity.classes.pdiagram import PDiagram
+from ringity.core.metric2ringscore import ring_score_from_sequence
+from ringity.networkmeasures.centralities import net_flow, resistance
 from ringity.readwrite.prompts import _yes_or_no
 from ringity.classes.exceptions import UnknownGraphType
 from ringity.networkmeasures import centralities
@@ -20,7 +20,7 @@ def ring_score(arg,
             nb_pers = np.inf,
             verbose = False,
             **kwargs):
-    """Calculate pdiagram from various data structures.
+    """Calculate pdiagram from given data structures.
 
     Generic function to calculate ring score by calling another appropriate
     ring score function:
@@ -57,7 +57,7 @@ def pdiagram(arg,
             argtype = 'suggest',
             verbose = False,
             **kwargs):
-    """Calculate ring score from various data structures.
+    """Calculate ring score from given data structures.
 
     Generic function to calculate persistence diagram by calling another appropriate
     pdiagram function:
@@ -281,6 +281,45 @@ def pdiagram_from_distance_matrix(D,
 # =============================================================================
 #  -------------------------- AUXILIARY FUNCTIONS ----------------------------
 # =============================================================================
+def SPL(A):
+    """Calculates all shortest path lengths from a given adjacency matrix.
+    
+    THIS CODE IS MODIFIED FROM NETWORKX UNDER THE 3-CLAUSE BSD LICENSE."""
+    
+    #CHECK IF VALID
+    
+    D = np.where(A == 0, np.inf, A)
+    np.fill_diagonal(D, 0)
+    for i in range(len(D)):
+        di = D[i].reshape(1, -1)
+        D = np.minimum(D, di + di.T)    
+    return D
+
+def transform_to_metric_space(G, metric):
+    edge_dict = nx.get_edge_attributes(G, metric)
+    if edge_dict:
+        pass
+        #DO SOMETHING
+    if metric.lower() == 'net_flow':
+        needs_extension = True
+        edge_dict = centralities.net_flow(G, inplace = False)
+        D = extend_to_metric_space(edge_dict)
+    if metric.lower() == 'resistance':
+        D = centralities.resistance(G)
+    else:
+        raise Exception(f'Centrality measure {metric} unknown!')
+
+def extend_to_metric_space(data, weight):
+    if isinstance(data, nx.Graph):
+        G  = data
+    elif isinstance(data, dict):
+        pass
+        #TURN `data` INTO A GRAPH!
+    else:
+        raise Exception(f'Unknown how to extend data type {type(data)} '
+                        f'to metric space.')
+    D = nx.floyd_warshall_numpy(G, weight = weight)
+    return D
 
 def calculate_weights(G, metric,
                 inplace = False,
@@ -292,12 +331,17 @@ def calculate_weights(G, metric,
 
     # TO-DO: WHAT HAPPENS WHEN WEIGHT NAME ALREADY EXISTS?
     
-    if metric == 'net_flow':
+    if metric.lower() == 'net_flow':
+        needs_extension = True
         return centralities.net_flow(G, 
                                 inplace = inplace,
                                 new_weight_name = new_weight_name)
-
-    pass
+    if metric.lower() == 'resistance':
+        return centralities.resistance(G, 
+                                inplace = inplace,
+                                new_weight_name = new_weight_name)
+    else:
+        raise Exception("Centrality measure {metric} unknown!")
 
 
 # =============================================================================

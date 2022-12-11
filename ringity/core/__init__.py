@@ -1,5 +1,5 @@
 #FUNCTIONS
-from ringity.core.ringscore_functions import (
+from ringity.core.pipeline import (
                     pdiagram, 
                     pdiagram_from_network,
                     pdiagram_from_point_cloud,
@@ -12,9 +12,9 @@ from ringity.core.ringscore_functions import (
 
                     ring_score_from_pdiagram
                     )
-from ringity.core.ringscore_flavours import ring_score_from_sequence
+from ringity.core.metric2ringscore import ring_score_from_sequence
 
 
 # MODULES
 import ringity.core.statistics as statistics
-import ringity.core.singlecell as singlecell
+import ringity.singlecell.singlecell as singlecell

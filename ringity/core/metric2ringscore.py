@@ -30,8 +30,6 @@ def ring_score_from_sequence(seq,
 #  -------------------------- RING SCORE FLAVOURS ----------------------------
 # =============================================================================
 
-
-
 def gap_ring_score(seq):
     """"Calculates gap ring score from sequence of positive numbers.
 

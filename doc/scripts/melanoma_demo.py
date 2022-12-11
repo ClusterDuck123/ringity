@@ -1,5 +1,5 @@
 import scanpy as sc
-import ringity.core.singlecell as rsc
+import ringity.singlecell.singlecell as rsc
 
 # Single cell RNA-seq of three human melanoma cell lines: Ma-Mel-123, Ma-Mel-108 and Ma-Mel-93
 experiment = "E-GEOD-81383"

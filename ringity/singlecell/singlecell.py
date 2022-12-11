@@ -9,8 +9,6 @@ import numpy as np
 import scanpy as sc
 import ringity as rng
 
-from ringity.core.genesets import (get_canonical_gene_id, get_cell_cycle_genes)
-
 def ring_score_from_anndata(adata, 
                             var_names = None, 
                             obs_names = None, 
@@ -39,7 +37,7 @@ def ring_score_from_anndata(adata,
     return score
 
 
-def pdiagram_from_AnnData(
+def pdiagram_from_anndata(
                         adata,
                         var_names = None, 
                         obs_names = None, 

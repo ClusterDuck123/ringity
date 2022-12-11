@@ -1,0 +1,57 @@
+import scipy
+import numpy as np
+import networkx as nx
+
+from scipy.sparse.csgraph import floyd_warshall
+from scipy.spatial.distance import pdist, squareform, is_valid_dm
+
+def pwdistance(data, 
+            data_structure = 'suggest', 
+            metric = None,
+            verbose = False,):
+    """Calculates pairwise distances from given data structure."""
+    
+    if isinstance(data, nx.Graph):
+        D = pwdistance_from_network(G, metric = metric)
+    if isinstance(data, np.ndarray) or isinstance(data, scipy.sparse.spmatrix):
+        if data_structure == 'suggest':
+            if is_valid_dm(data):
+                data_structure = 'adjacency matrix'
+            else:
+                data_structure = 'point cloud'
+            if verbose:
+                print(f"`data_structure` was set to {data_structure}")
+                
+        if data_structure == 'point cloud':
+            D = pwdistance_from_point_cloud(metric, verbose)
+        elif data_structure == 'adjacency matrix':
+            D = pwdistance_from_adjacency_matrix(data)
+        else:
+            raise Exception(f"Data structure `{data_structure} unknown.")
+    else:
+        raise Exception(f"Data type `{type(data)} unknown.")
+
+def pwdistance_from_point_cloud(X, 
+                            metric = 'euclidean', 
+                            verbose = False):
+    if metric is None:
+        metric = 'euclidean'
+    D = squareform(pdist(X.T, metric = metric))
+    return D
+
+def pwdistance_from_adjacency_matrix(A, 
+                                verbose = False):
+    """Uses Floyd-Warshall algorithm to calculate all shortest path length matrix 
+    from a given adjacency matrix.
+    """
+    is_valid = is_valid_dm(A)
+    if not is_valid:
+        raise ValueError('Adjacency matrix `A` must be symmetric and have zeros on the diagonal.')
+    D = floyd_warshall(A)
+    return D
+
+def pwdistance_from_network(G, 
+                        metric = 'net_flow',
+                        verbose = False):
+    if metric is None:
+        metric = 'net_flow'

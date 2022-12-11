@@ -19,7 +19,7 @@ from ringity.core import (
                     )
 
 # MODULES
-from ringity.core import (statistics, singlecell)
+from ringity.core import (statistics)
 
 from ringity.generators import (
                     random_pdgm,
@@ -31,6 +31,8 @@ from ringity.plotting import (plot, plot_nx, plot_dgm)
 from ringity.readwrite.pdiagram import (write_pdiagram, read_pdiagram)
 
 import sys
+
+from ringity.singlecell import singlecell
 
 # Check for appropriate Python version
 if sys.version_info[:2] < (3, 6):

@@ -3,6 +3,10 @@ import numpy as np
 from ringity.classes.pdiagram import PDiagram
 from gtda.homology import VietorisRipsPersistence
 
+# =============================================================================
+#  ----------------------- VIETORIS-RIPS PERSISTENCE -------------------------
+# =============================================================================
+
 def vietoris_rips_from_point_cloud(X,
                             metric = 'euclidean',
                             metric_params = {},
@@ -25,3 +29,4 @@ def vietoris_rips_from_point_cloud(X,
                             n_jobs = n_jobs)
     dgm = VR.fit_transform([X])[0]
     return PDiagram.from_gtda(dgm)
+
