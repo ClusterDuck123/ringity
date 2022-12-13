@@ -3,7 +3,7 @@ from ringity.core.metric2ringscore import ring_score_from_sequence
 from ringity.networkmeasures.centralities import net_flow, resistance
 from ringity.readwrite.prompts import _yes_or_no
 from ringity.classes.exceptions import UnknownGraphType
-from ringity.networkmeasures import centralities
+from ringity.core.data2metric import pwdistance_from_network
 
 from gtda.homology import VietorisRipsPersistence
 from scipy.spatial.distance import is_valid_dm
@@ -13,6 +13,9 @@ import numpy as np
 import networkx as nx
 import scipy.sparse
 
+# -----------------------------------------------------------------------------    
+# -------------------- GENERIC PDIAGRAM AND SCORE FUNCTION --------------------
+# ----------------------------------------------------------------------------- 
 def ring_score(arg,
             argtype = 'suggest',
             flavour = 'geometric',
@@ -52,6 +55,7 @@ def ring_score(arg,
                                 base = base,
                                 nb_pers = nb_pers)
     return score
+
 
 def pdiagram(arg,
             argtype = 'suggest',
@@ -105,15 +109,15 @@ def pdiagram(arg,
     return pdgm
                                                         
 # -----------------------------------------------------------------------------    
-# ---------------------------- RING SCORE FUNCTIONS ---------------------------
+# --------------------- DATA SPECIFIC RING SCORE FUNCTIONS --------------------
 # -----------------------------------------------------------------------------     
 def ring_score_from_point_cloud(X,
                             flavour = 'geometric',
                             base = None,
                             nb_pers = np.inf,
                             persistence = 'VietorisRipsPersistence',
-                            metric='euclidean',
-                            metric_params={},
+                            metric = 'euclidean',
+                            metric_params = {},
                             homology_dim = 1,
                             **kwargs):
     """Calculate ring score from point cloud.
@@ -176,7 +180,29 @@ def ring_score_from_distance_matrix(D,
                                 base = None,
                                 flavour = 'geometric',
                                 **kwargs):
-    """Calculates ring-score from a PDiagram object."""
+    """Calculates ring-score from a PDiagram object.
+
+    Parameters
+    ----------
+    D : _type_
+        _description_
+    persistence : str, optional
+        _description_, by default 'VietorisRipsPersistence'
+    homology_dim : int, optional
+        _description_, by default 1
+    nb_pers : _type_, optional
+        _description_, by default np.inf
+    base : _type_, optional
+        _description_, by default None
+    flavour : str, optional
+        _description_, by default 'geometric'
+
+    Returns
+    -------
+    _type_
+        _description_
+    """                                
+    
     dgm = pdiagram_from_distance_matrix(D,
                                     persistence = persistence,
                                     homology_dim = homology_dim,
@@ -222,47 +248,42 @@ def pdiagram_from_point_cloud(X,
     
 def pdiagram_from_network(G, 
                         metric = 'net_flow', 
-                        use_weights = True,
-                        store_weights = True,
+                        use_weights = None,
+                        store_weights = None,
                         new_weight_name = None,
                         overwrite_weights = False,
                         verbose = False,
                         **kwargs):
     """Constructs a PDiagram object from a networkx graph.
-    
-    This function is not available yet. NEEDS TESTING!!!! """
 
-    if nx.get_edge_attributes(G, metric) and use_weights:
-        weight = metric
-        if verbose and use_weights:
-            print(f"Weights named `{metric}` detected. " 
-                  f"They will be used for distance calculation.")
-    else:
-        if verbose and use_weights:
-            print(f"No weights named `{metric}` detected. " 
-                  f"New weights will be calculcated.")
-        if not store_weights:
-            new_weight_name = '-'.join(str(np.random.randint(2**20)) for _ in range(10))
-        
-        calculate_weights(G, metric, 
-                    inplace = True,
-                    new_weight_name = new_weight_name,
-                    verbose = verbose)
-        
-        weight = metric if new_weight_name is None else new_weight_name
+    This function is not available yet. NEEDS TESTING!!!! 
 
+    Parameters
+    ----------
+    G : _type_
+        _description_
+    metric : str, optional
+        _description_, by default 'net_flow'
+    use_weights : bool, optional
+        _description_, by default None
+    store_weights : bool, optional
+        Weights will only be stored if a centrality measure is 
+        used for distance calculations! By default None.
+    new_weight_name : _type_, optional
+        _description_, by default None
+    overwrite_weights : bool, optional
+        _description_, by default False
+    verbose : bool, optional
+        _description_, by default False
 
-    t1 = time.time()
-    D  = nx.floyd_warshall_numpy(G, weight = weight)
-    t2 = time.time()
+    Returns
+    -------
+    _type_
+        _description_
+    """
 
-    if not store_weights:
-        DELETE_WEIGHTS
-
-    if verbose:
-        print(f'Time for SPL calculation: {t2-t1:.6f} sec')
+    D = pwdistance_from_network(G, metric = metric, verbose = verbose)
     return pdiagram_from_distance_matrix(D)
-    
     
 def pdiagram_from_distance_matrix(D, 
                                 persistence = 'VietorisRipsPersistence',
@@ -276,73 +297,6 @@ def pdiagram_from_distance_matrix(D,
                                      **kwargs)
         dgm = VR.fit_transform([D])[0]
     return PDiagram.from_gtda(dgm, homology_dim = homology_dim)         
-
-
-# =============================================================================
-#  -------------------------- AUXILIARY FUNCTIONS ----------------------------
-# =============================================================================
-def SPL(A):
-    """Calculates all shortest path lengths from a given adjacency matrix.
-    
-    THIS CODE IS MODIFIED FROM NETWORKX UNDER THE 3-CLAUSE BSD LICENSE."""
-    
-    #CHECK IF VALID
-    
-    D = np.where(A == 0, np.inf, A)
-    np.fill_diagonal(D, 0)
-    for i in range(len(D)):
-        di = D[i].reshape(1, -1)
-        D = np.minimum(D, di + di.T)    
-    return D
-
-def transform_to_metric_space(G, metric):
-    edge_dict = nx.get_edge_attributes(G, metric)
-    if edge_dict:
-        pass
-        #DO SOMETHING
-    if metric.lower() == 'net_flow':
-        needs_extension = True
-        edge_dict = centralities.net_flow(G, inplace = False)
-        D = extend_to_metric_space(edge_dict)
-    if metric.lower() == 'resistance':
-        D = centralities.resistance(G)
-    else:
-        raise Exception(f'Centrality measure {metric} unknown!')
-
-def extend_to_metric_space(data, weight):
-    if isinstance(data, nx.Graph):
-        G  = data
-    elif isinstance(data, dict):
-        pass
-        #TURN `data` INTO A GRAPH!
-    else:
-        raise Exception(f'Unknown how to extend data type {type(data)} '
-                        f'to metric space.')
-    D = nx.floyd_warshall_numpy(G, weight = weight)
-    return D
-
-def calculate_weights(G, metric,
-                inplace = False,
-                new_weight_name = None,
-                verbose = False):
-    
-    if new_weight_name is None:
-        new_weight_name = metric
-
-    # TO-DO: WHAT HAPPENS WHEN WEIGHT NAME ALREADY EXISTS?
-    
-    if metric.lower() == 'net_flow':
-        needs_extension = True
-        return centralities.net_flow(G, 
-                                inplace = inplace,
-                                new_weight_name = new_weight_name)
-    if metric.lower() == 'resistance':
-        return centralities.resistance(G, 
-                                inplace = inplace,
-                                new_weight_name = new_weight_name)
-    else:
-        raise Exception("Centrality measure {metric} unknown!")
-
 
 # =============================================================================
 #  -------------------------------- LEGACY ----------------------------------
