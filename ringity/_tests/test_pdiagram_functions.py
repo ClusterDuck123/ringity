@@ -4,7 +4,7 @@ import networkx as nx
 
 from ringity.networkmeasures.centralities import net_flow
 from ringity.classes.exceptions import DisconnectedGraphError
-from ringity.core.pipeline import diagram
+from ringity._legacy.pipeline import diagram
 
 """THIS MODULE NEEDS TO BE UPDATED!!"""
 
@@ -39,10 +39,7 @@ class TestDiagramFunction(unittest.TestCase):
     def test_pathological_cases(self):
         pass
 
-    def test_distance_matrix_flag_use_weight_compability(self):
-        pass
-
-    def test_distance_matrix_flag_vs_use_weight_with_zero_entries(self):
+    def test_zero_weight_compability(self):
         pass
 
     def test_disconnection_error(self):
