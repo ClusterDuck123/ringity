@@ -3,11 +3,12 @@ import numpy as np
 import ringity as rng
 import networkx as nx
 
-from ringity.generators.utils.param_utils import (infer_density_parameter,
-                                                infer_rate_parameter,
-                                                infer_response_parameter,
-                                                infer_coupling_parameter,
-                                                beta_to_rate)
+from ringity.generators.utils.param_utils import (
+                                        infer_density_parameter,
+                                        infer_rate_parameter,
+                                        infer_response_parameter,
+                                        infer_coupling_parameter,
+                                        beta_to_rate)
 
 class TestExponentialNetworkModel(unittest.TestCase):
     def setUp(self):
@@ -106,70 +107,7 @@ class TestExponentialNetworkModel(unittest.TestCase):
                                 mean_density, 
                                 self.density, 
                                 rtol=1e-01))
-        
-        G_rho = rng.network_model(
-                                N = self.N,
-                                alpha = self.response,
-                                beta = self.beta,
-                                rho = self.density,
-                                random_state = self.random_state)
-        self.assertTrue(nx.is_isomorphic(G_density, G_rho))
-        
-    def test_density_calculation(self):
-        G_gen = (rng.network_model(
-                                N = self.N,
-                                response = self.response ,
-                                beta = self.beta,
-                                coupling = self.coupling,
-                          ) for _ in range(2**5))
-                          
-        mean_density = np.mean(list(map(nx.density, G_gen)))
-        
-        self.assertTrue(np.isclose(
-                                mean_density, 
-                                self.density, 
-                                rtol=1e-01))
-        
-        G_K = rng.network_model(
-                                N = self.N,
-                                alpha = self.response,
-                                beta = self.beta,
-                                K = self.coupling,
-                                random_state = self.random_state)
-        self.assertTrue(nx.is_isomorphic(self.G, G_c))
-        self.assertTrue(nx.is_isomorphic(self.G, G_K))
-        
-    def test_density_parameter_consistency(self):
-        G_density = rng.network_model(
-                                N = self.N,
-                                alpha = self.response,
-                                beta = self.beta,
-                                density = self.density,
-                                random_state = self.random_state)
-        
-        G_rho = rng.network_model(
-                                N = self.N,
-                                alpha = self.response,
-                                beta = self.beta,
-                                rho = self.density,
-                                random_state = self.random_state)
-        self.assertTrue(nx.is_isomorphic(G_density, G_rho))
-        
-    def test_density_calculation(self):
-        G_gen = (rng.network_model(
-                                N = self.N,
-                                response = self.response ,
-                                beta = self.beta,
-                                coupling = self.coupling,
-                          ) for _ in range(2**5))
-                          
-        mean_density = np.mean(list(map(nx.density, G_gen)))
-        
-        self.assertTrue(np.isclose(
-                                a = mean_density, 
-                                b = self.density, 
-                                rtol = 1e-01))
-        
+             
     def test_parameter_inference(self):
         response = infer_response_parameter(
                                 rate = self.rate,

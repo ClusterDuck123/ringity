@@ -1,6 +1,5 @@
 import numpy as np
 import networkx as nx
-import plotly.express as px
 import matplotlib.pyplot as plt
 
 from collections import Counter

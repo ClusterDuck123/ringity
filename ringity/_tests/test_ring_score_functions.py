@@ -1,4 +1,3 @@
-import anndata
 import unittest
 import numpy as np
 import ringity as rng

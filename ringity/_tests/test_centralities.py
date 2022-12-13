@@ -1,12 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jul  5 19:05:19 2018
-
-@author: myoussef
-"""
-
-
 import unittest
 import numpy as np
 import ringity as rng
@@ -79,13 +70,6 @@ class TestNetFlowCentrality(unittest.TestCase):
         precision = 1e-10
         self.assertTrue(all([abs(bb1[key]-bb2[key]) < precision for key in bb1.keys()]))
         self.assertTrue(all([abs(bb2[key]-bb3[key]) < precision for key in bb1.keys()]))
-
-    # def test_memory_speed_compability(self):
-    #     edge_dict1 = rng.net_flow(self.G, efficiency = 'memory')
-    #     edge_dict2 = rng.net_flow(self.G, efficiency = 'speed')
-    # 
-    #     np.testing.assert_allclose(np.array(list(edge_dict1.values())), 
-    #                                np.array(list(edge_dict2.values())))
 
 
 if __name__ == '__main__':

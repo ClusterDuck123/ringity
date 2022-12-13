@@ -46,7 +46,7 @@ def ring_score(arg,
             **kwargs)
 
     score = ring_score_from_pdiagram(
-                                dgm = pdgm,
+                                pdgm = pdgm,
                                 flavour = flavour,
                                 base = base,
                                 nb_pers = nb_pers)
@@ -98,9 +98,9 @@ def pdiagram(arg,
         elif argtype == 'distance matrix':
             pdgm  = pdiagram_from_distance_matrix(arg, **kwargs)
         else:
-            raise Exception(f"Argtype `{argtype} unknown")
+            raise Exception(f"Argtype `{argtype} unknown.")
     else:
-        raise Exception
+        raise Exception(f"Data structure `{type(arg)} unknown.")
 
     return pdgm
                                                         
@@ -199,25 +199,25 @@ def ring_score_from_distance_matrix(D,
         _description_
     """                                
     
-    dgm = pdiagram_from_distance_matrix(D,
+    pdgm = pdiagram_from_distance_matrix(D,
                                     persistence = persistence,
                                     homology_dim = homology_dim,
                                     **kwargs)
-    return ring_score_from_pdiagram(dgm,
+    return ring_score_from_pdiagram(pdgm,
                                     flavour = flavour,
                                     base = base,
                                     nb_pers = nb_pers)
                             
                                     
-def ring_score_from_pdiagram(dgm,
+def ring_score_from_pdiagram(pdgm,
                              flavour = 'geometric',
                              nb_pers = np.inf,
                              base = None):
     """Calculates ring-score from a PDiagram object."""
-    return ring_score_from_sequence(dgm.sequence,
+    return ring_score_from_sequence(pdgm.sequence,
                                     flavour = flavour,
                                     nb_pers = nb_pers,
-                                    base = None)
+                                    base = base)
                                                
 # -----------------------------------------------------------------------------    
 # ----------------------- PERSISTENCE DIAGRAM FUNCTIONS -----------------------
@@ -238,8 +238,8 @@ def pdiagram_from_point_cloud(X,
                                      metric_params = metric_params,
                                      homology_dimensions = tuple(range(homology_dim+1)),
                                      **kwargs)
-        dgm = VR.fit_transform([X])[0]
-    return PDiagram.from_gtda(dgm, homology_dim = homology_dim)   
+        pdgm = VR.fit_transform([X])[0]
+    return PDiagram.from_gtda(pdgm, homology_dim = homology_dim)   
     
     
 def pdiagram_from_network(G, 
@@ -291,5 +291,5 @@ def pdiagram_from_distance_matrix(D,
         VR = VietorisRipsPersistence(metric = "precomputed",
                                      homology_dimensions = tuple(range(homology_dim+1)),
                                      **kwargs)
-        dgm = VR.fit_transform([D])[0]
-    return PDiagram.from_gtda(dgm, homology_dim = homology_dim)
+        pdgm = VR.fit_transform([D])[0]
+    return PDiagram.from_gtda(pdgm, homology_dim = homology_dim)
