@@ -57,6 +57,7 @@ def pwdistance_from_network(G,
                         metric = 'net_flow', 
                         use_weights = None,
                         store_weights = True,
+                        remove_self_loops = True,
                         new_weight_name = None,
                         overwrite_weights = False,
                         verbose = False,
@@ -88,6 +89,11 @@ def pwdistance_from_network(G,
     """                        
     if not store_weights:
         G = G.copy()
+
+    if (nx.number_of_selfloops(G) > 0) and remove_self_loops:
+        if verbose:
+            print('Self loops in graph detected. They will be removed!')
+        G.remove_edges_from(nx.selfloop_edges(G))
 
     # Check if metric is stored as edge attribute
     induction_status = _check_weight_induction(G, 

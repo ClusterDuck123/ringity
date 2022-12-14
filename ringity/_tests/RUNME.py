@@ -1,7 +1,6 @@
 from test_classes import *
 from test_methods import *
 from test_main_score import *
-from _legacy_test_conversions import *
 from test_centralities import *
 from test_network_model import *
 from test_pdiagram_functions import *
