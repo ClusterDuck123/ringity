@@ -15,7 +15,12 @@ from ringity.core import (
                     ring_score_from_distance_matrix,
 
                     ring_score_from_sequence,
-                    ring_score_from_pdiagram
+                    ring_score_from_pdiagram,
+
+                    pwdistance,
+                    pwdistance_from_network,
+                    pwdistance_from_point_cloud,
+                    pwdistance_from_adjacency_matrix
                     )
 
 # MODULES

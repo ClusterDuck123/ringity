@@ -112,7 +112,7 @@ def pwdistance_from_network(G,
         D = floyd_warshall(A)
     else:
         if metric == 'resistance':
-            return centralities.resistance(D)
+            D = centralities.resistance(G)
         elif metric == 'SPL':
             A = nx.to_numpy_array(G, weight = None)
             D = floyd_warshall(A)

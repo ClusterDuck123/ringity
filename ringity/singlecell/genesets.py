@@ -7,11 +7,11 @@ from  pathlib import Path
 This module is for supplementary material needed in demonstrations of ringity.
 """
 
-def get_canonical_gene_id(gene_id):
+def _get_canonical_gene_id(gene_id):
     """Convert string to match ringity-conventions of gene id names."""
-    gene_id = gene_id.lower()
+    gene_id = gene_id.upper()
     gene_id = ''.join(filter(str.isalnum, gene_id))
-    gene_id = re.sub('id|gene', '', gene_id)
+    gene_id = re.sub('ID|GENE', '', gene_id)
     return gene_id
 
 def get_cell_cycle_genes(geneset = 'TIROSH_ALL_MARKERS', gene_id = 'SYMBOL'):
