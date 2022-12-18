@@ -8,11 +8,16 @@ from scipy.spatial.distance import pdist, squareform
 
 def annulus(N, r, dist_th,
         noise = 0,
-        seed = 0):
+        return_point_cloud = False,
+        seed = None):
     """Construct geometric network from uniformly sampled annulus."""
     X = point_clouds.annulus(N = N, r = r, noise = noise, seed = seed)
     G = from_point_cloud(X, dist_th)
-    return G
+    
+    if return_point_cloud:
+        return G, X
+    else:
+        return G
 
 
 def from_point_cloud(X, dist_th, 

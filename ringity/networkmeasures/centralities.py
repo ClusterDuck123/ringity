@@ -7,6 +7,22 @@ import scipy.stats
 import numpy as np
 import networkx as nx
 
+def current_flow(G,
+        inplace = False,
+        new_weight_name = None,
+        verbose = False):
+    
+    N = len(G)
+    edge_dict = net_flow(G, inplace = False)
+    edge_dict = {e : v/((N-1)*(N-2)) for e,v in edge_dict.items()}
+
+    if inplace:
+        nx.set_edge_attributes(G, 
+                            values = edge_dict, 
+                            name = new_weight_name)
+    else:
+        return edge_dict
+
 @njit
 def potential_to_current_flow_edge(C, edge):
     """Calculates the current flow for a single edge given the potential

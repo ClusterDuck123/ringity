@@ -124,6 +124,8 @@ def induce_edge_weights(G, metric = 'net_flow', verbose = False):
         ew_dict = centralities.net_flow(G)
     elif metric == 'betweenness':
         ew_dict = nx.edge_betweenness_centrality(G)
+    elif metric == 'current_flow':
+        ew_dict = centralities.current_flow(G)
     else:
         raise Exception(f'Centrality measure {metric} unknown.')
     nx.set_edge_attributes(G, ew_dict, metric)
