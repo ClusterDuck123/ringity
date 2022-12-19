@@ -1,6 +1,6 @@
 from ringity.classes.pdiagram import PDiagram
 from ringity.core.metric2ringscore import ring_score_from_sequence
-from ringity.core.data2metric import pwdistance_from_network
+from ringity.core.data2metric import pwdistance_from_network, pwdistance_from_point_cloud
 
 from gtda.homology import VietorisRipsPersistence
 from scipy.spatial.distance import is_valid_dm
@@ -114,7 +114,7 @@ def ring_score_from_point_cloud(X,
                             persistence = 'VietorisRipsPersistence',
                             metric = 'euclidean',
                             metric_params = {},
-                            homology_dim = 1,
+                            dim = 1,
                             **kwargs):
     """Calculate ring score from point cloud.
 
@@ -130,7 +130,7 @@ def ring_score_from_point_cloud(X,
                                 persistence = persistence,
                                 metric = metric,
                                 metric_params = metric_params,
-                                homology_dim = homology_dim,
+                                dim = dim,
                                 **kwargs)
     return ring_score_from_pdiagram(pdgm,
                                 flavour = flavour,
@@ -145,7 +145,7 @@ def ring_score_from_network(G,
                         persistence = 'VietorisRipsPersistence',
                         metric = 'net_flow',
                         metric_params = {},
-                        homology_dim = 1,
+                        dim = 1,
                         **kwargs):
     """Calculate ring score from network.
 
@@ -161,7 +161,7 @@ def ring_score_from_network(G,
                             persistence = persistence,
                             metric = metric,
                             metric_params = metric_params,
-                            homology_dim = homology_dim,
+                            dim = dim,
                             **kwargs)
     return ring_score_from_pdiagram(pdgm,
                                 flavour = flavour,
@@ -171,7 +171,7 @@ def ring_score_from_network(G,
                                     
 def ring_score_from_distance_matrix(D,
                                 persistence = 'VietorisRipsPersistence',
-                                homology_dim = 1,
+                                dim = 1,
                                 nb_pers = np.inf,
                                 base = None,
                                 flavour = 'geometric',
@@ -184,7 +184,7 @@ def ring_score_from_distance_matrix(D,
         _description_
     persistence : str, optional
         _description_, by default 'VietorisRipsPersistence'
-    homology_dim : int, optional
+    dim : int, optional
         _description_, by default 1
     nb_pers : _type_, optional
         _description_, by default np.inf
@@ -201,7 +201,7 @@ def ring_score_from_distance_matrix(D,
     
     pdgm = pdiagram_from_distance_matrix(D,
                                     persistence = persistence,
-                                    homology_dim = homology_dim,
+                                    dim = dim,
                                     **kwargs)
     return ring_score_from_pdiagram(pdgm,
                                     flavour = flavour,
@@ -223,23 +223,22 @@ def ring_score_from_pdiagram(pdgm,
 # ----------------------- PERSISTENCE DIAGRAM FUNCTIONS -----------------------
 # ----------------------------------------------------------------------------- 
 def pdiagram_from_point_cloud(X,
-                              persistence = 'VietorisRipsPersistence',
-                              metric = 'euclidean',
-                              metric_params = {},
-                              homology_dim = 1,
-                              **kwargs):
+                            metric = 'euclidean',
+                            dim = 1,
+                            persistence = 'VietorisRipsPersistence',
+                            **kwargs):
     """Constructs a PDiagram object from a point cloud.
     
     This function wraps persistent homolgy calculation from giotto-tda."""
     
-    
     if persistence == 'VietorisRipsPersistence':
-        VR = VietorisRipsPersistence(metric = metric,
-                                     metric_params = metric_params,
-                                     homology_dimensions = tuple(range(homology_dim+1)),
-                                     **kwargs)
-        pdgm = VR.fit_transform([X])[0]
-    return PDiagram.from_gtda(pdgm, homology_dim = homology_dim)   
+        D = pwdistance_from_point_cloud(X, 
+                                        metric = metric)
+        pdgm = pdiagram_from_distance_matrix(D, 
+                                        dim = dim,
+                                        persistence = persistence,
+                                        kwargs = kwargs)
+    return pdgm   
     
     
 def pdiagram_from_network(G, 
@@ -283,13 +282,14 @@ def pdiagram_from_network(G,
     
 def pdiagram_from_distance_matrix(D, 
                                 persistence = 'VietorisRipsPersistence',
-                                homology_dim = 1,
+                                dim = 1,
                                 **kwargs):
     """Constructs a PDiagram object from a distance matrix.
     """
     if persistence == 'VietorisRipsPersistence':
         VR = VietorisRipsPersistence(metric = "precomputed",
-                                     homology_dimensions = tuple(range(homology_dim+1)),
-                                     **kwargs)
+                                     homology_dimensions = tuple(range(dim+1)))
         pdgm = VR.fit_transform([D])[0]
-    return PDiagram.from_gtda(pdgm, homology_dim = homology_dim)
+    return PDiagram.from_gtda(pdgm, 
+                        dim = dim, 
+                        diameter = D.max())

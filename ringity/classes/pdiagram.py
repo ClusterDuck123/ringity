@@ -123,17 +123,36 @@ class PDiagramPoint(tuple):
 #  -------------------------------- Dgm CLASS --------------------------------
 # =============================================================================
 class PDiagram(list):
-    def __init__(self, iterable = (), dim = None):
+    def __init__(self, iterable = (), dim = None, diameter = None):
 
-        super().extend(sorted(map(PDiagramPoint, iterable), reverse=True))
-        self.dim = dim
+        super().extend(sorted(map(PDiagramPoint, iterable), reverse = True))
+        if dim is not None:
+            self.set_dim(dim)
+        if diameter is not None:
+            self.set_diameter(diameter)
+
 
     @classmethod
-    def from_gtda(cls, arr, homology_dim = 1):
-        dgm = arr[arr[:,2] == homology_dim][:,:2]
-        return cls(dgm)
+    def from_gtda(cls, arr, 
+                dim = 1, 
+                diameter = None):
+        dgm = arr[arr[:,2] == dim][:,:2]
+        return cls(dgm, dim = dim, diameter = diameter)
 
 # -------------------------------- Proerties ---------------------------------
+    @property
+    def diameter(self):
+        return self._diameter
+    def set_diameter(self, diameter):
+        assert isinstance(diameter, float)
+        self._diameter = diameter
+
+    @property
+    def dim(self):
+        return self._dim
+    def set_dim(self, dim):
+        assert isinstance(dim, int)
+        self._dim = dim
 
     @property
     def births(self):
@@ -146,35 +165,55 @@ class PDiagram(list):
         return np.array(deaths)
 
     @property
-    def lengths(self):
+    def plengths(self):
         return self.deaths - self.births
 
     @property
-    def ratios(self):
+    def pratios(self):
         return self.deaths / self.births
-
-    @property
-    def persistences(self):
-        return tuple(pt.persistence for pt in self)
 
     @property
     def signal(self):
         return self[0].death - self[0].birth
 
+# ------------------------- Legacy Properties --------------------------
+    @property
+    def persistences(self):
+        warnings.warn("The property `persistences` is depricated! "
+                      "Please use the method `psequence` instead.",
+                      DeprecationWarning, stacklevel = 2)
+        return tuple(pt.persistence for pt in self)
+
     @property
     def sequence(self, length = None):
+        warnings.warn("The property `sequence` is depricated! "
+                      "Please use the method `psequence` instead.",
+                      DeprecationWarning, stacklevel = 2)
         if self.signal > 0:
             return tuple(p / self.signal for p in self.persistences)
         else:
             return ()
+    
     @property
     def score(self):
         warnings.warn("The property `score` is depricated! "
-                      "Please use `ring_score` instead.",
-                      DeprecationWarning, stacklevel=2)
+                      "Please use the method `ring_score` instead.",
+                      DeprecationWarning, stacklevel = 2)
         return self.ring_score()
 
 # -------------------------------- Methods ---------------------------------
+    def psequence(self, normalisation = 'diameter'):
+        pseq = self.plengths
+
+        if normalisation is None:
+            return pseq
+        elif normalisation.lower() == 'diameter':
+            return pseq/self.diameter
+        elif normalisation.lower() == 'signal':
+            return pseq/self.signal
+        else:
+            raise ValueError(f'normalisation `{normalisation}` unknown.')
+
     def copy(self):
         other = type(self)(self)
         return other

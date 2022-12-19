@@ -36,10 +36,11 @@ def pwdistance(data,
 
 def pwdistance_from_point_cloud(X, 
                             metric = 'euclidean', 
-                            verbose = False):
+                            verbose = False,
+                            **kwargs):
     if metric is None:
         metric = 'euclidean'
-    D = squareform(pdist(X.T, metric = metric))
+    D = squareform(pdist(X, metric = metric))
     return D
 
 def pwdistance_from_adjacency_matrix(A, 
