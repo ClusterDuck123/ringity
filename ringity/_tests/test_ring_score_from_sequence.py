@@ -10,15 +10,7 @@ from ringity.core.metric2ringscore import (
                             amplitude_ring_score,
                             entropy_ring_score)
 
-def generate_message(seq, ring_score, rand_nb_pers, rand_base):
-    nb_pers = min(10, len(seq))
-    msg = f"\nseq: {seq[:nb_pers]} \n" \
-          f"ring score: {ring_score.__name__} \n" \
-          f"nb_pers: {rand_nb_pers} \n" \
-          f"base: {rand_base} \n"
-    return msg
-
-all_ring_scores = {
+ALL_RING_SCORES = {
         gap_ring_score,
         geometric_ring_score,
         linear_ring_score,
@@ -26,11 +18,21 @@ all_ring_scores = {
         entropy_ring_score
         }
 
-inf_ring_scores = {
+INF_RING_SCORES = {
         geometric_ring_score,
         amplitude_ring_score,
         entropy_ring_score
         }
+        
+def _generate_message(seq, ring_score, rand_nb_pers, rand_base):
+    """Informative error message."""
+    nb_pers = min(10, len(seq))
+    msg = f"\nseq: {seq[:nb_pers]} \n" \
+          f"ring score: {ring_score.__name__} \n" \
+          f"nb_pers: {rand_nb_pers} \n" \
+          f"base: {rand_base} \n"
+    return msg
+
 
 class TestFiniteEdgeCases(unittest.TestCase):
     def setUp(self):
@@ -38,55 +40,55 @@ class TestFiniteEdgeCases(unittest.TestCase):
         self.rand_base = np.random.uniform(1, 10)
         self.rand_nb_pers = np.random.randint(2, 10)
         self.rand_zero_pads = np.random.randint(1, 10)
-        self.rand_seq = np.random.uniform(size=self.rand_nb_pers)
+        self.rand_seq = np.random.uniform(size = self.rand_nb_pers)
 
     def test_empty_seq(self):
         seq = ()
-        for ring_score in all_ring_scores:
+        for ring_score in ALL_RING_SCORES:
             kwargs = {}
             if 'base' in inspect.signature(ring_score).parameters:
                 kwargs['base'] = self.rand_base
             if 'nb_pers' in inspect.signature(ring_score).parameters:
                 kwargs['nb_pers'] = self.rand_nb_pers
-            msg = generate_message(seq, ring_score, self.rand_nb_pers, self.rand_base)
-            self.assertAlmostEqual(ring_score(seq, **kwargs), 0., msg=msg)
+            msg = _generate_message(seq, ring_score, self.rand_nb_pers, self.rand_base)
+            self.assertAlmostEqual(ring_score(seq, **kwargs), 0., msg = msg)
 
     def test_noiseless_seq(self):
         seq = [self.rand_p0]
-        for ring_score in all_ring_scores:
+        for ring_score in ALL_RING_SCORES:
             kwargs = {}
             if 'base' in inspect.signature(ring_score).parameters:
                 kwargs['base'] = self.rand_base
             if 'nb_pers' in inspect.signature(ring_score).parameters:
                 kwargs['nb_pers'] = self.rand_nb_pers
-            msg = generate_message(seq, ring_score, self.rand_nb_pers, self.rand_base)
-            self.assertAlmostEqual(ring_score(seq, **kwargs), 1., msg=msg)
+            msg = _generate_message(seq, ring_score, self.rand_nb_pers, self.rand_base)
+            self.assertAlmostEqual(ring_score(seq, **kwargs), 1., msg = msg)
 
     def test_max_score_of_one(self):
         seq = [self.rand_p0] + [0]*self.rand_zero_pads
-        for ring_score in all_ring_scores:
+        for ring_score in ALL_RING_SCORES:
             kwargs = {}
             if 'base' in inspect.signature(ring_score).parameters:
                 kwargs['base'] = self.rand_base
             if 'nb_pers' in inspect.signature(ring_score).parameters:
                 kwargs['nb_pers'] = self.rand_nb_pers
-            msg = generate_message(seq, ring_score, self.rand_nb_pers, self.rand_base)
-            self.assertAlmostEqual(ring_score(seq, **kwargs), 1., msg=msg)
+            msg = _generate_message(seq, ring_score, self.rand_nb_pers, self.rand_base)
+            self.assertAlmostEqual(ring_score(seq, **kwargs), 1., msg = msg)
 
     def test_min_score_of_zero(self):
         seq = [self.rand_p0] * (self.rand_nb_pers + 1)
-        for ring_score in all_ring_scores:
+        for ring_score in ALL_RING_SCORES:
             kwargs = {}
             if 'base' in inspect.signature(ring_score).parameters:
                 kwargs['base'] = self.rand_base
             if 'nb_pers' in inspect.signature(ring_score).parameters:
                 kwargs['nb_pers'] = self.rand_nb_pers
-            msg = generate_message(seq, ring_score, self.rand_nb_pers, self.rand_base)
-            self.assertAlmostEqual(ring_score(seq, **kwargs), 0., msg=msg)
+            msg = _generate_message(seq, ring_score, self.rand_nb_pers, self.rand_base)
+            self.assertAlmostEqual(ring_score(seq, **kwargs), 0., msg = msg)
 
     def test_finiteness(self):
-        for ring_score in all_ring_scores - {gap_ring_score}:
-            msg = generate_message(self.rand_seq,
+        for ring_score in ALL_RING_SCORES - {gap_ring_score}:
+            msg = _generate_message(self.rand_seq,
                                    ring_score,
                                    self.rand_nb_pers,
                                    self.rand_base)
@@ -101,7 +103,7 @@ class TestFiniteEdgeCases(unittest.TestCase):
                                 nb_pers = self.rand_nb_pers,
                                 **kwargs)
 
-            self.assertAlmostEqual(score1, score2, msg=msg)
+            self.assertAlmostEqual(score1, score2, msg = msg)
 
 
 class TestInfiniteCases(unittest.TestCase):
@@ -112,35 +114,35 @@ class TestInfiniteCases(unittest.TestCase):
 
     def test_empty_seq(self):
         seq = ()
-        for ring_score in inf_ring_scores:
+        for ring_score in INF_RING_SCORES:
             kwargs = {}
             if 'base' in inspect.signature(ring_score).parameters:
                 kwargs['base'] = self.rand_base
             if 'nb_pers' in inspect.signature(ring_score).parameters:
                 kwargs['nb_pers'] = np.inf
-            msg = generate_message(seq, ring_score, np.inf, self.rand_base)
-            self.assertAlmostEqual(ring_score(seq, **kwargs), 0., msg=msg)
+            msg = _generate_message(seq, ring_score, np.inf, self.rand_base)
+            self.assertAlmostEqual(ring_score(seq, **kwargs), 0., msg = msg)
 
     def test_delta_seq(self):
         seq = [self.rand_p0]
-        for ring_score in inf_ring_scores:
+        for ring_score in INF_RING_SCORES:
             kwargs = {}
             if 'base' in inspect.signature(ring_score).parameters:
                 kwargs['base'] = self.rand_base
             if 'nb_pers' in inspect.signature(ring_score).parameters:
                 kwargs['nb_pers'] = np.inf
-            msg = generate_message(seq, ring_score, np.inf, self.rand_base)
+            msg = _generate_message(seq, ring_score, np.inf, self.rand_base)
             self.assertAlmostEqual(ring_score(seq, **kwargs), 1., msg=msg)
 
     def test_max_score_of_one(self):
         seq = [self.rand_p0] + [0]*self.rand_zero_pads
-        for ring_score in inf_ring_scores:
+        for ring_score in INF_RING_SCORES:
             kwargs = {}
             if 'base' in inspect.signature(ring_score).parameters:
                 kwargs['base'] = self.rand_base
             if 'nb_pers' in inspect.signature(ring_score).parameters:
                 kwargs['nb_pers'] = np.inf
-            msg = generate_message(seq, ring_score, np.inf, self.rand_base)
+            msg = _generate_message(seq, ring_score, np.inf, self.rand_base)
             self.assertAlmostEqual(ring_score(seq, **kwargs), 1., msg=msg)
 
     def test_min_score_of_zero(self):
@@ -150,19 +152,21 @@ class TestInfiniteCases(unittest.TestCase):
         nb_pers = max(nb_pers_geo, nb_pers_amp) + 1
 
         seq = [self.rand_p0] * nb_pers
-        for ring_score in inf_ring_scores:
+        for ring_score in INF_RING_SCORES:
             kwargs = {}
             if 'base' in inspect.signature(ring_score).parameters:
                 kwargs['base'] = self.rand_base
             if 'nb_pers' in inspect.signature(ring_score).parameters:
                 kwargs['nb_pers'] = np.inf
-            msg = generate_message(seq, ring_score, np.inf, self.rand_base)
-            self.assertAlmostEqual(ring_score(seq, **kwargs), 0., msg=msg, delta=delta)
+            msg = _generate_message(seq, ring_score, np.inf, self.rand_base)
+            self.assertAlmostEqual(ring_score(seq, **kwargs), 0., 
+                                msg = msg, 
+                                delta = delta)
 
     def test_infiniteness(self):
         seq = np.random.uniform(size = 5)
-        for ring_score in inf_ring_scores - {entropy_ring_score}:
-            msg = generate_message(seq,
+        for ring_score in INF_RING_SCORES - {entropy_ring_score}:
+            msg = _generate_message(seq,
                                    ring_score,
                                    np.inf,
                                    self.rand_base)
@@ -177,13 +181,13 @@ class TestInfiniteCases(unittest.TestCase):
                                 nb_pers = np.inf,
                                 **kwargs)
 
-            self.assertAlmostEqual(score1, score2, msg=msg)
+            self.assertAlmostEqual(score1, score2, msg = msg)
 
 class TestTwoPersistenceIdentities(unittest.TestCase):
     def setUp(self):
         pseq_list = [np.random.uniform(size = N)
                                 for _ in range(2**2)
-                                        for N in range(2, 2**2)]
+                                    for N in range(2, 2**2)]
 
         self.p0_list = [sorted(pseq)[-1] for pseq in pseq_list]
         self.p1_list = [sorted(pseq)[-2] for pseq in pseq_list]

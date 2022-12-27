@@ -1,9 +1,15 @@
+import os
 import random
 import ringity
 import unittest
 import numpy as np
 
+from pathlib import Path
 from ringity.core.metric2ringscore import ring_score_from_sequence
+
+DIRNAME_RINGITY = Path(os.path.dirname(ringity.__file__))
+DIRNAME_TEST_DATA = DIRNAME_RINGITY / '_tests' / 'test_data'
+FNAME_PDGM = DIRNAME_TEST_DATA / 'lipid_coexp_dgm.txt'
 
 class TestSyntheticExamples(unittest.TestCase):
     def setUp(self):
@@ -51,7 +57,7 @@ class TestSyntheticExamples(unittest.TestCase):
 
 class TestKnownNetworks(unittest.TestCase):
     def test_lipid_network(self):
-        dgm = ringity.read_pdiagram("test_data/lipid_coexp_dgm.txt")
+        dgm = ringity.read_pdiagram(FNAME_PDGM)
         self.assertAlmostEqual(dgm.ring_score(), 0.7669806588679011)
 
 if __name__ == '__main__':

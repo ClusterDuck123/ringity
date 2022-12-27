@@ -6,7 +6,7 @@ import ringity.networkmeasures.centralities as centralities
 from scipy.sparse.csgraph import floyd_warshall
 from scipy.spatial.distance import pdist, squareform, is_valid_dm
 
-METRIC_TRANSFORMERS = {'resistance', 'SPL'}
+METRIC_TRANSFORMERS = {'resistance', 'spl'}
 
 def pwdistance(data, 
             data_structure = 'suggest', 
@@ -15,19 +15,19 @@ def pwdistance(data,
     """Calculates pairwise distances from given data structure."""
     
     if isinstance(data, nx.Graph):
-        D = pwdistance_from_network(G, metric = metric)
+        D = pwdistance_from_network(data, metric = metric)
     if isinstance(data, np.ndarray) or isinstance(data, scipy.sparse.spmatrix):
         if data_structure == 'suggest':
             if is_valid_dm(data):
-                data_structure = 'adjacency matrix'
+                data_structure = 'adjacency_matrix'
             else:
-                data_structure = 'point cloud'
+                data_structure = 'point_cloud'
             if verbose:
                 print(f"`data_structure` was set to {data_structure}")
                 
-        if data_structure == 'point cloud':
+        if data_structure == 'point_cloud':
             D = pwdistance_from_point_cloud(metric, verbose)
-        elif data_structure == 'adjacency matrix':
+        elif data_structure == 'adjacency_matrix':
             D = pwdistance_from_adjacency_matrix(data)
         else:
             raise Exception(f"Data structure `{data_structure} unknown.")
@@ -105,27 +105,27 @@ def pwdistance_from_network(G,
         induce_edge_weights(G, metric = metric, verbose = verbose)
 
     spl_status = _check_spl_calculation(G, 
-                                        induction_status = induction_status,
-                                        metric = metric,
-                                        verbose = verbose)
+                                    induction_status = induction_status,
+                                    metric = metric,
+                                    verbose = verbose)
     if spl_status:
         A = nx.to_numpy_array(G, weight = metric)
         D = floyd_warshall(A)
     else:
-        if metric == 'resistance':
+        if metric.lower() == 'resistance':
             D = centralities.resistance(G)
-        elif metric == 'SPL':
+        elif metric.lower() == 'spl':
             A = nx.to_numpy_array(G, weight = None)
             D = floyd_warshall(A)
     return D
     
 
 def induce_edge_weights(G, metric = 'net_flow', verbose = False):
-    if metric == 'net_flow':
+    if metric.lower() == 'net_flow':
         ew_dict = centralities.net_flow(G)
-    elif metric == 'betweenness':
+    elif metric.lower() == 'betweenness':
         ew_dict = nx.edge_betweenness_centrality(G)
-    elif metric == 'current_flow':
+    elif metric.lower() == 'current_flow':
         ew_dict = centralities.current_flow(G)
     else:
         raise Exception(f'Centrality measure {metric} unknown.')
@@ -136,18 +136,21 @@ def induce_edge_weights(G, metric = 'net_flow', verbose = False):
 def _check_weight_induction(G, metric, use_weights, verbose):
     # Cases where no further calculation is needed.
     if use_weights is False:
+        if verbose:
+            print(
+                f'No weights will be used for calculations.')
         return False
     elif nx.get_edge_attributes(G, metric):
         if verbose and use_weights:
             print(
-            f'Weights named `{metric}` detected.' 
-            f'They will be used for distance calculation.')
+                f'Weights named `{metric}` detected.' 
+                f'They will be used for distance calculation.')
         return False
     elif use_weights is True:
         raise Exception(f'No weights named {metric} detected.')
     
-    # Cases where calculation is needed dependin on the metric.
-    elif metric in METRIC_TRANSFORMERS:
+    # Cases where calculation is needed depending on the metric.
+    elif metric.lower() in METRIC_TRANSFORMERS:
         if verbose:
             print(
             f'No weights named `{metric}` detected. ' 
@@ -155,7 +158,7 @@ def _check_weight_induction(G, metric, use_weights, verbose):
         return False
     else:
         # Only case where weights are being induced.
-        if verbose and metric not in METRIC_TRANSFORMERS:
+        if verbose and metric.lower() not in METRIC_TRANSFORMERS:
             print(
                 f'No weights named `{metric}` detected. ' 
                 f'Centrality measure `{metric}` will be calculated.')

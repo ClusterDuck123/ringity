@@ -15,7 +15,7 @@ import scipy.sparse
 def ring_score(arg,
             argtype = None,
             flavour = 'geometric',
-            base = None,
+            exponent = 2,
             nb_pers = np.inf,
             verbose = False,
             **kwargs):
@@ -48,7 +48,7 @@ def ring_score(arg,
     score = ring_score_from_pdiagram(
                                 pdgm = pdgm,
                                 flavour = flavour,
-                                base = base,
+                                exponent = exponent,
                                 nb_pers = nb_pers)
     return score
 
@@ -109,7 +109,7 @@ def pdiagram(arg,
 # -----------------------------------------------------------------------------     
 def ring_score_from_point_cloud(X,
                             flavour = 'geometric',
-                            base = None,
+                            exponent = 2,
                             nb_pers = np.inf,
                             persistence = 'VietorisRipsPersistence',
                             metric = 'euclidean',
@@ -134,13 +134,13 @@ def ring_score_from_point_cloud(X,
                                 **kwargs)
     return ring_score_from_pdiagram(pdgm,
                                 flavour = flavour,
-                                base = base,
+                                exponent = exponent,
                                 nb_pers = nb_pers)
     
                                                
 def ring_score_from_network(G,
                         flavour = 'geometric',
-                        base = None,
+                        exponent = 2,
                         nb_pers = np.inf,
                         persistence = 'VietorisRipsPersistence',
                         metric = 'net_flow',
@@ -165,7 +165,7 @@ def ring_score_from_network(G,
                             **kwargs)
     return ring_score_from_pdiagram(pdgm,
                                 flavour = flavour,
-                                base = base,
+                                exponent = exponent,
                                 nb_pers = nb_pers)
                                     
                                     
@@ -173,7 +173,7 @@ def ring_score_from_distance_matrix(D,
                                 persistence = 'VietorisRipsPersistence',
                                 dim = 1,
                                 nb_pers = np.inf,
-                                base = None,
+                                exponent = 2,
                                 flavour = 'geometric',
                                 **kwargs):
     """Calculates ring-score from a PDiagram object.
@@ -205,19 +205,19 @@ def ring_score_from_distance_matrix(D,
                                     **kwargs)
     return ring_score_from_pdiagram(pdgm,
                                     flavour = flavour,
-                                    base = base,
+                                    exponent = exponent,
                                     nb_pers = nb_pers)
                             
                                     
 def ring_score_from_pdiagram(pdgm,
                              flavour = 'geometric',
                              nb_pers = np.inf,
-                             base = None):
+                             exponent = 2):
     """Calculates ring-score from a PDiagram object."""
     return ring_score_from_sequence(pdgm.sequence,
                                     flavour = flavour,
                                     nb_pers = nb_pers,
-                                    base = base)
+                                    exponent = exponent)
                                                
 # -----------------------------------------------------------------------------    
 # ----------------------- PERSISTENCE DIAGRAM FUNCTIONS -----------------------

@@ -1,17 +1,25 @@
+import os
 import unittest
 import ringity as rng
 import networkx as nx
 
+from pathlib import Path
 from ringity.networkmeasures.centralities import net_flow
 from ringity.classes.exceptions import DisconnectedGraphError
+
+DIRNAME_RINGITY = Path(os.path.dirname(rng.__file__))
+DIRNAME_TEST_DATA = DIRNAME_RINGITY / '_tests' / 'test_data'
+
+FNAME_PDGM = DIRNAME_TEST_DATA / 'lipid_coexp_dgm.txt'
+FNAME_NETWORK = DIRNAME_TEST_DATA / 'lipid_coexp_network.txt'
 
 """THIS MODULE NEEDS TO BE UPDATED!!"""
 
 
 class TestDiagramFunction(unittest.TestCase):
     def setUp(self):
-        self.G = nx.read_edgelist("test_data/lipid_coexp_network.txt")
-        self.pdgm = rng.read_pdiagram("test_data/lipid_coexp_dgm.txt")
+        self.G = nx.read_edgelist(FNAME_NETWORK)
+        self.pdgm = rng.read_pdiagram(FNAME_PDGM)
     
     def test_lipid_network(self):    
         pdgm = rng.pdiagram_from_network(self.G)

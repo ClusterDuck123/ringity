@@ -122,8 +122,8 @@ def net_flow(G,
 
 
 def resistance(G):
-    L = nx.laplacian_matrix(G)
-    Gamm = np.linalg.pinv(L.A)
+    L = laplace(nx.to_scipy_sparse_array(G))
+    Gamm = np.linalg.pinv(L.A, hermitian = True)
     diag = np.diag(Gamm)
     return (-2*Gamm + diag).T + diag
 

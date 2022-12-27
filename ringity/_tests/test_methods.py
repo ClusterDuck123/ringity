@@ -1,18 +1,53 @@
 import os
-import ringity
 import unittest
+import ringity as rng
 
-RINGITY_PATH = os.path.dirname(ringity.__file__)
+from pathlib import Path
+from ringity.core.metric2ringscore import (
+                            gap_ring_score,
+                            geometric_ring_score,
+                            linear_ring_score,
+                            amplitude_ring_score,
+                            entropy_ring_score)
+
+DIRNAME_RINGITY = Path(os.path.dirname(rng.__file__))
+DIRNAME_TMP = DIRNAME_RINGITY / '_tests' / 'test_data' / 'tmp'
+FNAME_PDGM = DIRNAME_TMP / 'random_dgm.txt'
+
 
 class TestReadAndWrite(unittest.TestCase):
     def test_save_and_load(self):
-        pdgm1 = ringity.random_pdgm(100)
-        ringity.write_pdiagram(pdgm1, "tmp/random_dgm.txt")
+        pdgm1 = rng.random_pdgm(2**5)
+        rng.write_pdiagram(pdgm1, FNAME_PDGM)
 
-        pdgm2 = ringity.read_pdiagram("tmp/random_dgm.txt")
-        os.remove("tmp/random_dgm.txt")
+        pdgm2 = rng.read_pdiagram(FNAME_PDGM)
+        os.remove(FNAME_PDGM)
         
         self.assertEqual(pdgm1, pdgm2)
+
+class TestRingScore(unittest.TestCase):
+    def test_ring_score_flavours(self):
+        pdgm = rng.random_pdgm(2**5)
+        pseq = pdgm.psequence(normalisation = 'signal')
+
+        self.assertEqual(
+                    gap_ring_score(pseq),
+                    pdgm.ring_score(flavour = 'gap'))
+        self.assertEqual(
+                    linear_ring_score(pseq, nb_pers = 4),
+                    pdgm.ring_score(flavour = 'linear', nb_pers = 4))
+        self.assertEqual(
+                    geometric_ring_score(pseq, nb_pers = 4, exponent = 3),
+                    pdgm.ring_score(flavour = 'geometric', nb_pers = 4, exponent = 3))
+        self.assertEqual(
+                    amplitude_ring_score(pseq, nb_pers = 4),
+                    pdgm.ring_score(flavour = 'amplitude', nb_pers = 4))
+        self.assertEqual(
+                    entropy_ring_score(pseq, nb_pers = 4),
+                    pdgm.ring_score(flavour = 'entropy', nb_pers = 4))
+        self.assertNotAlmostEqual(
+                    geometric_ring_score(pseq, nb_pers = 4),
+                    pdgm.ring_score(flavour = 'geometric', nb_pers = 4, exponent = 3))
 
 if __name__ == '__main__':
     unittest.main()

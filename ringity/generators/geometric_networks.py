@@ -6,13 +6,52 @@ from ringity.generators import point_clouds
 from scipy.spatial.distance import pdist, squareform
 
 
-def annulus(N, r, dist_th,
+def circle(N,
+        abs_th = None,
+        rel_th = 0.25,
+        noise = 0,
+        return_point_cloud = False,
+        seed = None):
+    """Construct geometric network from uniformly sampled annulus."""
+    X = point_clouds.circle(N = N, noise = noise, seed = seed)
+
+    d_th = _get_threshold(rel_th, abs_th, X)
+    G = from_point_cloud(X, d_th)
+    
+    if return_point_cloud:
+        return G, X
+    else:
+        return G
+
+
+def annulus(N, r, 
+        abs_th = None,
+        rel_th = 0.25,
         noise = 0,
         return_point_cloud = False,
         seed = None):
     """Construct geometric network from uniformly sampled annulus."""
     X = point_clouds.annulus(N = N, r = r, noise = noise, seed = seed)
-    G = from_point_cloud(X, dist_th)
+
+    d_th = _get_threshold(rel_th, abs_th, X)
+    G = from_point_cloud(X, d_th)
+    
+    if return_point_cloud:
+        return G, X
+    else:
+        return G
+
+def cylinder(N, height,
+        abs_th = None,
+        rel_th = 0.25,
+        noise = 0,
+        return_point_cloud = False,
+        seed = None):
+    """Construct geometric network from uniformly sampled cylinder."""
+    X = point_clouds.cylinder(N = N, height = height, noise = noise, seed = seed)
+
+    d_th = _get_threshold(rel_th, abs_th, X)
+    G = from_point_cloud(X, d_th)
     
     if return_point_cloud:
         return G, X
@@ -36,3 +75,10 @@ def from_point_cloud(X, dist_th,
         for (a, b, d) in G.edges(data = True):
             d.clear()
     return G
+
+def _get_threshold(rel_th, abs_th, X):
+    if abs_th is not None:
+        d_th = abs_th
+    else:
+        d_th = pdist(X).max() * rel_th
+    return d_th
