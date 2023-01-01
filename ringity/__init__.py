@@ -1,6 +1,6 @@
 name = "ringity"
 __author__ = "Markus K. Youssef"
-__version__ = "1.0a0"
+__version__ = "0.3a0"
 
 # FUNCTIONS
 from ringity.core import (
@@ -35,11 +35,13 @@ from ringity.plotting import (plot, plot_nx, plot_dgm)
 
 from ringity.readwrite.pdiagram import (write_pdiagram, read_pdiagram)
 
-import sys
-
 from ringity.singlecell import singlecell
+from ringity.classes.pdiagram import PDiagram
 
+import sys
 # Check for appropriate Python version
-if sys.version_info[:2] < (3, 6):
-    m = "Python 3.6 or later is required for ringity (%d.%d detected)."
-    raise ImportError(m % sys.version_info[:2])
+major, minor = sys.version_info[:2]
+if (major, minor) < (3, 6):
+    msg = f'Python 3.6 or later is required for ringity ' \
+          f'({major}.{minor} detected).'
+    raise ImportError(msg)
