@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from collections import Counter
 from ringity.plotting.styling import ax_setup
+from ringity.plotting._plotly import plot_nx_plotly_3d, plot_nx_plotly_2d
 
 CEMM_COL1 = (  0/255,  85/255, 100/255)
 CEMM_COL2 = (  0/255, 140/255, 160/255)
@@ -14,9 +15,11 @@ DARK_CEMM_COL1 = (0/255, 43/255, 50/255)
 BAR_COL = (0.639, 0.639, 0.639)
 
 
-def plot(arg, ax = None):
+def plot(arg, ax = None, **kwargs):
     if isinstance(arg, np.ndarray):
-        plot_X(arg, ax=ax)
+        plot_X(arg, ax = ax, **kwargs)
+    if isinstance(arg, nx.Graph):
+        plot_nx(arg, ax = ax, **kwargs)
 
 def plot_seq(dgm, crop = None, ax = None, **kwargs):
     if ax is None:
@@ -32,8 +35,44 @@ def plot_seq(dgm, crop = None, ax = None, **kwargs):
     bar = list(dgm_plot.sequence)
     ax.bar(range(len(bar)), bar, color = BAR_COL);
 
-
 def plot_nx(G,
+            pos = None,
+            ax  = None,
+            library = None,
+            dim = 2,
+            hoverinfo = None,
+            node_color = None,
+            node_colors = None,
+            node_alpha  = 0.3,
+            edge_colors = None,
+            edge_alpha  = 0.2,
+            **kwargs):
+    
+    if library is None:
+        if dim == 2:
+            library = 'matplotlib'
+        elif dim == 3:
+            library = 'plotly'
+    
+    if library == 'matplotlib':
+        return plot_nx_old(G,
+            pos = pos,
+            ax  = ax,
+            node_colors = node_colors,
+            node_alpha  = node_alpha,
+            edge_colors = edge_colors,
+            edge_alpha  = edge_alpha,
+            **kwargs)
+    if library == 'plotly':
+        if dim == 2:
+            return plot_nx_plotly_2d(G, 
+                    pos = pos, 
+                    hoverinfo = hoverinfo, 
+                    node_color = node_color)
+        elif dim == 3:
+            return plot_nx_plotly_3d(G, pos = pos, hoverinfo = hoverinfo, node_color = node_color)
+
+def plot_nx_old(G,
             pos = None,
             ax  = None,
             node_colors = None,

@@ -1,3 +1,5 @@
+import ringity.generators.geometric_networks as geometric_networks
+
 from ringity.generators.point_clouds import (
                                 annulus, torus, 
                                 two_adjacent_circles

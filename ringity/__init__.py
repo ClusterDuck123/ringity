@@ -28,8 +28,9 @@ from ringity.core import (statistics)
 
 from ringity.generators import (
                     random_pdgm,
-                    network_model
+                    network_model,
                     )
+import ringity.generators.geometric_networks as geometric_networks
 
 from ringity.plotting import (plot, plot_nx, plot_dgm)
 
