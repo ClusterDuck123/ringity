@@ -34,7 +34,7 @@ import ringity.generators.geometric_networks as geometric_networks
 
 from ringity.plotting import (plot, plot_nx, plot_dgm)
 
-from ringity.readwrite.pdiagram import (write_pdiagram, read_pdiagram)
+from ringity.readwrite.pdiagrams import (write_pdiagram, read_pdiagram)
 
 from ringity.singlecell import singlecell
 from ringity.classes.pdiagram import PDiagram
