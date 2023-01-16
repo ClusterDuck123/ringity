@@ -17,9 +17,23 @@ def write_pdiagram(dgm, fname, **kwargs):
     array = np.array(dgm)
     np.savetxt(fname, array, **kwargs)
 
-def json_to_dict_dict_list(fname, 
-                          lambda_key1 = lambda x:x, 
-                          lambda_key2 = lambda x:x):
+def json_to_dictoflist(fname, 
+            lambda_key = lambda x:x):
+    """Takes a json file and turns it into PDiagrams in a dict-of-list object. 
+    This can be useful for data where the inner most level (the list) are samples depending 
+    on one parameters (key of the dict)."""
+    data_dict = defaultdict(list)
+    if fname.is_file():
+        with open(fname, 'r') as f:
+            json_dict = json.load(f)
+            for jkey in json_dict:
+                dkey = lambda_key(jkey)
+                data_dict[dkey] = list(map(PDiagram, json_dict[jkey]))
+    return data_dict
+
+def json_to_dictofdictoflist(fname, 
+            lambda_key1 = lambda x:x, 
+            lambda_key2 = lambda x:x):
     """Takes a json file and turns it into PDiagrams in a dict-of-dict-of-list object. 
     This can be useful for data where the inner most level (the list) are samples depending 
     on two other parameters (key1 and key2)."""

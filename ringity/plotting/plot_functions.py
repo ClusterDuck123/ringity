@@ -183,7 +183,7 @@ def plot_X(X, ax = None, return_artist_obj = False):
     
     if n_vars == 2:
         x, y = X.T
-        plt.scatter(x, y)
+        ax.scatter(x, y)
     
     ax_setup(ax)
     ax.axis('off')
@@ -228,3 +228,13 @@ def _parse_return_data(return_artist_obj, fig, ax):
     return_data = tuple(obj for obj in (fig, ax) if obj is not None)
 
     return return_data
+
+
+
+# TO BE IMPLEMENTED
+def my_plotter(ax, data1, data2, param_dict):
+    """
+    A helper function to make a graph.
+    """
+    out = ax.plot(data1, data2, **param_dict)
+    return out
