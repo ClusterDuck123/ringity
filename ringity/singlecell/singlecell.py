@@ -75,7 +75,37 @@ def process_adata_from_counts(adata,
                               highly_variable_subset = True,
                               verbose = False
                               ):
-    """Follows Seurat guidelines to preprocess data."""
+    """Filters adata for genes and cells. Normalizes counts per cell and 
+    performs a log(x+1) transformation.
+
+    Parameters
+    ----------
+    adata : Anndata
+        Raw count data.
+    min_genes : int, optional
+        Removes cells that have less than ``min_genes`` expressed.
+        By default 1_000.
+    min_cells : int, optional
+        Removes genes that have less than ``min_cells`` expressed.
+        By default 3.
+    target_sum : int, optional
+        Normalize each cell, by dividing through the total sum
+        and multiplying by ``target_sum``. By default 10_000.
+    diffuse : bool, optional
+        Diffuse normalized counts using ``magic``. By default True.
+    diffuse_t : int, optional
+        Number of diffusion steps in ``magic``. By default 1.
+    highly_variable_subset : bool, optional
+        Filter genes further after normalization, based on their variance.
+        By default True
+    verbose : bool, optional
+        Prints output about individual steps. By default False.
+
+    Returns
+    -------
+    Anndata
+        Normalized count data.
+    """    
     
     sc.pp.filter_cells(adata, min_genes = min_genes)
     sc.pp.filter_genes(adata, min_cells = min_cells)
