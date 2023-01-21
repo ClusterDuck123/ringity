@@ -12,7 +12,27 @@ def pwdistance(data,
             data_structure = 'suggest', 
             metric = None,
             verbose = False,):
-    """Calculates pairwise distances from given data structure."""
+    """Calculates pairwise distances from given data structure.
+
+    Parameters
+    ----------
+    data : networkx.Graph, nump.ndarray
+        Data to calculate pairwise-distance from.
+    data_structure : str, optional
+        Specify what kind of data the argument ``data`` describes.
+        By default 'suggest'.
+    metric : string, optional
+        Which metric to use for pairwise distance caluclation. By default None.
+    verbose : bool, optional
+        Prints logs of various calulation steps. By default False.
+
+    Raises
+    ------
+    Exception
+        When data type of ``data`` is unknown.
+    Exception
+        When the string ``data_structure`` is unknown.
+    """    
     
     if isinstance(data, nx.Graph):
         D = pwdistance_from_network(data, metric = metric)

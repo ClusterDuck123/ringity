@@ -4,6 +4,7 @@ requires = [
     "wheel",
     "matplotlib",
     "numba",
-    "networkx"
+    "networkx",
+    "scipy"
 ]
 build-backend = "setuptools.build_meta"
