@@ -18,7 +18,7 @@ def circle(N,
         new_weight_name = 'distance'):
     """Construct geometric network from uniformly sampled circle."""
     X = point_clouds.circle(N = N, noise = noise, seed = seed)
-    G = from_point_cloud(X, 
+    G = pointcloud_to_network(X, 
                 er_fc_th = er_fc_th,
                 rel_dist_th = rel_dist_th,
                 abs_dist_th = abs_dist_th,
@@ -43,7 +43,7 @@ def vonmises_circles(N, kappa,
     """Construct geometric network from von Mises distributed 
     the of circle."""
     X = point_clouds.vonmises_circles(N = N, kappa = kappa, noise = noise, seed = seed)
-    G = from_point_cloud(X, 
+    G = pointcloud_to_network(X, 
                 er_fc_th = er_fc_th,
                 rel_dist_th = rel_dist_th,
                 abs_dist_th = abs_dist_th,
@@ -68,7 +68,7 @@ def annulus(N, r,
         new_weight_name = 'distance'):
     """Construct geometric network from unifomly sampled annulus."""
     X = point_clouds.annulus(N = N, r = r, noise = noise, seed = seed)
-    G = from_point_cloud(X, 
+    G = pointcloud_to_network(X, 
                 er_fc_th = er_fc_th,
                 rel_dist_th = rel_dist_th,
                 abs_dist_th = abs_dist_th,
@@ -92,7 +92,7 @@ def cylinder(N, height,
         new_weight_name = 'distance'):
     """Construct geometric network from unifomly sampled cylinder."""
     X = point_clouds.cylinder(N = N, height = height, noise = noise, seed = seed)
-    G = from_point_cloud(X, 
+    G = pointcloud_to_network(X, 
                 er_fc_th = er_fc_th,
                 rel_dist_th = rel_dist_th,
                 abs_dist_th = abs_dist_th,
@@ -116,7 +116,7 @@ def torus(N, r,
         new_weight_name = 'distance'):
     """Construct geometric network from unifomly sampled torus."""
     X = point_clouds.torus(N = N, r = r, noise = noise, seed = seed)
-    G = from_point_cloud(X, 
+    G = pointcloud_to_network(X, 
                 er_fc_th = er_fc_th,
                 rel_dist_th = rel_dist_th,
                 abs_dist_th = abs_dist_th,
@@ -129,11 +129,12 @@ def torus(N, r,
         return G
 
 
-def from_point_cloud(X,
+def pointcloud_to_network(X,
                 er_fc_th = 10,
                 rel_dist_th = None,
                 abs_dist_th = None,
                 density_th = None,
+                n_neighbors = None, 
                 keep_weights = False,
                 new_weight_name = 'distance'):
     """Construct geometric network from point cloud."""
@@ -145,7 +146,8 @@ def from_point_cloud(X,
                     er_fc_th = er_fc_th, 
                     rel_dist_th = rel_dist_th, 
                     abs_dist_th = abs_dist_th,
-                    density_th = density_th)
+                    density_th = density_th,
+                    n_neighbors = n_neighbors)
 
     if keep_weights:
         A = coo.coo_matrix(np.where(D > d_th, 0, D))
@@ -158,11 +160,12 @@ def from_point_cloud(X,
             d.clear()
     return G
 
-def _get_threshold(Dsq, rel_dist_th, abs_dist_th, density_th, er_fc_th):
+def _get_threshold(Dsq, rel_dist_th, abs_dist_th, density_th, er_fc_th, n_neighbors):
     non_fc_th_types = [
                 ('relative_distance_th',  rel_dist_th), 
                 ('absolute_distance_th', abs_dist_th), 
-                ('density_th', density_th)]
+                ('density_th', density_th),
+                ('n_neighbors', n_neighbors)]
     th_types = [(k, v) for k,v in non_fc_th_types if v is not None]
 
     if len(th_types) > 1:
@@ -183,6 +186,10 @@ def _get_threshold(Dsq, rel_dist_th, abs_dist_th, density_th, er_fc_th):
     elif th_type == 'density_th':
         d_th = np.quantile(Dsq, th)
     elif th_type == 'er_foldchange_th':
+        N = round((1 + np.sqrt(1 + 8*len(Dsq))) / 2)
+        density = th * np.log(N)/N
+        d_th = np.quantile(Dsq, density)
+    elif th_type == 'n_neighbors':
         N = round((1 + np.sqrt(1 + 8*len(Dsq))) / 2)
         density = th * np.log(N)/N
         d_th = np.quantile(Dsq, density)

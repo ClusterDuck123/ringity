@@ -11,3 +11,5 @@ E-MTAB-*
 **/.DS_Store
 doc/data/
 .vscode
+doc/notebooks/private
+

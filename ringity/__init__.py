@@ -1,5 +1,5 @@
 name = "ringity"
-__author__ = "Markus K. Youssef"
+__author__ = "M. K. Youssef, et al."
 __version__ = "0.3a1"
 
 # FUNCTIONS
@@ -32,11 +32,16 @@ from ringity.generators import (
                     )
 import ringity.generators.geometric_networks as geometric_networks
 
-from ringity.plotting import (plot, plot_nx, plot_dgm)
+from ringity.plotting import (
+                        plot,
+                        plot_X,
+                        plot_nx,
+                        plot_dgm,
+                        plot_seq,
+                        plot_degree_distribution)
 
 from ringity.readwrite.pdiagrams import (write_pdiagram, read_pdiagram)
 
-from ringity.singlecell import singlecell
 from ringity.classes.pdiagram import PDiagram
 
 import sys

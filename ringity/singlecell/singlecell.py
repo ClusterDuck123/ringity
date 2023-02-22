@@ -3,11 +3,25 @@ Module to deal with single cell data. Collects all related functions
 from around the ringity package. Will probably become its own 
 subpackage at some point.
 """
-
-import magic
+import warnings
 import numpy as np
-import scanpy as sc
 import ringity as rng
+
+try:
+    import scanpy as sc
+except ImportError:
+    warnings.warn(
+        "Module `scanpy` could not be loaded. "
+        "Some functions may throw an error. "
+        "Try running `pip install scanpy` to get rid of this warning.")
+
+try:
+    import magic
+except ImportError:
+    warnings.warn(
+        "Module `magic` could not be loaded. "
+        "Some functions may throw an error. "
+        "Try running `pip install magic-impute` to get rid of this warning.")
 
 def ring_score_from_anndata(adata, 
                             var_names = None, 
