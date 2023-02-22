@@ -5,7 +5,7 @@ from ringity.generators.point_clouds import (
                                 two_adjacent_circles
                                 )
 
-from ringity.generators.geometric_networks import from_point_cloud
+from ringity.generators.geometric_networks import pointcloud_to_graph
 
 from ringity.generators.pdiagrams import random_pdgm
 
