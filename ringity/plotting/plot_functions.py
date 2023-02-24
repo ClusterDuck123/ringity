@@ -23,7 +23,7 @@ def plot(arg, ax = None, **kwargs):
 
 def plot_seq(dgm, crop = None, ax = None, **kwargs):
     if ax is None:
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(**kwargs)
         fig.patch.set_alpha(0)
 
     if crop is None:
@@ -70,7 +70,11 @@ def plot_nx(G,
                     hoverinfo = hoverinfo, 
                     node_color = node_color)
         elif dim == 3:
-            return plot_nx_plotly_3d(G, pos = pos, hoverinfo = hoverinfo, node_color = node_color)
+            return plot_nx_plotly_3d(G, 
+                    pos = pos, 
+                    hoverinfo = 
+                    hoverinfo, 
+                    node_color = node_color)
 
 def plot_nx_old(G,
             pos = None,
@@ -173,12 +177,12 @@ def plot_dgm(dgm,
     return return_data
 
 
-def plot_X(X, ax = None, return_artist_obj = False):
+def plot_X(X, ax = None, return_artist_obj = False, **kwargs):
     n_obs, n_vars = X.shape
     
     fig = None
     if ax is None:
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(**kwargs)
         fig.patch.set_alpha(0)
     
     if n_vars == 2:
