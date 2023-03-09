@@ -308,7 +308,7 @@ class NetworkBuilder:
         np_rng = np.random.RandomState(random_state)
         coinflips = np_rng.uniform(size = (self.N * (self.N - 1)) // 2)
 
-        self.network = self._probabilities >= coinflips
+        self.network = (self._probabilities >= coinflips).astype(int)
 
 
 

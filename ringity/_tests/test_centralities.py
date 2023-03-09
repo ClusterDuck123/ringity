@@ -47,7 +47,7 @@ class TestCurrentFlowCentrality(unittest.TestCase):
 
 class TestNetFlowCentrality(unittest.TestCase):
     def setUp(self):
-        self.G = nx.erdos_renyi_graph(50,0.3)
+        self.G = nx.erdos_renyi_graph(2**5, 2**(-1))
 
     def test_different_current_flow_matrix_calculations(self):
         A = nx.adjacency_matrix(self.G)
@@ -59,18 +59,14 @@ class TestNetFlowCentrality(unittest.TestCase):
         self.assertTrue(equal)
 
     def test_different_net_flow_calculations(self):
-        bb1 = rng.networkmeasures.centralities.stupid_current_distance(self.G)
-        bb2 = rng.networkmeasures.centralities.slow_current_distance(self.G)
-        bb3 = rng.networkmeasures.centralities.net_flow(self.G)
+        bb1 = rng.networkmeasures.centralities.current_flow(self.G)
+        bb2 = nx.edge_current_flow_betweenness_centrality(self.G)
 
-        self.assertEqual(set(bb1),set(bb2))
-        self.assertEqual(set(bb2),set(bb3))
-        self.assertEqual(set(bb3),set(self.G.edges))
+        self.assertEqual(len(bb1),len(bb2))
 
-        precision = 1e-10
-        self.assertTrue(all([abs(bb1[key]-bb2[key]) < precision for key in bb1.keys()]))
-        self.assertTrue(all([abs(bb2[key]-bb3[key]) < precision for key in bb1.keys()]))
-
+        truth_values = [np.isclose(value, bb1[(min(edge), max(edge))]) 
+                                for edge, value in bb2.items()]
+        self.assertTrue(all(truth_values))
 
 if __name__ == '__main__':
     unittest.main()
