@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.stats as ss
 
-from ringity.generators.utils.defaults import DEFAULT_RESPONSE_PARAMETER
+from ringity.networkmodel.defaults import DEFAULT_RESPONSE_PARAMETER
 
 """ Utility module with functions leading up to the interaction probability function.
 

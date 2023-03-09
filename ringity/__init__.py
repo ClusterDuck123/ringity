@@ -42,7 +42,7 @@ from ringity.plotting import (
 
 from ringity.readwrite.pdiagrams import (write_pdiagram, read_pdiagram)
 
-from ringity.classes.pdiagram import PDiagram
+from ringity.userclasses.pdiagram import PDiagram
 
 import sys
 # Check for appropriate Python version

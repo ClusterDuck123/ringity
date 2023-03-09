@@ -2,7 +2,7 @@ import json
 import numpy as np
 
 from collections import defaultdict
-from ringity.classes.pdiagram import PDiagram
+from ringity.userclasses.pdiagram import PDiagram
 
 def read_pdiagram(fname, **kwargs):
     """

@@ -3,7 +3,7 @@ import numpy as np
 import ringity as rng
 import networkx as nx
 
-from ringity.generators.utils.param_utils import (
+from ringity.networkmodel.param_utils import (
                                         infer_density_parameter,
                                         infer_rate_parameter,
                                         infer_response_parameter,

@@ -4,7 +4,7 @@ import random
 import numpy as np
 
 from ringity.generators.pdiagrams import random_pdgm_point, random_pdgm
-from ringity import classes
+from ringity.userclasses import pdiagram
 
 path = os.path.dirname(os.path.abspath(__file__)) + '/..'
 sys.path.append(path)
@@ -28,15 +28,15 @@ class TestDgmPt(unittest.TestCase):
 class TestDgm(unittest.TestCase):
     def setUp(self):
         self.number = random.random()
-        self.signal_pt = classes.pdiagram.PDiagramPoint((0, self.number))
-        self.noise_pt  = classes.pdiagram.PDiagramPoint((0, 0))
+        self.signal_pt = pdiagram.PDiagramPoint((0, self.number))
+        self.noise_pt  = pdiagram.PDiagramPoint((0, 0))
 
     def test_score1(self):
-        dgm = classes.pdiagram.PDiagram(self.signal_pt for _ in range(100))
+        dgm = pdiagram.PDiagram(self.signal_pt for _ in range(100))
         self.assertAlmostEqual(dgm.ring_score(), 0, places = 8)
 
     def test_score2(self):
-        dgm = classes.pdiagram.PDiagram(self.noise_pt for _ in range(100))
+        dgm = pdiagram.PDiagram(self.noise_pt for _ in range(100))
         dgm.append(self.signal_pt)
         self.assertAlmostEqual(dgm.ring_score(), 1, places = 8)
 

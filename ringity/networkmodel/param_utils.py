@@ -2,7 +2,7 @@ import numpy as np
 
 from warnings import warn
 from scipy.optimize import bisect
-from ringity.generators.utils.defaults import DEFAULT_RESPONSE_PARAMETER
+from ringity.networkmodel.defaults import DEFAULT_RESPONSE_PARAMETER
 
 # =============================================================================
 #  -------------------------- PARAMETER INFERENCE ----------------------------
@@ -84,8 +84,14 @@ def max_density(rate, response):
     denominator = (response*2*plamb * np.sinh(plamb))
 
     return 1 - numerator / denominator
+
+
+def get_density(response, coupling, rate) -> float:
+    return coupling * max_density(response = response, rate = rate)
             
-#  -------------------------- OLD INFERENCE FUNCTIONS ----------------------------
+# ------------------------------------------------------------------------------
+# --------------------------- OLD INFERENCE FUNCTIONS --------------------------
+# ------------------------------------------------------------------------------ 
 
 def denisty_to_response(density, coupling, response, rate):
     if np.isclose(rate, 0):
@@ -112,7 +118,7 @@ def denisty_to_response(density, coupling, response, rate):
 
 def density_to_coupling(density, response, rate):
     mu_S = mean_similarity(rate = rate, response = response)
-    if rho <= mu_S:
+    if density <= mu_S:
         return density/mu_S
     else:
         raise ValueError("Please provide a lower density!")
@@ -222,8 +228,7 @@ def parse_coupling_parameter(c = None,
 
     elif nb_parms > 1:
         raise ValueError(f"Please provide only one coupling parameter! " \
-                         f"r = {r}, a = {a}, alpha = {alpha}, " \
-                         f"response = {response}")
+                         f"c = {c}, K = {K}, coupling = {coupling}.")
 
     elif c is not None:
         coupling = c

@@ -5,7 +5,7 @@ import networkx as nx
 
 from pathlib import Path
 from ringity.networkmeasures.centralities import net_flow
-from ringity.classes.exceptions import DisconnectedGraphError
+from ringity.userclasses.exceptions import DisconnectedGraphError
 
 DIRNAME_RINGITY = Path(os.path.dirname(rng.__file__))
 DIRNAME_TEST_DATA = DIRNAME_RINGITY / '_tests' / 'test_data'

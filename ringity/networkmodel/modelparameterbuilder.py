@@ -1,5 +1,5 @@
 import numpy as np
-from ringity.generators.utils.param_utils import (
+from ringity.networkmodel.param_utils import (
                                     infer_response_parameter,
                                     infer_coupling_parameter,
                                     infer_rate_parameter,

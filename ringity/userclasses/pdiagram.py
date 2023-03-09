@@ -5,7 +5,7 @@ import ringity as rng
 from itertools import compress
 from collections.abc import MutableMapping
 from ringity.core.metric2ringscore import ring_score_from_sequence
-from ringity.classes.exceptions import (
+from ringity.userclasses.exceptions import (
                                     SchroedingersException,
                                     TimeParadoxError,
                                     EndOfTimeError,

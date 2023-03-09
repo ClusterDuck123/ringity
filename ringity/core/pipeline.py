@@ -1,4 +1,4 @@
-from ringity.classes.pdiagram import PDiagram
+from ringity.userclasses.pdiagram import PDiagram
 from ringity.core.metric2ringscore import ring_score_from_sequence
 from ringity.core.data2metric import pwdistance_from_network, pwdistance_from_point_cloud
 

@@ -4,7 +4,7 @@ import scipy.stats as ss
 import scipy.special as sc
 
 from scipy.stats._distn_infrastructure import rv_generic, rv_frozen
-from ringity.classes.exceptions import DistributionParameterError
+from ringity.userclasses.exceptions import DistributionParameterError
 
 # =============================================================================
 #  -------------------------- GLOBAL CONSTANTS ------------------------------
