@@ -140,10 +140,14 @@ def net_flow(G,
 
 
 def resistance(G):
-    L = laplace(nx.to_scipy_sparse_array(G))
-    Gamm = np.linalg.pinv(L.A, hermitian = True)
+    n = len(G)
+    A = nx.to_numpy_array(G)
+    L = np.diag(np.sum(A, axis=1)) - A
+    Gamm = np.linalg.pinv(L + 1/n * np.ones([n,n]), 
+                        hermitian = True)
     diag = np.diag(Gamm)
-    return (-2*Gamm + diag).T + diag
+    D = (-2*Gamm + diag).T + diag
+    return D
 
 # -------------------- ONLY FOR LEGACY AND TESTING --------------------
 
@@ -166,7 +170,7 @@ def edge_extractor(A):
             yield i,j
 
 def oriented_incidence_matrix(A):
-    assert type(A) == scipy.sparse.csr.csr_matrix
+    A = scipy.sparse.csr.csr_matrix(A)
     N = A.shape[0]
     E = int(A.nnz/2)
     B = scipy.sparse.lil_matrix((E, N))
