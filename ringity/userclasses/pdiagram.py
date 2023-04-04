@@ -166,6 +166,8 @@ class PDiagram(list):
 
     @property
     def plengths(self):
+        if len(self) == 0:
+            return np.array([])
         return self.deaths - self.births
 
     @property
@@ -202,13 +204,13 @@ class PDiagram(list):
         return self.ring_score()
 
 # -------------------------------- Methods ---------------------------------
-    def psequence(self, normalisation = 'diameter'):
+    def psequence(self, normalisation = 'signal'):
         """Return 1-dimensional transformation of persistence diagram.
 
         Parameters
         ----------
         normalisation : str, optional
-            Acceptable normalisation: `diameter`, `signal`. By default 'diameter'.
+            Acceptable normalisation: `diameter`, `signal`. By default 'signal'.
 
         Returns
         -------
@@ -222,6 +224,8 @@ class PDiagram(list):
         """        
         pseq = self.plengths
 
+        if len(pseq) == 0:
+            return pseq
         if normalisation is None:
             return pseq
         elif normalisation.lower() == 'diameter':
@@ -263,7 +267,7 @@ class PDiagram(list):
                 flavour = 'geometric', 
                 nb_pers = None, 
                 exponent = 2):
-        return ring_score_from_sequence(self.sequence,
+        return ring_score_from_sequence(self.psequence(),
                                         flavour = flavour,
                                         nb_pers = nb_pers,
                                         exponent = exponent)
