@@ -1,3 +1,6 @@
+__author__ = "M. K. Youssef, et al."
+__version__ = "0.3a2"
+
 # FUNCTIONS
 from ringity.core import (
                     pdiagram, 
@@ -45,8 +48,6 @@ if __name__ == "__main__":
       import sys
 
       name = "ringity"
-      __author__ = "M. K. Youssef, et al."
-      __version__ = "0.3a2"
 
       major, minor = sys.version_info[:2]
       if (major, minor) < (3, 6):

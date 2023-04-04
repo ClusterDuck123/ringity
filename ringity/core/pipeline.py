@@ -214,7 +214,7 @@ def ring_score_from_pdiagram(pdgm,
                              nb_pers = np.inf,
                              exponent = 2):
     """Calculates ring-score from a PDiagram object."""
-    return ring_score_from_sequence(pdgm.sequence,
+    return ring_score_from_sequence(pdgm.trimmed().sequence,
                                     flavour = flavour,
                                     nb_pers = nb_pers,
                                     exponent = exponent)
@@ -247,6 +247,7 @@ def pdiagram_from_network(G,
                         store_weights = None,
                         new_weight_name = None,
                         overwrite_weights = False,
+                        return_distance_matrix = False,
                         verbose = False,
                         **kwargs):
     """Constructs a PDiagram object from a networkx graph.
@@ -278,7 +279,11 @@ def pdiagram_from_network(G,
     """
 
     D = pwdistance_from_network(G, metric = metric, verbose = verbose)
-    return pdiagram_from_distance_matrix(D)
+    pdgm = pdiagram_from_distance_matrix(D)
+    if return_distance_matrix:
+        return (pdgm, D)
+    else:
+        return pdgm
     
 def pdiagram_from_distance_matrix(D, 
                                 persistence = 'VietorisRipsPersistence',
