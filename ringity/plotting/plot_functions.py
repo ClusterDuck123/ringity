@@ -21,15 +21,15 @@ def plot(arg, ax = None, **kwargs):
     if isinstance(arg, nx.Graph):
         plot_nx(arg, ax = ax, **kwargs)
 
-def plot_seq(dgm, trim = None, ax = None, **kwargs):
+def plot_seq(dgm, crop = None, ax = None, **kwargs):
     if ax is None:
         fig, ax = plt.subplots(**kwargs)
         fig.patch.set_alpha(0)
 
-    if trim is None:
+    if crop is None:
         dgm_plot = dgm.copy()
     else:
-        dgm_plot = dgm.trimmed(trim)
+        dgm_plot = dgm.crop(crop)
 
     ax_setup(ax)
     bar = list(dgm_plot.sequence)

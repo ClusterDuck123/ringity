@@ -5,7 +5,7 @@ import ringity as rng
 from itertools import compress
 from collections.abc import MutableMapping
 from ringity.core.metric2ringscore import ring_score_from_sequence
-from ringity.userclasses.exceptions import (
+from ringity.classes.exceptions import (
                                     SchroedingersException,
                                     TimeParadoxError,
                                     EndOfTimeError,
@@ -240,7 +240,7 @@ class PDiagram(list):
         self.sort(reverse=True)
 
     def trimmed(self, length = None):
-        if length is None or length == np.inf:
+        if length in {None, np.inf}:
             return self[self > 0]
 
         if length <= len(self):

@@ -1,4 +1,4 @@
-from ringity.userclasses.pdiagram import PDiagram
+from ringity.classes.pdiagram import PDiagram
 from ringity.core.metric2ringscore import ring_score_from_sequence
 from ringity.core.data2metric import pwdistance_from_network, pwdistance_from_point_cloud
 
@@ -210,14 +210,35 @@ def ring_score_from_distance_matrix(D,
                             
                                     
 def ring_score_from_pdiagram(pdgm,
+                             score_type = 'length',
                              flavour = 'geometric',
                              nb_pers = np.inf,
                              exponent = 2):
     """Calculates ring-score from a PDiagram object."""
-    return ring_score_from_sequence(pdgm.trimmed().sequence,
-                                    flavour = flavour,
-                                    nb_pers = nb_pers,
-                                    exponent = exponent)
+
+    trimmed_pdgm = pdgm.trimmed(nb_pers)
+
+    if score_type == 'length':
+        score = ring_score_from_sequence(trimmed_pdgm.plengths,
+                                         flavour = flavour,
+                                         nb_pers = nb_pers,
+                                         exponent = exponent)
+    elif score_type == 'ratio':
+        score = ring_score_from_sequence(trimmed_pdgm.pratios,
+                                            flavour = flavour,
+                                            nb_pers = nb_pers,
+                                            exponent = exponent)
+    elif score_type == 'diameter':
+        score = ring_score_from_sequence(trimmed_pdgm.plengths,
+                                         flavour = flavour,
+                                         nb_pers = nb_pers,
+                                         exponent = exponent)
+        score *= trimmed_pdgm.signal/trimmed_pdgm.diameter * (2/np.sqrt(3))
+        
+    else:
+        raise Exception(f"Score type `{score_type}` unknown.")
+
+    return score
                                                
 # -----------------------------------------------------------------------------    
 # ----------------------- PERSISTENCE DIAGRAM FUNCTIONS -----------------------
@@ -247,7 +268,6 @@ def pdiagram_from_network(G,
                         store_weights = None,
                         new_weight_name = None,
                         overwrite_weights = False,
-                        return_distance_matrix = False,
                         verbose = False,
                         **kwargs):
     """Constructs a PDiagram object from a networkx graph.
@@ -279,11 +299,7 @@ def pdiagram_from_network(G,
     """
 
     D = pwdistance_from_network(G, metric = metric, verbose = verbose)
-    pdgm = pdiagram_from_distance_matrix(D)
-    if return_distance_matrix:
-        return (pdgm, D)
-    else:
-        return pdgm
+    return pdiagram_from_distance_matrix(D)
     
 def pdiagram_from_distance_matrix(D, 
                                 persistence = 'VietorisRipsPersistence',
