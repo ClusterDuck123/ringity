@@ -215,7 +215,6 @@ def ring_score_from_pdiagram(pdgm,
                              nb_pers = np.inf,
                              exponent = 2):
     """Calculates ring-score from a PDiagram object."""
-
     trimmed_pdgm = pdgm.trimmed(nb_pers)
 
     if score_type == 'length':
