@@ -1,10 +1,10 @@
+import numbers
 import warnings
 import numpy as np
 import ringity as rng
 
 from itertools import compress
 from collections.abc import MutableMapping
-from ringity.core.metric2ringscore import ring_score_from_sequence
 from ringity.classes.exceptions import (
                                     SchroedingersException,
                                     TimeParadoxError,
@@ -125,7 +125,9 @@ class PDiagramPoint(tuple):
 class PDiagram(list):
     def __init__(self, iterable = (), dim = None, diameter = None):
 
-        super().extend(sorted(map(PDiagramPoint, iterable), reverse = True))
+        pdgm_list = sorted(map(PDiagramPoint, iterable), reverse = True)
+        super().extend(pdgm_list)
+        
         if dim is not None:
             self.set_dim(dim)
         if diameter is not None:
@@ -138,13 +140,20 @@ class PDiagram(list):
                 diameter = None):
         dgm = arr[arr[:,2] == dim][:,:2]
         return cls(dgm, dim = dim, diameter = diameter)
+    
+    def _create_instance(self, data):
+        return type(self)(
+            data, 
+            dim = getattr(self, 'dim', None), 
+            diameter = getattr(self, 'diameter', None)
+        )
 
 # -------------------------------- Proerties ---------------------------------
     @property
     def diameter(self):
         return self._diameter
     def set_diameter(self, diameter):
-        assert isinstance(diameter, float)
+        assert isinstance(diameter, numbers.Number)
         self._diameter = diameter
 
     @property
@@ -232,8 +241,7 @@ class PDiagram(list):
             raise ValueError(f'normalisation `{normalisation}` unknown.')
 
     def copy(self):
-        other = type(self)(self)
-        return other
+        return self._create_instance(self)
     
     def append(self, item):
         list.append(self, PDiagramPoint(item))
@@ -260,13 +268,15 @@ class PDiagram(list):
 
 # ---------------------------- Function calls -----------------------------
     def ring_score(self, 
+                score_type = 'length',
                 flavour = 'geometric', 
                 nb_pers = None, 
                 exponent = 2):
-        return ring_score_from_sequence(self.sequence,
-                                        flavour = flavour,
-                                        nb_pers = nb_pers,
-                                        exponent = exponent)
+        return rng.ring_score_from_pdiagram(self,
+                                score_type = score_type,
+                                flavour = flavour,
+                                nb_pers = nb_pers,
+                                exponent = exponent)
 
     def plot(self, 
             ax = None, 
@@ -281,15 +291,16 @@ class PDiagram(list):
 
     def __getitem__(self, item):
         if isinstance(item, slice):
-            return type(self)(super().__getitem__(item))
+            return self._create_instance(super().__getitem__(item))
         try:
             item_iter = iter(item)
         except TypeError:
             return PDiagramPoint(super().__getitem__(item))
+        
         try:
-            return type(self)(super().__getitem__(item_iter))
+            return self._create_instance(super().__getitem__(item_iter))
         except TypeError:
-            return type(self)(compress(self, item_iter))
+            return self._create_instance(compress(self, item_iter))
 
     def __setitem__(self, index, value):
         raise SettingPersistenceError("Manually setting a persistence point is forbidden. "

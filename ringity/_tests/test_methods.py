@@ -30,19 +30,19 @@ class TestRingScore(unittest.TestCase):
         pdgm = rng.random_pdgm(2**5)
         pseq = pdgm.psequence(normalisation = 'signal')
 
-        self.assertEqual(
+        self.assertAlmostEqual(
                     gap_ring_score(pseq),
                     pdgm.ring_score(flavour = 'gap'))
-        self.assertEqual(
+        self.assertAlmostEqual(
                     linear_ring_score(pseq, nb_pers = 4),
                     pdgm.ring_score(flavour = 'linear', nb_pers = 4))
-        self.assertEqual(
+        self.assertAlmostEqual(
                     geometric_ring_score(pseq, nb_pers = 4, exponent = 3),
                     pdgm.ring_score(flavour = 'geometric', nb_pers = 4, exponent = 3))
-        self.assertEqual(
+        self.assertAlmostEqual(
                     amplitude_ring_score(pseq, nb_pers = 4),
                     pdgm.ring_score(flavour = 'amplitude', nb_pers = 4))
-        self.assertEqual(
+        self.assertAlmostEqual(
                     entropy_ring_score(pseq, nb_pers = 4),
                     pdgm.ring_score(flavour = 'entropy', nb_pers = 4))
         self.assertNotAlmostEqual(
