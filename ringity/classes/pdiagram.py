@@ -165,13 +165,11 @@ class PDiagram(list):
 
     @property
     def births(self):
-        births, deaths = zip(*self)
-        return np.array(births)
+        return self.to_array()[:,0]
 
     @property
     def deaths(self):
-        births, deaths = zip(*self)
-        return np.array(deaths)
+        return self.to_array()[:,1]
 
     @property
     def plengths(self):
@@ -264,7 +262,7 @@ class PDiagram(list):
         self.sort(reverse=True)
 
     def to_array(self):
-        return np.array(self)
+        return np.array(self).reshape(-1,2)
 
 # ---------------------------- Function calls -----------------------------
     def ring_score(self, 
