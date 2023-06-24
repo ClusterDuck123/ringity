@@ -3,7 +3,7 @@ __author__ = "M. K. Youssef, et al."
 __version__ = "0.3a2"
 
 # FUNCTIONS
-from ringity.core import (
+from ringity.ringscore import (
                     pdiagram, 
                     pdiagram_from_network,
                     pdiagram_from_point_cloud,
@@ -24,12 +24,9 @@ from ringity.core import (
                     )
 
 # MODULES
-from ringity.core import (statistics)
+from ringity.ringscore import (statistics)
 
-from ringity.generators import (
-                    random_pdgm,
-                    network_model,
-                    )
+from ringity.networkmodel import network_model
 import ringity.generators.geometric_networks as geometric_networks
 
 from ringity.plotting import (

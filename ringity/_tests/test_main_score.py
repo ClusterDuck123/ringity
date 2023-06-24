@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 
 from pathlib import Path
-from ringity.core.metric2ringscore import ring_score_from_sequence
+from ringity.ringscore.metric2ringscore import ring_score_from_sequence
 
 DIRNAME_RINGITY = Path(os.path.dirname(ringity.__file__))
 DIRNAME_TEST_DATA = DIRNAME_RINGITY / '_tests' / 'test_data'

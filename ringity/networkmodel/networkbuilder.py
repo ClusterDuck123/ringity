@@ -9,6 +9,7 @@ import numpy as np
 import scipy.stats as ss
 
 from ringity.networkmodel.modelparameterbuilder import ModelParameterBuilder
+from ringity.networkmodel.transformations import pw_circular_distance
 
 """This module describes the NetworkBuilder class.
 
@@ -262,9 +263,7 @@ class NetworkBuilder:
 
 
     def calculate_distances(self, circular = True, metric = 'euclidean'):
-        abs_dists = pdist(self.positions.reshape(-1,1), metric = metric)
-        circ_dists = np.pi - abs(abs_dists - np.pi)
-        self.distances = circ_dists if circular else abs_dists
+        self.distances = pw_circular_distance(self.positions, metric = metric)
 
     def calculate_similarities(self, sim_func = 'box_cosine', r = None):
         if r is not None:

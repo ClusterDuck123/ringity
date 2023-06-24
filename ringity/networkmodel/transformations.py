@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.stats as ss
 
-from ringity.networkmodel.defaults import DEFAULT_RESPONSE_PARAMETER
+from scipy.spatial.distance import pdist
 
 """ Utility module with functions leading up to the interaction probability function.
 
@@ -81,6 +81,11 @@ def get_canonical_prob_name(prob_name):
 # =============================================================================
 #  --------------------------- TRANSFORMATIONS ------------------------------
 # =============================================================================
+
+def pw_circular_distance(x, metric = 'euclidean'):
+    abs_dists = pdist(x.reshape(-1,1), metric = metric)
+    circ_dists = np.pi - abs(abs_dists - np.pi)
+    return circ_dists 
 
 def box_cosine_similarity(dists, box_length):
     """Calculate the normalized overlap of two boxes on the circle."""

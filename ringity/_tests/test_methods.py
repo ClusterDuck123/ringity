@@ -3,12 +3,13 @@ import unittest
 import ringity as rng
 
 from pathlib import Path
-from ringity.core.metric2ringscore import (
+from ringity.ringscore.metric2ringscore import (
                             gap_ring_score,
                             geometric_ring_score,
                             linear_ring_score,
                             amplitude_ring_score,
                             entropy_ring_score)
+from ringity.generators.pdiagrams import random_pdgm
 
 DIRNAME_RINGITY = Path(os.path.dirname(rng.__file__))
 DIRNAME_TMP = DIRNAME_RINGITY / '_tests' / 'test_data' / 'tmp'
@@ -17,7 +18,7 @@ FNAME_PDGM = DIRNAME_TMP / 'random_dgm.txt'
 
 class TestReadAndWrite(unittest.TestCase):
     def test_save_and_load(self):
-        pdgm1 = rng.random_pdgm(2**5)
+        pdgm1 = random_pdgm(2**5)
         rng.write_pdiagram(pdgm1, FNAME_PDGM)
 
         pdgm2 = rng.read_pdiagram(FNAME_PDGM)
@@ -27,7 +28,7 @@ class TestReadAndWrite(unittest.TestCase):
 
 class TestRingScore(unittest.TestCase):
     def test_ring_score_flavours(self):
-        pdgm = rng.random_pdgm(2**5)
+        pdgm = random_pdgm(2**5)
         pseq = pdgm.psequence(normalisation = 'signal')
 
         self.assertAlmostEqual(

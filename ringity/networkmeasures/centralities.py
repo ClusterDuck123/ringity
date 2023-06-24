@@ -83,6 +83,9 @@ def net_flow(G,
     # perspective, but differs in the implementation below.
     A_coo = nx.to_scipy_sparse_array(G, format = 'coo')
 
+    if not isinstance(A_coo.dtype, np.float64):
+        A_coo = A_coo.astype(np.float64)
+
     # Inverted Laplacian is going to be dense anyways.
     # So there is no harm in working with dense matrices here.
     L = -A_coo.toarray()

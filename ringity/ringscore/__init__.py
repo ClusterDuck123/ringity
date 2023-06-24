@@ -1,5 +1,5 @@
 #FUNCTIONS
-from ringity.core.pipeline import (
+from ringity.ringscore.pipeline import (
                     pdiagram, 
                     pdiagram_from_network,
                     pdiagram_from_point_cloud,
@@ -12,8 +12,8 @@ from ringity.core.pipeline import (
 
                     ring_score_from_pdiagram
                     )
-from ringity.core.metric2ringscore import ring_score_from_sequence
-from ringity.core.data2metric import (
+from ringity.ringscore.metric2ringscore import ring_score_from_sequence
+from ringity.ringscore.data2metric import (
                                 pwdistance,
                                 pwdistance_from_network,
                                 pwdistance_from_point_cloud,
@@ -21,5 +21,5 @@ from ringity.core.data2metric import (
 
 
 # MODULES
-import ringity.core.statistics as statistics
+import ringity.ringscore.statistics as statistics
 import ringity.singlecell.singlecell as singlecell
