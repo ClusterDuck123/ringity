@@ -29,7 +29,7 @@ def l_transform(pratios, fit_pratios = None):
     if fit_pratios is None:
         fit_pratios = pratios
     loglog_ratio = np.log(np.log(pratios))
-    corr_factor = np.euler_gamma + np.mean(fit_pratios)
+    corr_factor = np.euler_gamma + np.mean(np.log(np.log(fit_pratios)))
     lvalues = loglog_ratio - corr_factor
     return lvalues
 
