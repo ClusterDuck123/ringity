@@ -127,7 +127,6 @@ def linear_probability(sims, slope, intercept):
 
 def interaction_probability(d, r, c):
     l = 2 * np.pi * r  # Response length
-    r2 = np.clip((1 - r) / r, 0, 1)  # Dual response parameter
-    smin = 1 - r2  # Minimal similarity
-    s = np.clip(r2 - d / l, 0, 1) + smin  # Similarity
+    s_min = 1 - np.clip((1 - r) / r, 0, 1)  # Minimal similarity
+    s = np.clip(1 - s_min - d / l, 0, 1) + s_min  # Similarity
     return c * s
