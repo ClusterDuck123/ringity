@@ -85,6 +85,9 @@ def ppf_delay(q, beta=None, rate=None):
 class delaydist_gen(ss.rv_continuous):
     r"""A wrapped exponential continuous random variable."""
 
+    def _argcheck(self, beta):
+        return (0 <= beta) & (beta <= 1)
+
     def _shape_info(self):
         return [_ShapeInfo("beta", False, (0, 1), (True, True))]
 
@@ -168,6 +171,77 @@ class distancedist_gen(ss.rv_continuous):
 
 distancedist = distancedist_gen(a=0.0, b=np.pi, name="distancedist")
 
+
+def pdf_conditional_distance(x, theta, beta=None, rate=None):
+    """
+    Probability distribution function of conditional (circular) distance
+    of two wrapped exponentialy distributed random variables with scale
+    parameter kappa. Support is on [0,pi].
+    """
+    rate, support = _compute_rate_and_support(
+        condition=(0 < x) & (x < np.pi),
+        beta=beta,
+        rate=rate,
+    )
+    theta0 = np.pi - abs(theta - np.pi)
+    eps = np.sign(theta - np.pi)
+    values = np.where(
+        x <= theta0,
+        np.cosh(rate * x),
+        np.exp(eps * rate * np.pi) * np.cosh(rate * (x - np.pi)),
+    )
+    normalization = 2 * rate * np.exp(-rate * theta) / (-sc.expm1(-2 * np.pi * rate))
+    return support * values * normalization
+
+
+def cdf_conditional_distance(x, theta, beta=None, rate=None):
+    """
+    Cumulative distribution function of conditional (circular) distance
+    of two wrapped exponentialy distributed random variables with scale
+    parameter kappa. Support of the corresponding pdf is on [0,pi].
+    """
+    rate, support = _compute_rate_and_support(
+        condition=(0 <= x),
+        beta=beta,
+        rate=rate,
+    )
+    theta0 = np.pi - abs(theta - np.pi)
+    eps = np.sign(theta - np.pi)
+    values = np.where(
+        x <= theta0,
+        np.sinh(rate * x),
+        np.sinh(rate * theta0)
+        + np.exp(eps * rate * np.pi)
+        * (np.sinh((np.pi - theta0) * rate) - np.sinh((np.pi - x) * rate)),
+    )
+    normalization = (
+        2 * rate * np.exp(-rate * theta) / (-rate * sc.expm1(-2 * np.pi * rate))
+    )
+    return support * values * normalization
+
+
+class conddistancedist_gen(ss.rv_continuous):
+    r"""A wrapped exponential continuous random variable."""
+
+    def _shape_info(self):
+        return [
+            _ShapeInfo("beta", False, (0, 1), (True, True)),
+            _ShapeInfo("theta", False, (0, 2 * np.pi), (True, True)),
+        ]
+
+    def _get_support(self, beta, theta):
+        return self.a, self.b
+
+    def _pdf(self, x, beta, theta):
+        return np.vectorize(pdf_conditional_distance)(x, beta=beta, theta=theta)
+
+    def _cdf(self, x, beta, theta):
+        return np.vectorize(cdf_conditional_distance)(x, beta=beta, theta=theta)
+
+
+conddistancedist = conddistancedist_gen(a=0.0, b=np.pi, name="conddistancedist")
+
+
 #  ----------------------------- SIMILARITY DISTRIBUTION ---------------------------
 
 
@@ -237,6 +311,118 @@ class similaritydist_gen(ss.rv_continuous):
 
 similaritydist = similaritydist_gen(a=0.0, b=1.0, name="similaritydist")
 
+
+def pdf_conditional_similarity(x, r, theta, beta=None, rate=None):
+    """
+    (Continuous part of the) probability density function of s_r ∘ d(X,theta),
+    where X is a wrapped exponentially distributed random variable
+    with delay parameter beta, d(-,-) denotes the circular distance and s_r is the
+    (normalized) area of the overlap of two boxes of length 2*pi*r on the circle.
+    Normalization is taken to be the area of one box, 2*pi*r. Hence, the
+    support is on [s_min,1], where s_min=|1 - (1-r)/r|_+.
+    """
+    l = 2 * np.pi * r  # Response length
+    s_min = np.clip(1 - (1 - r) / r, 0, 1)
+
+    rate, support = _compute_rate_and_support(
+        condition=(s_min < x) & (x < 1),
+        beta=beta,
+        rate=rate,
+    )
+
+    theta0 = np.pi - abs(theta - np.pi)
+    eps = np.sign(theta - np.pi)
+
+    values = np.where(
+        1 - theta0 / l <= x,
+        np.cosh(rate * l * (1 - x)),
+        np.exp(eps * rate * np.pi) * np.cosh(rate * (l * (1 - x) - np.pi)),
+    )
+    normalization = (
+        2 * rate * l * np.exp(-rate * theta) / (-sc.expm1(-2 * np.pi * rate))
+    )
+    return support * values * normalization
+
+
+def cdf_conditional_similarity(x, r, theta, beta=None, rate=None):
+    """
+    (Continuous part of the) probability density function of s_r ∘ d(X,theta),
+    where X is a wrapped exponentially distributed random variable
+    with delay parameter beta, d(-,-) denotes the circular distance and s_r is the
+    (normalized) area of the overlap of two boxes of length 2*pi*r on the circle.
+    Normalization is taken to be the area of one box, 2*pi*r. Hence, the
+    support is on [s_min,1], where s_min=|1 - (1-r)/r|_+.
+    """
+    l = 2 * np.pi * r  # Response length
+    s_min = np.clip(1 - (1 - r) / r, 0, 1)
+
+    rate, support = _compute_rate_and_support(
+        condition=(s_min < x),
+        beta=beta,
+        rate=rate,
+    )
+
+    theta0 = np.pi - abs(theta - np.pi)
+    eps = np.sign(theta - np.pi)
+
+    values = np.where(
+        l * (1 - x) <= theta0,
+        np.sinh(rate * l * (1 - x)),
+        np.sinh(rate * theta0)
+        + np.exp(eps * rate * np.pi)
+        * (np.sinh((np.pi - theta0) * rate) - np.sinh((np.pi - l * (1 - x)) * rate)),
+    )
+    normalization = (
+        2 * rate * np.exp(-rate * theta) / (-rate * sc.expm1(-2 * np.pi * rate))
+    )
+    return support * (1 - values * normalization)
+
+
+class condsimilaritydist_gen(ss.rv_continuous):
+    r"""A wrapped exponential continuous random variable."""
+
+    def _shape_info(self):
+        return [
+            _ShapeInfo("theta", False, (0, 2 * np.pi), (True, True)),
+            _ShapeInfo("beta", False, (0, 1), (True, True)),
+            _ShapeInfo("r", False, (0, 1), (True, True)),
+        ]
+
+    def _get_support(self, theta, beta, r):
+        return self.a, self.b
+
+    def _pdf(self, x, theta, beta, r):
+        return np.vectorize(pdf_conditional_similarity)(x, theta=theta, r=r, beta=beta)
+
+    def _cdf(self, x, theta, beta, r):
+        return np.vectorize(cdf_conditional_similarity)(x, theta=theta, r=r, beta=beta)
+
+
+condsimilaritydist = condsimilaritydist_gen(a=0.0, b=1.0, name="condsimilaritydist")
+
+
+#  ----------------------------- AUXILIARY DISTRIBUTIONS ---------------------------
+
+
+def pdf_conditional_absolute_distance(t, theta, beta=None, rate=None):
+    """
+    Probability distribution function of conditional absolute distance
+    of two wrapped exponentialy distributed random variables with scale
+    parameter kappa. Support is on [0,2*pi].
+    """
+    rate, support = _compute_rate_and_support(
+        condition=(0 < t) & (t < np.pi),
+        beta=beta,
+        rate=rate,
+    )
+    theta0 = np.pi - abs(theta - np.pi)
+    eps = np.sign(theta - np.pi)
+    values = np.where(t <= theta0, 2 * np.cosh(rate * t), np.exp(eps * rate * t))
+    normalization = rate * np.exp(-rate * theta) / (-sc.expm1(-2 * np.pi * rate))
+    support = np.where((0 < t) & (t < 2 * np.pi - theta0), 1.0, 0.0)
+    return support * values * normalization
+
+
 ###############################################################################
 # ------------------------------- LEGACY -------------------------------------#
 ###############################################################################
@@ -289,16 +475,6 @@ def cdf_absolute_distance(t, parameter, parameter_type="rate"):
     return support * np.where(t >= 2 * PI, 1, values * normalization)
 
 
-def pdf_conditional_absolute_distance(t, theta, parameter, parameter_type="rate"):
-    """
-    [MISSING]
-    """
-    term1 = pdf_delay(theta + t, parameter=parameter, parameter_type=parameter_type)
-    term2 = pdf_delay(theta - t, parameter=parameter, parameter_type=parameter_type)
-    support = np.where((0 < t) & (t < 2 * PI), 1.0, 0.0)
-    return support * (term1 + term2)
-
-
 def cdf_conditional_absolute_distance(t, theta, parameter, parameter_type="rate"):
     """
     [MISSING] & somehow faulty....
@@ -309,128 +485,9 @@ def cdf_conditional_absolute_distance(t, theta, parameter, parameter_type="rate"
     return support * np.where(t >= 2 * PI, 1, term1 - term2)
 
 
-def pdf_circular_distance(t, parameter, parameter_type="rate"):
-    """
-    Probability distribution function of (circular) distance of two wrapped
-    exponentialy distributed random variables with scale parameter kappa.
-    Support is on [0,pi].
-    """
-    rate = get_rate_parameter(parameter, parameter_type)
-    support = np.where((0 < t) & (t < PI), 1.0, 0.0)
-    values = np.cosh((PI - t) * rate)
-    normalization = rate / np.sinh(PI * rate)
-    return support * values * normalization
-
-
-def cdf_circular_distance(t, parameter, parameter_type="rate"):
-    """
-    Cumulative distribution function of (circular) distance of two wrapped
-    exponentialy distributed random variables with scale parameter kappa.
-    F(t)=0 for t<0 and F(t)=1 for t>pi.
-    """
-    rate = get_rate_parameter(parameter, parameter_type)
-    support = np.where(0 <= t, 1.0, 0.0)
-    values = np.sinh(rate * (PI - t))
-    normalization = 1 / np.sinh(rate * PI)
-    return support * np.where(t >= PI, 1, 1 - values * normalization)
-
-
-def pdf_conditional_circular_distance(t, theta, parameter, parameter_type="rate"):
-    """
-    [MISSING]
-    """
-    term1 = pdf_conditional_absolute_distance(
-        t, theta, parameter=parameter, parameter_type=parameter_type
-    )
-    term2 = pdf_conditional_absolute_distance(
-        2 * PI - t, theta, parameter=parameter, parameter_type=parameter_type
-    )
-    support = np.where((0 < t) & (t < PI), 1.0, 0.0)
-    return support * (term1 + term2)
-
-
-def cdf_conditional_circular_distance(t, theta, parameter, parameter_type="rate"):
-    """
-    [MISSING]
-    """
-    term1 = cdf_conditional_absolute_distance(
-        t, theta, parameter=parameter, parameter_type=parameter_type
-    )
-    term2 = cdf_conditional_absolute_distance(
-        2 * PI - t, theta, parameter=parameter, parameter_type=parameter_type
-    )
-    support = np.where(0 < t, 1.0, 0.0)
-    return support * np.where(t >= PI, 1, term1 + (1 - term2))
-
-
 # =============================================================================
 #  ----- SIMILARITY AND INTERACTION PROBABILITY DISTRIBUTION FUNCTIONS -------
 # =============================================================================
-
-
-# def pdf_similarity(t, parameter, a, parameter_type="rate"):
-#     """
-#     (Continuous part of the) probability density function of s_a ∘ d(X,Y),
-#     where X,Y are two wrapped exponentially distributed random variables
-#     with scale parameter kappa, d(-,-) denotes the distance on the circle
-#     and s_a(-) is the area of the (normalized) overlap of two boxes of length
-#     2*pi*a on the circle for a given distance (measured from edge to edge,
-#     or equivalently from center to center).
-#     Normalization is taken to be the area of one box, 2*pi*a. Hence, the
-#     support is on [s_min,pi], where s_min=|2-1/a|^+.
-#     """
-#     rate = get_rate_parameter(parameter, parameter_type)
-#     s_min = np.clip(2 - 1 / a, 0, 1)
-#     support = np.where((s_min <= t) & (t <= 1), 1.0, 0.0)
-#     values = np.cosh(PI * rate * (1 - 2 * a * (1 - t)))
-#     normalization = 2 * a * PI * rate / np.sinh(PI * rate)
-#     return support * values * normalization
-
-
-# def cdf_similarity(t, parameter, a, parameter_type="rate"):
-#     """
-#     Cumulative distribution function of s_a ∘ d(X,Y), where X,Y are two wrapped
-#     exponentially distributed random variables with scale parameter kappa,
-#     d(-,-) denotes the distance on the circle and s_a(-) is the area of the
-#     (normalized) overlap of two boxes of length 2*pi*a on the circle for a
-#     given distance (measured from edge to edge, or equivalently from center
-#     to center).
-#     Normalization is taken to be the area of one box, 2*pi*a. Hence, the
-#     support is on [s_min,pi], where s_min=|2-1/a|^+.
-#     """
-#     rate = get_rate_parameter(parameter, parameter_type)
-#     s_min = np.clip(2 - 1 / a, 0, 1)
-#     support = np.where(s_min <= t, 1.0, 0.0)
-#     numerator = np.sinh(rate * (PI - 2 * a * PI * (1 - t)))
-#     denominator = np.sinh(rate * PI)
-#     return support * np.where(t >= 1, 1.0, numerator / denominator)
-
-
-def pdf_conditional_similarity(t, theta, a, parameter, parameter_type="rate"):
-    """
-    [MISSING]
-    """
-    s_min = np.clip(2 - 1 / a, 0, 1)
-    support = np.where((s_min <= t) & (t <= 1), 1.0, 0.0)
-    return (
-        support
-        * 2
-        * PI
-        * a
-        * pdf_conditional_circular_distance(
-            t=2 * PI * a * (1 - t),
-            theta=theta,
-            parameter=parameter,
-            parameter_type=parameter_type,
-        )
-    )
-
-
-def cdf_conditional_similarity(t, theta, a, parameter, parameter_type="rate"):
-    """
-    [MISSING]
-    """
-    assert False, "Not implemented yet!"
 
 
 def pdf_probability(t, parameter, a, rho, parameter_type="rate"):
