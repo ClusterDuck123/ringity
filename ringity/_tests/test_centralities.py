@@ -1,7 +1,10 @@
 import unittest
 import numpy as np
-import ringity as rng
 import networkx as nx
+
+import ringity as rng
+import ringity._legacy.legacy_centralities as legacy
+import ringity.networkmeasures.centralities as cent
 
 class TestCurrentFlowCentrality(unittest.TestCase):
     def test_network_1(self):
@@ -17,7 +20,7 @@ class TestCurrentFlowCentrality(unittest.TestCase):
 
         G = nx.convert_node_labels_to_integers(G)
 
-        I = rng.networkmeasures.centralities.current_flow_betweenness(G)
+        I = legacy.current_flow_betweenness(G)
         sample = set(np.round(I,3))
 
         self.assertEqual(sample, set([0.269, 0.333, 0.67]))
@@ -39,7 +42,7 @@ class TestCurrentFlowCentrality(unittest.TestCase):
 
         G = nx.convert_node_labels_to_integers(G)
 
-        I = rng.networkmeasures.centralities.current_flow_betweenness(G)
+        I = legacy.current_flow_betweenness(G)
         sample = set(np.round(I,3))
 
         self.assertEqual(sample, set([0.194, 0.267, 0.316, 0.321, 0.361, 0.417, 0.471]))
@@ -51,15 +54,15 @@ class TestNetFlowCentrality(unittest.TestCase):
 
     def test_different_current_flow_matrix_calculations(self):
         A = nx.adjacency_matrix(self.G)
-        C = rng.networkmeasures.centralities.prepotential(self.G)
-        B = rng.networkmeasures.centralities.oriented_incidence_matrix(A).toarray()
+        C = legacy.prepotential(self.G)
+        B = legacy.oriented_incidence_matrix(A).toarray()
         F2 = B@C
-        F1 = rng.networkmeasures.centralities.current_flow_matrix(A)
+        F1 = legacy.current_flow_matrix(A)
         equal = np.allclose(F1,F2)
         self.assertTrue(equal)
 
     def test_different_net_flow_calculations(self):
-        bb1 = rng.networkmeasures.centralities.current_flow(self.G)
+        bb1 = cent.current_flow(self.G)
         bb2 = nx.edge_current_flow_betweenness_centrality(self.G)
 
         self.assertEqual(len(bb1),len(bb2))
