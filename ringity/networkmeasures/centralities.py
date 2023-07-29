@@ -1,4 +1,4 @@
-from ringity.classes.exceptions import DisconnectedGraphError
+from ringity.userclasses.exceptions import DisconnectedGraphError
 from numba import njit
 
 import scipy.sparse

@@ -3,6 +3,7 @@ __author__ = "M. K. Youssef, et al."
 __version__ = "0.3a3"
 
 # FUNCTIONS
+from ringity.ringscore.metric2ringscore import ring_score_from_sequence
 from ringity.ringscore import (
                     pdiagram, 
                     pdiagram_from_network,
@@ -14,7 +15,6 @@ from ringity.ringscore import (
                     ring_score_from_point_cloud,
                     ring_score_from_distance_matrix,
 
-                    ring_score_from_sequence,
                     ring_score_from_pdiagram,
 
                     pwdistance,
@@ -39,7 +39,7 @@ from ringity.plotting import (
 
 from ringity.readwrite.pdiagrams import (write_pdiagram, read_pdiagram)
 
-from ringity.classes.pdiagram import PDiagram
+from ringity.userclasses.pdiagram import PDiagram
 
 import sys
 # Check for appropriate Python version

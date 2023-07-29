@@ -1,6 +1,5 @@
 import warnings
 import numpy as np
-import ringity as rng
 
 from itertools import compress
 from collections.abc import MutableMapping

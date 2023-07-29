@@ -4,7 +4,7 @@ import networkx as nx
 
 from scipy.stats import rankdata
 from ringity.networkmeasures.centralities import laplace
-from ringity.classes.exceptions import DisconnectedGraphError
+from ringity.userclasses.exceptions import DisconnectedGraphError
 
 # -------------------- FROM CENTRALITY.PY --------------------
 

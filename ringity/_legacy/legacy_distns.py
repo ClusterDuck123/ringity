@@ -1,10 +1,6 @@
-import inspect
-import numpy as np
 import scipy.stats as ss
-import scipy.special as sc
 
 from scipy.stats._distn_infrastructure import rv_generic, rv_frozen
-from ringity.classes.exceptions import DistributionParameterError
 
 """This module is deprecated and should be safely removed in the future."""
 
@@ -48,29 +44,3 @@ def _get_frozen_random_variable(distn_arg, **kwargs):
         
     assert isinstance(frozen_rv, rv_frozen)
     return frozen_rv
-        
-def _get_rv(distn, **kwargs):
-    
-    if   isinstance(distn, str):
-        if   distn == 'wrappedexpon':
-            possible_args = inspect.getfullargspec(wrappedexpon._parse_args)[0]
-            given_args = {key:value for (key,value) in kwargs.items() if key in possible_args}
-            return wrappedexpon, given_args
-        else:
-            assert False, f"Distribution {distn} not known."
-    
-    elif isinstance(distn, rv_frozen):
-        return ss.rv_continuous(name = 'frozen'), None
-    else:
-        assert False, f"data type of distn recognized: ({type(distn)})"
-
-def get_rate_parameter(parameter, parameter_type):
-    if   parameter_type.lower() == 'rate':
-        return parameter
-    elif parameter_type.lower() == 'shape':
-        return 1/parameter
-    elif parameter_type.lower() == 'delay':
-        return np.cos(np.pi*parameter/2) / np.sin(np.pi*parameter/2)
-    else:
-        assert False, f"Parameter type '{parameter_type}' not known! " \
-                       "Please choose between 'rate', 'shape' and 'delay'."
