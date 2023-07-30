@@ -1,4 +1,4 @@
-from ringity.plotting.plot_functions import (
+from ringity.utils.plotting.plot_functions import (
                                 plot,
                                 plot_X,
                                 plot_nx,
@@ -7,4 +7,4 @@ from ringity.plotting.plot_functions import (
                                 plot_degree_distribution
                                 )
 
-from ringity.plotting.singlecell import plot_dimreduction_from_anndata
+from ringity.utils.plotting.singlecell import plot_dimreduction_from_anndata

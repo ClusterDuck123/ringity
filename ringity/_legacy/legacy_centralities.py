@@ -3,8 +3,8 @@ import numpy as np
 import networkx as nx
 
 from scipy.stats import rankdata
-from ringity.networkmeasures.centralities import laplace
-from ringity.userclasses.exceptions import DisconnectedGraphError
+from ringity.networks.centralities import laplace
+from ringity.utils.exceptions import DisconnectedGraphError
 
 # -------------------- FROM CENTRALITY.PY --------------------
 

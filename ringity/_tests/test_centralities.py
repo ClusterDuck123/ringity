@@ -4,7 +4,7 @@ import networkx as nx
 
 import ringity as rng
 import ringity._legacy.legacy_centralities as legacy
-import ringity.networkmeasures.centralities as cent
+import ringity.networks.centralities as cents
 
 class TestCurrentFlowCentrality(unittest.TestCase):
     def test_network_1(self):
@@ -62,7 +62,7 @@ class TestNetFlowCentrality(unittest.TestCase):
         self.assertTrue(equal)
 
     def test_different_net_flow_calculations(self):
-        bb1 = cent.current_flow(self.G)
+        bb1 = cents.current_flow(self.G)
         bb2 = nx.edge_current_flow_betweenness_centrality(self.G)
 
         self.assertEqual(len(bb1),len(bb2))

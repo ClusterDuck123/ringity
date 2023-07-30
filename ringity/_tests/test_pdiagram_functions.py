@@ -1,11 +1,11 @@
 import os
 import unittest
-import ringity as rng
 import networkx as nx
+import ringity as rng
+import ringity.networks.centralities as cents
 
 from pathlib import Path
-from ringity.userclasses import exceptions
-from ringity.networkmeasures import centralities
+from ringity.utils import exceptions
 
 DIRNAME_RINGITY = Path(os.path.dirname(rng.__file__))
 DIRNAME_TEST_DATA = DIRNAME_RINGITY / '_tests' / 'test_data'
@@ -47,7 +47,7 @@ class TestDiagramFunction(unittest.TestCase):
         G.add_node(11)
         with self.assertRaises(Exception): 
             # For some reason I get an error here when I use DisconnectedGraphError
-             centralities.net_flow(G)
+             cents.net_flow(G)
 
 if __name__ == '__main__':
     unittest.main()

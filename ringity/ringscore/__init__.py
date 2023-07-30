@@ -22,4 +22,4 @@ from ringity.ringscore.data2metric import (
 
 # MODULES
 import ringity.ringscore.statistics as statistics
-import ringity.singlecell.singlecell as singlecell
+import ringity.utils.singlecell.singlecell as singlecell

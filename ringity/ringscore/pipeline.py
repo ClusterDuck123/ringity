@@ -1,6 +1,6 @@
 from ringity.ringscore.metric2ringscore import ring_score_from_sequence
 from ringity.ringscore.data2metric import pwdistance_from_network, pwdistance_from_point_cloud
-from ringity.userclasses.pdiagram import PDiagram
+from ringity.tda.pdiagram.pdiagram import PDiagram
 
 from gtda.homology import VietorisRipsPersistence # WE SHOULD GET RID OF THIS IMPORT HERE
 from scipy.spatial.distance import is_valid_dm

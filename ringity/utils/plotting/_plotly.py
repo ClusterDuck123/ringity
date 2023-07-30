@@ -1,7 +1,7 @@
 import networkx as nx
 import plotly.graph_objects as go
 
-from ringity.plotting.styling import CEMM_COL1, CEMM_COL2
+from ringity.utils.plotting.styling import CEMM_COL1, CEMM_COL2
 
 def _get_edge_coord_3d(G, pos):
     edge_x = []

@@ -9,7 +9,7 @@ from ringity.ringscore.metric2ringscore import (
                             linear_ring_score,
                             amplitude_ring_score,
                             entropy_ring_score)
-from ringity.generators.pdiagrams import random_pdgm
+from ringity.tda.pdiagram.generators import random_pdgm
 
 DIRNAME_RINGITY = Path(os.path.dirname(rng.__file__))
 DIRNAME_TMP = DIRNAME_RINGITY / '_tests' / 'test_data' / 'tmp'

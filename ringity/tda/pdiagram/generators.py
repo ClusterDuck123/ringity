@@ -1,5 +1,5 @@
 from ringity._legacy.legacy_distns import _get_frozen_random_variable
-from ringity.userclasses.pdiagram import PDiagramPoint, PDiagram
+from ringity.tda.pdiagram.pdiagram import PDiagramPoint, PDiagram
 
 def random_pdgm_point(distn_arg = 'uniform', **kwargs):
     frozen_rv = _get_frozen_random_variable(distn_arg, **kwargs)

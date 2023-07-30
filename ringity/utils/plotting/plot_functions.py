@@ -3,8 +3,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 from collections import Counter
-from ringity.plotting.styling import ax_setup
-from ringity.plotting._plotly import plot_nx_plotly_3d, plot_nx_plotly_2d
+from ringity.utils.plotting.styling import ax_setup
+from ringity.utils.plotting._plotly import plot_nx_plotly_3d, plot_nx_plotly_2d
 
 CEMM_COL1 = (  0/255,  85/255, 100/255)
 CEMM_COL2 = (  0/255, 140/255, 160/255)

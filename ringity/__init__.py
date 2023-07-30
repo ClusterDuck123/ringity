@@ -26,10 +26,10 @@ from ringity.ringscore import (
 # MODULES
 from ringity.ringscore import (statistics)
 
-from ringity.networkmodel import network_model
-import ringity.generators.geometric_networks as geometric_networks
+from ringity.networks.networkmodel import network_model
+import ringity.networks.geometric_networks as geometric_networks
 
-from ringity.plotting import (
+from ringity.utils.plotting import (
                         plot,
                         plot_X,
                         plot_nx,
@@ -37,9 +37,9 @@ from ringity.plotting import (
                         plot_seq,
                         plot_degree_distribution)
 
-from ringity.readwrite.pdiagrams import (write_pdiagram, read_pdiagram)
+from ringity.tda.pdiagram.readwrite import (write_pdiagram, read_pdiagram)
 
-from ringity.userclasses.pdiagram import PDiagram
+from ringity.tda.pdiagram.pdiagram import PDiagram
 
 import sys
 # Check for appropriate Python version

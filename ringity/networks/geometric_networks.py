@@ -1,4 +1,4 @@
-from ringity.generators import point_clouds
+from ringity.utils import point_clouds
 
 import numpy as np
 import networkx as nx

@@ -3,8 +3,8 @@ import sys
 import random
 import numpy as np
 
-from ringity.generators.pdiagrams import random_pdgm_point, random_pdgm
-from ringity.userclasses import pdiagram
+from ringity.tda.pdiagram.generators import random_pdgm_point, random_pdgm
+from ringity.tda.pdiagram import pdiagram
 
 path = os.path.dirname(os.path.abspath(__file__)) + '/..'
 sys.path.append(path)

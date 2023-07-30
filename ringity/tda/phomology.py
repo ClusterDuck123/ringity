@@ -1,6 +1,6 @@
 import numpy as np
 
-from ringity.classes.pdiagram import PDiagram
+from ringity.tda.pdiagram.pdiagram import PDiagram
 from gtda.homology import VietorisRipsPersistence # CHANGE FOR FUTURE: OPTIONAL IMPORT
 
 # =============================================================================

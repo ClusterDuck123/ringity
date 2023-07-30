@@ -1,7 +1,7 @@
 import scipy
 import numpy as np
 import networkx as nx
-import ringity.networkmeasures.centralities as centralities
+import ringity.networks.centralities as cents
 
 from scipy.sparse.csgraph import floyd_warshall
 from scipy.spatial.distance import pdist, squareform, is_valid_dm
@@ -133,7 +133,7 @@ def pwdistance_from_network(G,
         D = floyd_warshall(A)
     else:
         if metric.lower() == 'resistance':
-            D = centralities.resistance(G)
+            D = cents.resistance(G)
         elif metric.lower() == 'spl':
             A = nx.to_numpy_array(G, weight = None)
             D = floyd_warshall(A)
@@ -142,11 +142,11 @@ def pwdistance_from_network(G,
 
 def induce_edge_weights(G, metric = 'net_flow', verbose = False):
     if metric.lower() == 'net_flow':
-        ew_dict = centralities.net_flow(G)
+        ew_dict = cents.net_flow(G)
     elif metric.lower() == 'betweenness':
         ew_dict = nx.edge_betweenness_centrality(G)
     elif metric.lower() == 'current_flow':
-        ew_dict = centralities.current_flow(G)
+        ew_dict = cents.current_flow(G)
     else:
         raise Exception(f'Centrality measure {metric} unknown.')
     nx.set_edge_attributes(G, ew_dict, metric)
