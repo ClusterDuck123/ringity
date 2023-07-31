@@ -211,12 +211,10 @@ def cdf_conditional_distance(x, theta, beta=None, rate=None):
         x <= theta0,
         np.sinh(rate * x),
         np.sinh(rate * theta0)
-        + np.exp(eps * rate * np.pi)
-        * (np.sinh((np.pi - theta0) * rate) - np.sinh((np.pi - x) * rate)),
+        + np.exp(eps * np.pi * rate)
+        * (np.sinh(rate * (np.pi - theta0)) - np.sinh(rate * (np.pi - x))),
     )
-    normalization = (
-        2 * rate * np.exp(-rate * theta) / (-rate * sc.expm1(-2 * np.pi * rate))
-    )
+    normalization = 2 * np.exp(-rate * theta) / (-sc.expm1(-2 * np.pi * rate))
     return support * values * normalization
 
 
@@ -314,7 +312,7 @@ similaritydist = similaritydist_gen(a=0.0, b=1.0, name="similaritydist")
 
 def pdf_conditional_similarity(x, r, theta, beta=None, rate=None):
     """
-    (Continuous part of the) probability density function of s_r ∘ d(X,theta),
+    (Continuous part of the) probability density function of s_r ∘ d(X,theta),
     where X is a wrapped exponentially distributed random variable
     with delay parameter beta, d(-,-) denotes the circular distance and s_r is the
     (normalized) area of the overlap of two boxes of length 2*pi*r on the circle.
@@ -368,13 +366,10 @@ def cdf_conditional_similarity(x, r, theta, beta=None, rate=None):
     values = np.where(
         l * (1 - x) <= theta0,
         np.sinh(rate * l * (1 - x)),
-        np.sinh(rate * theta0)
-        + np.exp(eps * rate * np.pi)
-        * (np.sinh((np.pi - theta0) * rate) - np.sinh((np.pi - l * (1 - x)) * rate)),
+        np.exp(eps * rate * (np.pi - theta0)) * np.sinh(rate * np.pi)
+        - np.exp(eps * rate * np.pi) * np.sinh(rate * (np.pi - l * (1 - x))),
     )
-    normalization = (
-        2 * rate * np.exp(-rate * theta) / (-rate * sc.expm1(-2 * np.pi * rate))
-    )
+    normalization = 2 * np.exp(-rate * theta) / (-sc.expm1(-2 * np.pi * rate))
     return support * (1 - values * normalization)
 
 
@@ -421,6 +416,38 @@ def pdf_conditional_absolute_distance(t, theta, beta=None, rate=None):
     normalization = rate * np.exp(-rate * theta) / (-sc.expm1(-2 * np.pi * rate))
     support = np.where((0 < t) & (t < 2 * np.pi - theta0), 1.0, 0.0)
     return support * values * normalization
+
+
+#  ----------------------------- DENSITY FUNCTIONS ---------------------------
+def local_density(theta, r, beta=None, rate=None):
+    """
+    Local density function"""
+    l = 2 * np.pi * r  # Response length
+    s_min = np.clip(1 - (1 - r) / r, 0, 1)
+
+    theta0 = np.pi - abs(theta - np.pi)
+    eps = np.sign(theta - np.pi)
+
+    rate, support = _compute_rate_and_support(
+        condition=(True),
+        beta=beta,
+        rate=rate,
+    )
+
+    m = l * (1 - s_min)
+    I1 = np.cosh(rate * m)
+    I2a = np.exp(eps * rate * np.pi) * np.cosh(rate * (np.pi - m))
+    I2b = (
+        np.exp(eps * rate * (np.pi - theta0))
+        * np.sinh(rate * np.pi)
+        * (rate * (m - theta0) - eps)
+    )
+    values = np.where(m <= theta0, I1, I2a + I2b) - 1
+    normalization = (
+        2 * np.exp(-rate * theta) / (-rate * l * sc.expm1(-2 * np.pi * rate))
+    )
+    density = s_min + values * normalization
+    return density
 
 
 ###############################################################################
