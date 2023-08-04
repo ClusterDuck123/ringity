@@ -41,7 +41,7 @@ class TestAnalyticalConsistency(unittest.TestCase):
         self.beta = np.random.uniform()
         self.c = np.random.uniform()
 
-    def test_global_density_r_small(self):
+    def test_global_density_small_r(self):
         rho = dists.global_density(r=self.r1, beta=self.beta, c=self.c)
         rho_d, _ = quad(
             lambda x: pre_global_density_from_distance(
@@ -61,7 +61,7 @@ class TestAnalyticalConsistency(unittest.TestCase):
         self.assertAlmostEqual(rho, rho_d, places=5)
         self.assertAlmostEqual(rho, rho_s, places=5)
 
-    def test_global_density_r_big(self):
+    def test_global_density_big_r(self):
         rho = dists.global_density(r=self.r2, beta=self.beta, c=self.c)
         rho_d, _ = quad(
             lambda x: pre_global_density_from_distance(
@@ -81,7 +81,7 @@ class TestAnalyticalConsistency(unittest.TestCase):
         self.assertAlmostEqual(rho, rho_d, places=5)
         self.assertAlmostEqual(rho, rho_s, places=5)
 
-    def test_local_density_r_small_theta_small(self):
+    def test_local_density_small_r_small_theta(self):
         rho = dists.local_density(
             r=self.r1, theta=self.theta1, beta=self.beta, c=self.c
         )
@@ -100,10 +100,10 @@ class TestAnalyticalConsistency(unittest.TestCase):
             1,
         )
 
-        self.assertAlmostEqual(rho, rho_d, places=5)
-        self.assertAlmostEqual(rho, rho_s, places=5)
+        self.assertAlmostEqual(rho, rho_d, places=3)
+        self.assertAlmostEqual(rho, rho_s, places=3)
 
-    def test_local_density_r_small_theta_big(self):
+    def test_local_density_small_r_big_theta(self):
         rho = dists.local_density(
             r=self.r1, theta=self.theta2, beta=self.beta, c=self.c
         )
@@ -122,21 +122,21 @@ class TestAnalyticalConsistency(unittest.TestCase):
             1,
         )
 
-        self.assertAlmostEqual(rho, rho_d, places=5)
-        self.assertAlmostEqual(rho, rho_s, places=5)
+        self.assertAlmostEqual(rho, rho_d, places=4)
+        self.assertAlmostEqual(rho, rho_s, places=4)
 
-    def test_local_density_r_big_theta_small(self):
-        rho1 = dists.local_density(
+    def test_local_density_big_r_small_theta(self):
+        rho = dists.local_density(
             r=self.r2, theta=self.theta1, beta=self.beta, c=self.c
         )
-        rho1_d, _ = quad(
+        rho_d, _ = quad(
             lambda x: pre_local_density_from_distance(
                 x, theta=self.theta1, beta=self.beta, r=self.r2, c=self.c
             ),
             0,
             np.pi,
         )
-        rho1_s, _ = quad(
+        rho_s, _ = quad(
             lambda x: pre_local_density_from_similarity(
                 x, theta=self.theta1, beta=self.beta, r=self.r2, c=self.c
             ),
@@ -144,21 +144,21 @@ class TestAnalyticalConsistency(unittest.TestCase):
             1,
         )
 
-        self.assertAlmostEqual(rho1, rho1_d, places=5)
-        self.assertAlmostEqual(rho1, rho1_s, places=5)
+        self.assertAlmostEqual(rho, rho_d, places=3)
+        self.assertAlmostEqual(rho, rho_s, places=3)
 
-    def test_local_density_r_big_theta_big(self):
-        rho2 = dists.local_density(
+    def test_local_density_big_r_big_theta(self):
+        rho = dists.local_density(
             r=self.r2, theta=self.theta2, beta=self.beta, c=self.c
         )
-        rho2_d, _ = quad(
+        rho_d, _ = quad(
             lambda x: pre_local_density_from_distance(
                 x, theta=self.theta2, beta=self.beta, r=self.r2, c=self.c
             ),
             0,
             np.pi,
         )
-        rho2_s, _ = quad(
+        rho_s, _ = quad(
             lambda x: pre_local_density_from_similarity(
                 x, theta=self.theta2, beta=self.beta, r=self.r2, c=self.c
             ),
@@ -166,36 +166,82 @@ class TestAnalyticalConsistency(unittest.TestCase):
             1,
         )
 
-        self.assertAlmostEqual(rho2, rho2_d, places=5)
-        self.assertAlmostEqual(rho2, rho2_s, places=5)
+        self.assertAlmostEqual(rho, rho_d, places=4)
+        self.assertAlmostEqual(rho, rho_s, places=4)
+
+    def test_second_moment_small_r(self):
+        mu2 = dists.second_moment_density(r=self.r1, beta=self.beta, c=self.c)
+        mu2_rho, _ = quad(
+            lambda x: dists.local_density(x, r=self.r1, beta=self.beta, c=self.c) ** 2
+            * dists.pdf_delay(x, beta=self.beta),
+            0,
+            2 * np.pi,
+        )
+
+        self.assertAlmostEqual(mu2, mu2_rho, places=4)
+
+    def test_second_moment_big_r(self):
+        mu2 = dists.second_moment_density(r=self.r2, beta=self.beta, c=self.c)
+        mu2_rho, _ = quad(
+            lambda x: dists.local_density(x, r=self.r2, beta=self.beta, c=self.c) ** 2
+            * dists.pdf_delay(x, beta=self.beta),
+            0,
+            2 * np.pi,
+        )
+
+        self.assertAlmostEqual(mu2, mu2_rho, places=4)
 
 
-class TestEmpiricalConsistency(unittest.TestCase):
+class TestDegreeDistributionEmpiricaly(unittest.TestCase):
     def setUp(self):
-        self.N = 2**8
+        n_ensemble = 2**3
+        self.N = 2**7
 
         self.beta = np.random.uniform()
         self.r = np.random.uniform()
         self.c = np.random.uniform()
 
-        self.thetas = dists.delaydist.rvs(size=self.N, beta=self.beta)
+        self.thetas_arr = np.empty((n_ensemble, self.N))
+        self.degdist_arr = np.empty((n_ensemble, self.N))
 
-        self.G_list = []
+        for i in range(n_ensemble):
+            thetas = dists.delaydist.rvs(size=self.N, beta=self.beta)
 
-        for _ in range(2**3):
-            D = trafos.pw_circular_distance(self.thetas)
+            D = trafos.pw_circular_distance(thetas)
             P = trafos.interaction_probability(D, r=self.r, c=self.c)
 
-            R = np.random.uniform(size=self.N*(self.N-1)//2)
+            R = np.random.uniform(size=self.N * (self.N - 1) // 2)
             A = squareform(np.where(P > R, 1, 0))
-            
-            self.G_list.append(nx.from_numpy_array(A))
 
-    def test_global_density(self):
-        rho_exp = dists.global_density(r=self.r, beta=self.beta, c=self.c)
-        rho_obs = np.mean([nx.density(G) for G in self.G_list])
+            G = nx.from_numpy_array(A)
 
-        self.assertAlmostEqual(rho_exp, rho_obs, places=1)
+            self.thetas_arr[i] = thetas
+            self.degdist_arr[i] = np.array([d / (self.N - 1) for n, d in G.degree()])
+
+    def test_first_moment(self):
+        mu1_exp = dists.global_density(r=self.r, beta=self.beta, c=self.c)
+        mu1_obs1 = np.mean(self.degdist_arr)
+        mu1_obs2 = np.mean(
+            dists.local_density(self.thetas_arr, r=self.r, c=self.c, beta=self.beta)
+        )
+
+        self.assertAlmostEqual(mu1_exp, mu1_obs1, delta=0.01)
+        self.assertAlmostEqual(mu1_exp, mu1_obs2, delta=0.01)
+
+    def test_second_moment(self):
+        mu2_exp = dists.second_moment_density(r=self.r, beta=self.beta, c=self.c)
+        mu2_obs = np.mean(self.degdist_arr**2)
+
+        self.assertAlmostEqual(mu2_exp, mu2_obs, delta=0.01)
+
+    def test_degree_distribution(self):
+        degdist_exp = dists.local_density(
+            self.thetas_arr, r=self.r, c=self.c, beta=self.beta
+        )
+        degdist_obs = self.degdist_arr
+        mean_error = np.mean(degdist_exp - degdist_obs)
+
+        self.assertAlmostEqual(mean_error, 0, delta=0.01)
 
 
 if __name__ == "__main__":

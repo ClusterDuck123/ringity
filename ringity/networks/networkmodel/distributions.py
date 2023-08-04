@@ -419,7 +419,7 @@ def pdf_conditional_absolute_distance(t, theta, beta=None, rate=None):
 
 
 #  ----------------------------- DENSITY FUNCTIONS ---------------------------
-def global_density(r, c, beta=None, rate=None):
+def global_density(r, c, beta=None, rate=None) -> float:
     rate, _ = _compute_rate_and_support(
         condition=True,
         beta=beta,
@@ -431,7 +431,7 @@ def global_density(r, c, beta=None, rate=None):
     return c * (1 - numerator / denominator)
 
 
-def local_density(theta, r, c, beta=None, rate=None):
+def local_density(theta, r, c, beta=None, rate=None) -> float:
     """
     Local density function"""
     l = 2 * np.pi * r  # Response length
@@ -457,7 +457,7 @@ def local_density(theta, r, c, beta=None, rate=None):
     
     return c * density
 
-def degree_dist_var(theta, r, beta=None, rate=None):
+def second_moment_density(r, c, beta=None, rate=None) -> float:
     """
     (Continuous part of the) probability density function of s_r ∘ d(X,theta),
     where X is a wrapped exponentially distributed random variable
@@ -480,5 +480,5 @@ def degree_dist_var(theta, r, beta=None, rate=None):
     T2 = (1+s_min) * (np.sinh(2*np.pi*rate - m*rate) + np.sinh(m*rate)) - 2*np.sinh(2*np.pi*rate)
     T3 = (1+s_min) * (1-s_min) * (np.cosh(2*np.pi*rate) - 1)
     
-    var = s_min**2 + (T1 / (6 * rate**2 * l**2) + T2 / (l*rate) + T3) / (2*np.sinh(-np.pi*rate)**2)
-    return var
+    mu2_s = s_min**2 + (T1 / (6 * rate**2 * l**2) + T2 / (l*rate) + T3) / (2*np.sinh(-np.pi*rate)**2)
+    return c**2 * mu2_s
