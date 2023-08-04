@@ -187,10 +187,10 @@ def pdf_conditional_distance(x, theta, beta=None, rate=None):
     eps = np.sign(theta - np.pi)
     values = np.where(
         x <= theta0,
-        np.cosh(rate * x),
-        np.exp(eps * rate * np.pi) * np.cosh(rate * (x - np.pi)),
+        np.exp(-eps * rate * np.pi) * np.cosh(rate * x),
+        np.cosh(rate * (x - np.pi)),
     )
-    normalization = 2 * rate * np.exp(-rate * theta) / (-sc.expm1(-2 * np.pi * rate))
+    normalization = rate * np.exp(eps * rate * theta0) / np.sinh(np.pi*rate)
     return support * values * normalization
 
 
@@ -419,11 +419,23 @@ def pdf_conditional_absolute_distance(t, theta, beta=None, rate=None):
 
 
 #  ----------------------------- DENSITY FUNCTIONS ---------------------------
-def local_density(theta, r, beta=None, rate=None):
+def global_density(r, c, beta=None, rate=None):
+    rate, _ = _compute_rate_and_support(
+        condition=True,
+        beta=beta,
+        rate=rate,
+    )
+    l = 2 * np.pi * r  # Response length
+    numerator = np.cosh(rate * np.pi) - np.cosh(rate * np.pi - l * rate)
+    denominator = l * rate * np.sinh(rate * np.pi)
+    return c * (1 - numerator / denominator)
+
+
+def local_density(theta, r, c, beta=None, rate=None):
     """
     Local density function"""
     l = 2 * np.pi * r  # Response length
-    s_min = np.clip(1 - (1 - r) / r, 0, 1)
+    s_min = np.clip((2*r - 1) / r, 0, 1)
 
     theta0 = np.pi - abs(theta - np.pi)
     eps = np.sign(theta - np.pi)
@@ -436,253 +448,37 @@ def local_density(theta, r, beta=None, rate=None):
 
     m = l * (1 - s_min)
     I1 = np.cosh(rate * m)
-    I2a = np.exp(eps * rate * np.pi) * np.cosh(rate * (np.pi - m))
-    I2b = (
-        np.exp(eps * rate * (np.pi - theta0))
-        * np.sinh(rate * np.pi)
-        * (rate * (m - theta0) - eps)
-    )
-    values = np.where(m <= theta0, I1, I2a + I2b) - 1
-    normalization = (
-        2 * np.exp(-rate * theta) / (-rate * l * sc.expm1(-2 * np.pi * rate))
-    )
-    density = s_min + values * normalization
-    return density
+    I2a = np.exp(eps * rate * np.pi) * np.cosh(rate * np.pi - rate * l)
+    I2b = (rate * (m - theta0) - eps) * np.exp(eps * rate * (np.pi - theta0)) * np.sinh(rate * np.pi)
+    values = 1 - np.where(m <= theta0, I1, I2a + I2b)
+    normalization = np.exp(eps * rate * (theta0-np.pi)) / (rate * l * np.sinh(np.pi * rate))
+    
+    density = s_min - normalization * values
+    
+    return c * density
 
-
-###############################################################################
-# ------------------------------- LEGACY -------------------------------------#
-###############################################################################
-
-
-def get_rate_parameter(parameter, parameter_type):
-    if parameter_type.lower() == "rate":
-        return parameter
-    elif parameter_type.lower() == "shape":
-        return 1 / parameter
-    elif parameter_type.lower() == "delay":
-        return np.cos(PI * parameter / 2) / np.sin(PI * parameter / 2)
-    else:
-        assert False, (
-            f"Parameter type '{parameter_type}' not known! "
-            "Please choose between 'rate', 'shape' and 'delay'."
+def degree_dist_var(theta, r, beta=None, rate=None):
+    """
+    (Continuous part of the) probability density function of s_r ∘ d(X,theta),
+    where X is a wrapped exponentially distributed random variable
+    with delay parameter beta, d(-,-) denotes the circular distance and s_r is the
+    (normalized) area of the overlap of two boxes of length 2*pi*r on the circle.
+    Normalization is taken to be the area of one box, 2*pi*r. Hence, the
+    support is on [s_min,1], where s_min=|1 - (1-r)/r|_+.
+    """
+    l = 2 * np.pi * r  # Response length
+    s_min = np.clip(1 - (1 - r) / r, 0, 1)
+    
+    rate, support = _compute_rate_and_support(
+            condition=(True),
+            beta=beta,
+            rate=rate,
         )
-
-
-# =============================================================================
-#  -------------------- DISTANCE DISTRIBUTION FUNCTIONS ----------------------
-# =============================================================================
-
-
-def pdf_absolute_distance(t, parameter, parameter_type="rate"):
-    """
-    Probability distribution function of (absolute) distance of two wrapped
-    exponentialy distributed random variables with scale parameter kappa.
-    Support is on [0,2pi].
-    """
-    rate = get_rate_parameter(parameter, parameter_type)
-    support = np.where((0 < t) & (t < 2 * PI), 1.0, 0.0)
-    values = np.exp(-t * rate) - np.exp(rate * (t - 4 * PI))
-    normalization = rate / (np.exp(-4 * PI * rate) * (np.exp(2 * PI * rate) - 1) ** 2)
-    return support * values * normalization
-
-
-def cdf_absolute_distance(t, parameter, parameter_type="rate"):
-    """
-    Cumulative distribution function of (absolute) distance of two wrapped
-    exponentialy distributed random variables with scale parameter kappa.
-    Support is on [0,2pi].
-    """
-    rate = get_rate_parameter(parameter, parameter_type)
-    support = np.where(0 < t, 1.0, 0.0)
-    values = (
-        1 - np.exp(-rate * (4 * PI - t)) + np.exp(-4 * PI * rate) - np.exp(-rate * t)
-    )
-    normalization = 1 / (np.exp(-4 * PI * rate) * (np.exp(2 * PI * rate) - 1) ** 2)
-    return support * np.where(t >= 2 * PI, 1, values * normalization)
-
-
-def cdf_conditional_absolute_distance(t, theta, parameter, parameter_type="rate"):
-    """
-    [MISSING] & somehow faulty....
-    """
-    term1 = cdf_delay(theta + t, parameter=parameter, parameter_type=parameter_type)
-    term2 = cdf_delay(theta - t, parameter=parameter, parameter_type=parameter_type)
-    support = np.where(0 < t, 1.0, 0.0)
-    return support * np.where(t >= 2 * PI, 1, term1 - term2)
-
-
-# =============================================================================
-#  ----- SIMILARITY AND INTERACTION PROBABILITY DISTRIBUTION FUNCTIONS -------
-# =============================================================================
-
-
-def pdf_probability(t, parameter, a, rho, parameter_type="rate"):
-    """
-    (Continuous part of the) probability density function of [MISSING]
-    """
-    rate = get_rate_parameter(parameter, parameter_type)
-    mu_S = mean_similarity(rate, a)
-    if rho <= mu_S:
-        k = rho / mu_S
-        s_min = np.clip(2 - 1 / a, 0, 1)
-        support = np.where((k * s_min <= t) & (t <= k), 1.0, 0.0)
-        values = np.cosh(PI * rate * (1 - 2 * a * (1 - t / k)))
-        normalization = 2 * a * PI * rate / np.sinh(PI * rate)
-        return support * values * normalization / k
-    else:
-        assert False, "Not implemented yet!"
-
-
-def cdf_probability(t, parameter, a, rho, parameter_type="rate"):
-    """
-    Cumulative distribution function of [MISSING]
-    """
-    assert False, "Not implemented yet!"
-
-
-def pdf_conditional_probability(t, theta, parameter, a, rho, parameter_type="rate"):
-    """
-    (Continuous part of the) probability density function of [MISSING]
-    """
-    rate = get_rate_parameter(parameter, parameter_type)
-    mu_S = mean_similarity(rate, a)
-    if rho <= mu_S:
-        k = rho / mu_S
-        return (
-            pdf_conditional_similarity(
-                t / k,
-                theta=theta,
-                a=a,
-                parameter=parameter,
-                parameter_type=parameter_type,
-            )
-            / k
-        )
-    else:
-        assert False, "Not implemented yet!"
-
-
-def cdf_conditional_probability(t, theta, parameter, a, rho, parameter_type="rate"):
-    """
-    [MISSING]
-    """
-    assert False, "Not implemented yet!"
-
-
-# =============================================================================
-#  ----------------------------- MISCELLANEOUS -------------------------------
-# =============================================================================
-
-
-def mean_similarity(parameter, a, parameter_type="rate"):
-    rate = get_rate_parameter(parameter, parameter_type)
-    numerator = (
-        2 * np.sinh(PI * rate) * np.sinh((1 - a) * PI * rate) * np.sinh(a * PI * rate)
-    )
-    denominator = a * PI * rate * (np.cosh(2 * PI * rate) - 1)
-    return 1 - numerator / denominator
-
-
-def expected_node_degree(theta, a, rho, parameter, parameter_type="rate"):
-    if a > 0.5:
-        assert False, "Not implemented yet!"
-
-    rate = get_rate_parameter(parameter, parameter_type)
-    mu_S = mean_similarity(rate, a)
-    k = rho / mu_S
-
-    if k > 1:
-        assert False, "Not implemented yet!"
-
-    normalization = 1 / ((1 - np.exp(-2 * PI * rate)) * rate * (2 * PI * a) ** 2)
-
-    if theta <= 2 * PI * a:
-        const = 1 + 2 * a * PI * rate - theta * rate
-
-        term_A1 = -2 * np.exp(-rate * theta)
-        term_A2 = np.exp(-rate * (2 * PI + theta - 2 * a * PI))
-
-        term_B1 = np.exp(-rate * (2 * a * PI + theta))
-        term_B2 = (theta * rate - 2 * a * PI * rate - 1) * np.exp(-rate * 2 * PI)
-
-    else:
-        term_A1 = -2 * np.exp(-rate * theta)
-        term_A2 = np.exp(-rate * (theta - 2 * a * PI))
-
-        if theta + 2 * a * PI <= 2 * PI:
-            const = 0
-
-            term_B1 = np.exp(-rate * (2 * a * PI + theta))
-            term_B2 = 0
-
-        else:
-            const = theta * rate - 1 - 2 * (1 - a) * PI * rate
-
-            term_B1 = np.exp(-rate * (2 * (a - 1) * PI + theta))
-            term_B2 = (1 - 2 * (a - 1) * PI * rate - theta * rate) * np.exp(
-                -rate * 2 * PI
-            )
-
-    integral = normalization * (term_A1 + term_A2 + term_B1 + term_B2 + const)
-
-    return k * integral * 2 * PI * a
-
-
-def d_expected_node_degree(theta, a, rho, parameter, parameter_type="rate"):
-    if a > 0.5:
-        assert False, "Not implemented yet!"
-
-    rate = get_rate_parameter(parameter, parameter_type)
-    mu_S = mean_similarity(rate, a)
-    k = rho / mu_S
-
-    if k > 1:
-        assert False, "Not implemented yet!"
-
-    normalization = 1 / ((1 - np.exp(-2 * PI * rate)) * rate * (2 * PI * a) ** 2)
-
-    if theta <= 2 * PI * a:
-        const = -rate
-
-        term_A1 = 2 * rate * np.exp(-rate * theta)
-        term_A2 = -rate * np.exp(-rate * (2 * PI + theta - 2 * a * PI))
-
-        term_B1 = -rate * np.exp(-rate * (2 * a * PI + theta))
-        term_B2 = rate * np.exp(-rate * 2 * PI)
-
-    else:
-        term_A1 = 2 * rate * np.exp(-rate * theta)
-        term_A2 = -rate * np.exp(-rate * (theta - 2 * a * PI))
-
-        if theta + 2 * a * PI <= 2 * PI:
-            const = 0
-
-            term_B1 = -rate * np.exp(-rate * (2 * a * PI + theta))
-            term_B2 = 0
-
-        else:
-            const = rate
-
-            term_B1 = -rate * np.exp(-rate * (2 * (a - 1) * PI + theta))
-            term_B2 = -rate * np.exp(-rate * 2 * PI)
-
-    integral = normalization * (term_A1 + term_A2 + term_B1 + term_B2 + const)
-
-    return k * integral * 2 * PI * a
-
-
-def get_max_expectancy(a, parameter, parameter_type):
-    rate = get_rate_parameter(parameter=parameter, parameter_type=parameter_type)
-    term = (2 - np.exp(-rate * (2 * PI - 2 * a * PI)) - np.exp(-rate * 2 * a * PI)) / (
-        1 - np.exp(-rate * 2 * PI)
-    )
-    return np.log(term) / rate
-
-
-def get_min_expectancy(a, parameter, parameter_type):
-    rate = get_rate_parameter(parameter=parameter, parameter_type=parameter_type)
-    term = (np.exp(rate * 2 * a * PI) + np.exp(-rate * (2 * a * PI - 2 * PI)) - 2) / (
-        1 - np.exp(-rate * 2 * PI)
-    )
-    return np.log(term) / rate
+    m = l * (1 - s_min)
+    
+    T1 = np.cosh(2*np.pi*rate - 3*m*rate) - 9*np.cosh(2*np.pi*rate - m*rate) + 8*np.cosh(2*np.pi*rate)
+    T2 = (1+s_min) * (np.sinh(2*np.pi*rate - m*rate) + np.sinh(m*rate)) - 2*np.sinh(2*np.pi*rate)
+    T3 = (1+s_min) * (1-s_min) * (np.cosh(2*np.pi*rate) - 1)
+    
+    var = s_min**2 + (T1 / (6 * rate**2 * l**2) + T2 / (l*rate) + T3) / (2*np.sinh(-np.pi*rate)**2)
+    return var
