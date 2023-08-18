@@ -2,17 +2,8 @@ import numpy as np
 import scipy.stats as ss
 import scipy.special as sc
 
-from .param_utils import beta_to_rate
+from .transformations import _get_rate
 from scipy.stats._distn_infrastructure import _ShapeInfo
-
-from numpy import pi as PI
-
-
-@np.vectorize
-def _get_rate(beta, rate):
-    if beta is not None:
-        rate = beta_to_rate(beta)
-    return rate
 
 
 def _get_support(condition):
@@ -416,69 +407,3 @@ def pdf_conditional_absolute_distance(t, theta, beta=None, rate=None):
     normalization = rate * np.exp(-rate * theta) / (-sc.expm1(-2 * np.pi * rate))
     support = np.where((0 < t) & (t < 2 * np.pi - theta0), 1.0, 0.0)
     return support * values * normalization
-
-
-#  ----------------------------- DENSITY FUNCTIONS ---------------------------
-def global_density(r, c, beta=None, rate=None) -> float:
-    rate, _ = _compute_rate_and_support(
-        condition=True,
-        beta=beta,
-        rate=rate,
-    )
-    l = 2 * np.pi * r  # Response length
-    numerator = np.cosh(rate * np.pi) - np.cosh(rate * np.pi - l * rate)
-    denominator = l * rate * np.sinh(rate * np.pi)
-    return c * (1 - numerator / denominator)
-
-
-def local_density(theta, r, c, beta=None, rate=None) -> float:
-    """
-    Local density function"""
-    l = 2 * np.pi * r  # Response length
-    s_min = np.clip((2*r - 1) / r, 0, 1)
-
-    theta0 = np.pi - abs(theta - np.pi)
-    eps = np.sign(theta - np.pi)
-
-    rate, support = _compute_rate_and_support(
-        condition=(True),
-        beta=beta,
-        rate=rate,
-    )
-
-    m = l * (1 - s_min)
-    I1 = np.cosh(rate * m)
-    I2a = np.exp(eps * rate * np.pi) * np.cosh(rate * np.pi - rate * l)
-    I2b = (rate * (m - theta0) - eps) * np.exp(eps * rate * (np.pi - theta0)) * np.sinh(rate * np.pi)
-    values = 1 - np.where(m <= theta0, I1, I2a + I2b)
-    normalization = np.exp(eps * rate * (theta0-np.pi)) / (rate * l * np.sinh(np.pi * rate))
-    
-    density = s_min - normalization * values
-    
-    return c * density
-
-def second_moment_density(r, c, beta=None, rate=None) -> float:
-    """
-    (Continuous part of the) probability density function of s_r ∘ d(X,theta),
-    where X is a wrapped exponentially distributed random variable
-    with delay parameter beta, d(-,-) denotes the circular distance and s_r is the
-    (normalized) area of the overlap of two boxes of length 2*pi*r on the circle.
-    Normalization is taken to be the area of one box, 2*pi*r. Hence, the
-    support is on [s_min,1], where s_min=|1 - (1-r)/r|_+.
-    """
-    l = 2 * np.pi * r  # Response length
-    s_min = np.clip(1 - (1 - r) / r, 0, 1)
-    
-    rate, support = _compute_rate_and_support(
-            condition=(True),
-            beta=beta,
-            rate=rate,
-        )
-    m = l * (1 - s_min)
-    
-    T1 = np.cosh(2*np.pi*rate - 3*m*rate) - 9*np.cosh(2*np.pi*rate - m*rate) + 8*np.cosh(2*np.pi*rate)
-    T2 = (1+s_min) * (np.sinh(2*np.pi*rate - m*rate) + np.sinh(m*rate)) - 2*np.sinh(2*np.pi*rate)
-    T3 = (1+s_min) * (1-s_min) * (np.cosh(2*np.pi*rate) - 1)
-    
-    mu2_s = s_min**2 + (T1 / (6 * rate**2 * l**2) + T2 / (l*rate) + T3) / (2*np.sinh(-np.pi*rate)**2)
-    return c**2 * mu2_s

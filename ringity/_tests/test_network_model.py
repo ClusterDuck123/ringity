@@ -7,8 +7,8 @@ from ringity.networks.networkmodel.param_utils import (
                                         infer_density_parameter,
                                         infer_rate_parameter,
                                         infer_response_parameter,
-                                        infer_coupling_parameter,
-                                        beta_to_rate)
+                                        infer_coupling_parameter)
+from ringity.networks.networkmodel.transformations import beta_to_rate
 
 class TestExponentialNetworkModel(unittest.TestCase):
     def setUp(self):

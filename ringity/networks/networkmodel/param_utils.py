@@ -2,6 +2,7 @@ import numpy as np
 
 from warnings import warn
 from scipy.optimize import bisect
+from .transformations import beta_to_rate
 
 # =============================================================================
 #  -------------------------- PARAMETER INFERENCE ----------------------------
@@ -283,15 +284,3 @@ def parse_canonical_parameters(params):
         'coupling' : coupling,
         'density': density}
     return model_params
-
-
-def rate_to_beta(rate):
-    beta = 1 - 2/np.pi * np.arctan(rate)
-    return beta
-    
-def beta_to_rate(beta):
-    if np.isclose(beta,0):
-        rate = np.inf
-    else:
-        rate = np.tan(np.pi * (1-beta) / 2)
-    return rate
