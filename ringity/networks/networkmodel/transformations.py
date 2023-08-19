@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.stats as ss
 
+from scipy.optimize import toms748
 from scipy.spatial.distance import pdist
 
 """ Utility module with functions leading up to the interaction probability function.
@@ -34,6 +35,33 @@ def beta_to_rate(beta):
 
 
 #  ----------------------------- DENSITY FUNCTIONS ---------------------------
+
+def global_coupling(rho, r, beta=None, rate=None) -> float:
+    rate = _get_rate(beta=beta, rate=rate)
+    
+    numerator = np.pi * r * rate * np.sinh(rate * np.pi)
+    denominator = np.pi * r * rate * np.sinh(rate * np.pi) - np.sinh(rate*np.pi*r) * np.sinh(rate*np.pi*(1-r))
+    return rho * numerator/denominator
+
+def global_response(rho, c, beta=None, rate=None) -> float:
+    rate = _get_rate(beta=beta, rate=rate)
+    
+    def f_response(r):
+        numerator = np.sinh(rate * np.pi * r) * np.sinh(rate * np.pi * (1-r))
+        denominator = r
+        constant = np.pi * rate * np.sinh(rate * np.pi) * (1 - rho/c)
+
+        return numerator/denominator - constant
+    
+    # Derivative of f_response - NOT TESTED!!!
+#     def fprime_response(r):
+#         numerator1 = np.pi * r * rate * np.cosh(np.pi * r * rate) * np.sinh(np.pi * (1 - r) * rate)
+#         numerator2 =  - (np.pi * r * rate * np.cosh(np.pi * (r-1) * rate) + np.sinh(np.pi (1 - r) * rate)) * np.sinh(np.pi * r * rate)
+#         denominator = r**2
+#         return (numerator1 + numerator2) / denominator
+    
+    return toms748(f_response, 0.01, 0.99)
+
 def global_density(r, c, beta=None, rate=None) -> float:
     rate = _get_rate(beta=beta, rate=rate)
 
