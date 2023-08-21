@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.stats as ss
 
-from scipy.optimize import toms748
+from scipy.optimize import newton
 from scipy.spatial.distance import pdist
 
 """ Utility module with functions leading up to the interaction probability function.
@@ -36,31 +36,56 @@ def beta_to_rate(beta):
 
 #  ----------------------------- DENSITY FUNCTIONS ---------------------------
 
+
 def global_coupling(rho, r, beta=None, rate=None) -> float:
     rate = _get_rate(beta=beta, rate=rate)
-    
+
     numerator = np.pi * r * rate * np.sinh(rate * np.pi)
-    denominator = np.pi * r * rate * np.sinh(rate * np.pi) - np.sinh(rate*np.pi*r) * np.sinh(rate*np.pi*(1-r))
-    return rho * numerator/denominator
+    denominator = np.pi * r * rate * np.sinh(rate * np.pi) - np.sinh(
+        rate * np.pi * r
+    ) * np.sinh(rate * np.pi * (1 - r))
+    return rho * numerator / denominator
+
 
 def global_response(rho, c, beta=None, rate=None) -> float:
     rate = _get_rate(beta=beta, rate=rate)
-    
-    def f_response(r):
-        numerator = np.sinh(rate * np.pi * r) * np.sinh(rate * np.pi * (1-r))
-        denominator = r
-        constant = np.pi * rate * np.sinh(rate * np.pi) * (1 - rho/c)
 
-        return numerator/denominator - constant
-    
-    # Derivative of f_response - NOT TESTED!!!
-#     def fprime_response(r):
-#         numerator1 = np.pi * r * rate * np.cosh(np.pi * r * rate) * np.sinh(np.pi * (1 - r) * rate)
-#         numerator2 =  - (np.pi * r * rate * np.cosh(np.pi * (r-1) * rate) + np.sinh(np.pi (1 - r) * rate)) * np.sinh(np.pi * r * rate)
-#         denominator = r**2
-#         return (numerator1 + numerator2) / denominator
-    
-    return toms748(f_response, 0.01, 0.99)
+    def f_response(r):
+        numerator = np.sinh(rate * np.pi * r) * np.sinh(rate * np.pi * (1 - r))
+        denominator = r
+        constant = np.pi * rate * np.sinh(rate * np.pi) * (1 - rho / c)
+
+        return numerator / denominator - constant
+
+    def fprime_response(r):
+        numerator1 = np.sinh(np.pi * (1 - 2 * r) * rate)
+        numerator2 = -np.sinh(np.pi * (1 - r) * rate) * np.sinh(np.pi * r * rate)
+        denominator = r**2
+        return ((np.pi * r * rate) * numerator1 + numerator2) / denominator
+
+    # Only adds computational speed if initial guess is way off
+    def fprime2_response(r):
+        numerator1 = -np.cosh(np.pi * rate * (1 - 2 * r))
+        numerator2 = -np.sinh(np.pi * rate * (1 - 2 * r))
+        numerator3 = np.sinh(np.pi * rate * (1 - r)) * np.sinh(np.pi * r * rate)
+        denominator = r**3
+        return (
+            2
+            * (
+                (np.pi * r * rate) ** 2 * numerator1
+                + (np.pi * rate * r) * numerator2
+                + numerator3
+            )
+            / denominator
+        )
+
+    # Initial guess, based on approximation formula
+    r0 = np.clip(1 - (c - rho) / (c * beta), 0.001, 0.999)
+
+    return newton(
+        func=f_response, x0=r0, fprime=fprime_response, fprime2=fprime2_response
+    )
+
 
 def global_density(r, c, beta=None, rate=None) -> float:
     rate = _get_rate(beta=beta, rate=rate)
