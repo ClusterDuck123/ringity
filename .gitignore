@@ -1,16 +1,21 @@
+# Apple 
 *.DS_Store
-*.pyc
-.DS_Store*
-*.egg-info
-
-# sc-datasets
-E-GEOD-*
-*.ipynb_checkpoints*
-*.ipynb_checkpoints*
-E-MTAB-*
 **/.DS_Store
-doc/data/
-.vscode
-doc/notebooks/private
+.DS_Store*
 
-doc/notebooks/paper_figures/data
+# Python
+*.pyc
+*.egg-info
+*.ipynb_checkpoints*
+
+# Single-cell
+E-GEOD-*
+E-MTAB-*
+
+# Large files
+doc/data/
+doc/private
+
+# Rest
+.vscode
+
