@@ -62,6 +62,9 @@ class NetworkBuilder:
     def rate(self):
         return self.model_parameters.rate
     @property
+    def delay(self):
+        return self.model_parameters.delay
+    @property
     def coupling(self):
         return self.model_parameters.coupling
     @property

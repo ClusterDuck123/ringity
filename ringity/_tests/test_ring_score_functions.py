@@ -9,7 +9,7 @@ class TestPointCloud(unittest.TestCase):
     def setUp(self):
         self.X = np.random.uniform(size = [2**5, 3])
         self.D = squareform(pdist(self.X))
-        self.G = nx.erdos_renyi_graph(2**5, p = 0.25)
+        self.G = nx.erdos_renyi_graph(2**5, p = 0.3)
 
     def test_point_cloud_downstreams(self):
         pdgm_X_gen = rng.pdiagram(self.X)

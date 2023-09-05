@@ -3,6 +3,7 @@ __author__ = "M. K. Youssef, et al."
 __version__ = "0.3a4"
 
 # FUNCTIONS
+from ringity.utils.plotting import set_theme
 from ringity.ringscore.metric2ringscore import ring_score_from_sequence
 from ringity.ringscore import (
                     pdiagram, 
@@ -27,7 +28,7 @@ from ringity.ringscore import (
 from ringity.ringscore import (statistics)
 
 from ringity.networks.networkmodel import network_model
-import ringity.networks.geometric_networks as geometric_networks
+import ringity.networks.geometricnetworks as geometric_networks
 
 from ringity.utils.plotting import (
                         plot,

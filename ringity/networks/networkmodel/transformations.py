@@ -88,7 +88,12 @@ def global_response(rho, c, beta=None, rate=None) -> float:
 
 
 def global_density(r, c, beta=None, rate=None) -> float:
+    if np.isclose(beta, 0):
+        return c
     rate = _get_rate(beta=beta, rate=rate)
+
+    if np.isclose(rate, 0):
+        return r*c
 
     l = 2 * np.pi * r  # Response length
     numerator = np.cosh(rate * np.pi) - np.cosh(rate * np.pi - rate * l)
@@ -99,13 +104,19 @@ def global_density(r, c, beta=None, rate=None) -> float:
 def local_density(theta, r, c, beta=None, rate=None) -> float:
     """
     Local density function"""
+
+    if np.isclose(beta, 0):
+        return c
+    rate = _get_rate(beta=beta, rate=rate)
+
+    if np.isclose(rate, 0):
+        return r*c
+
     l = 2 * np.pi * r  # Response length
     s_min = np.clip((2 * r - 1) / r, 0, 1)
 
     theta0 = np.pi - abs(theta - np.pi)
     eps = np.sign(theta - np.pi)
-
-    rate = _get_rate(beta=beta, rate=rate)
 
     m = l * (1 - s_min)
     I1 = np.cosh(rate * m)

@@ -1,24 +1,32 @@
 from ringity.ringscore.metric2ringscore import ring_score_from_sequence
-from ringity.ringscore.data2metric import pwdistance_from_network, pwdistance_from_point_cloud
+from ringity.ringscore.data2metric import (
+    pwdistance_from_network,
+    pwdistance_from_point_cloud,
+)
 from ringity.tda.pdiagram.pdiagram import PDiagram
 
-from gtda.homology import VietorisRipsPersistence # WE SHOULD GET RID OF THIS IMPORT HERE
+from gtda.homology import (
+    VietorisRipsPersistence,
+)  # WE SHOULD GET RID OF THIS IMPORT HERE
 from scipy.spatial.distance import is_valid_dm
 
 import numpy as np
 import networkx as nx
 import scipy.sparse
 
+
 # -----------------------------------------------------------------------------
 # -------------------- GENERIC PDIAGRAM AND SCORE FUNCTION --------------------
 # -----------------------------------------------------------------------------
-def ring_score(arg,
-            argtype = None,
-            flavour = 'geometric',
-            exponent = 2,
-            nb_pers = np.inf,
-            verbose = False,
-            **kwargs):
+def ring_score(
+    arg,
+    argtype=None,
+    flavour="geometric",
+    exponent=2,
+    nb_pers=np.inf,
+    verbose=False,
+    **kwargs,
+):
     """Calculate pdiagram from given data structures.
 
     Generic function to calculate ring score by calling another appropriate
@@ -40,23 +48,15 @@ def ring_score(arg,
     -------
     score : float, ring-score of given object.
     """
-    pdgm = pdiagram(arg,
-            argtype = argtype,
-            verbose = verbose,
-            **kwargs)
+    pdgm = pdiagram(arg, argtype=argtype, verbose=verbose, **kwargs)
 
     score = ring_score_from_pdiagram(
-                                pdgm = pdgm,
-                                flavour = flavour,
-                                exponent = exponent,
-                                nb_pers = nb_pers)
+        pdgm=pdgm, flavour=flavour, exponent=exponent, nb_pers=nb_pers
+    )
     return score
 
 
-def pdiagram(arg,
-            argtype = None,
-            verbose = False,
-            **kwargs):
+def pdiagram(arg, argtype=None, verbose=False, **kwargs):
     """Calculate ring score from given data structures.
 
     Generic function to calculate persistence diagram by calling another appropriate
@@ -88,15 +88,15 @@ def pdiagram(arg,
     elif isinstance(arg, np.ndarray) or isinstance(arg, scipy.sparse.spmatrix):
         if argtype is None:
             if is_valid_dm(arg):
-                argtype = 'distance matrix'
+                argtype = "distance matrix"
             else:
-                argtype = 'point cloud'
+                argtype = "point cloud"
             if verbose:
                 print(f"`argtype` was set to {argtype}")
-        if argtype == 'point cloud':
+        if argtype == "point cloud":
             pdgm = pdiagram_from_point_cloud(arg, **kwargs)
-        elif argtype == 'distance matrix':
-            pdgm  = pdiagram_from_distance_matrix(arg, **kwargs)
+        elif argtype == "distance matrix":
+            pdgm = pdiagram_from_distance_matrix(arg, **kwargs)
         else:
             raise Exception(f"Argtype `{argtype} unknown.")
     else:
@@ -104,18 +104,21 @@ def pdiagram(arg,
 
     return pdgm
 
+
 # -----------------------------------------------------------------------------
 # --------------------- DATA SPECIFIC RING SCORE FUNCTIONS --------------------
 # -----------------------------------------------------------------------------
-def ring_score_from_point_cloud(X,
-                            flavour = 'geometric',
-                            exponent = 2,
-                            nb_pers = np.inf,
-                            persistence = 'VietorisRipsPersistence',
-                            metric = 'euclidean',
-                            metric_params = {},
-                            dim = 1,
-                            **kwargs):
+def ring_score_from_point_cloud(
+    X,
+    flavour="geometric",
+    exponent=2,
+    nb_pers=np.inf,
+    persistence="VietorisRipsPersistence",
+    metric="euclidean",
+    metric_params={},
+    dim=1,
+    **kwargs,
+):
     """Calculate ring score from point cloud.
 
     Parameters
@@ -126,27 +129,30 @@ def ring_score_from_point_cloud(X,
     -------
     score : float, ring-score of given object.
     """
-    pdgm = pdiagram_from_point_cloud(X,
-                                persistence = persistence,
-                                metric = metric,
-                                metric_params = metric_params,
-                                dim = dim,
-                                **kwargs)
-    return ring_score_from_pdiagram(pdgm,
-                                flavour = flavour,
-                                exponent = exponent,
-                                nb_pers = nb_pers)
+    pdgm = pdiagram_from_point_cloud(
+        X,
+        persistence=persistence,
+        metric=metric,
+        metric_params=metric_params,
+        dim=dim,
+        **kwargs,
+    )
+    return ring_score_from_pdiagram(
+        pdgm, flavour=flavour, exponent=exponent, nb_pers=nb_pers
+    )
 
 
-def ring_score_from_network(G,
-                        flavour = 'geometric',
-                        exponent = 2,
-                        nb_pers = np.inf,
-                        persistence = 'VietorisRipsPersistence',
-                        metric = 'net_flow',
-                        metric_params = {},
-                        dim = 1,
-                        **kwargs):
+def ring_score_from_network(
+    G,
+    flavour="geometric",
+    exponent=2,
+    nb_pers=np.inf,
+    persistence="VietorisRipsPersistence",
+    metric="net_flow",
+    metric_params={},
+    dim=1,
+    **kwargs,
+):
     """Calculate ring score from network.
 
     Parameters
@@ -157,25 +163,28 @@ def ring_score_from_network(G,
     -------
     score : float, ring-score of given object.
     """
-    pdgm = pdiagram_from_network(G,
-                            persistence = persistence,
-                            metric = metric,
-                            metric_params = metric_params,
-                            dim = dim,
-                            **kwargs)
-    return ring_score_from_pdiagram(pdgm,
-                                flavour = flavour,
-                                exponent = exponent,
-                                nb_pers = nb_pers)
+    pdgm = pdiagram_from_network(
+        G,
+        persistence=persistence,
+        metric=metric,
+        metric_params=metric_params,
+        dim=dim,
+        **kwargs,
+    )
+    return ring_score_from_pdiagram(
+        pdgm, flavour=flavour, exponent=exponent, nb_pers=nb_pers
+    )
 
 
-def ring_score_from_distance_matrix(D,
-                                persistence = 'VietorisRipsPersistence',
-                                dim = 1,
-                                nb_pers = np.inf,
-                                exponent = 2,
-                                flavour = 'geometric',
-                                **kwargs):
+def ring_score_from_distance_matrix(
+    D,
+    persistence="VietorisRipsPersistence",
+    dim=1,
+    nb_pers=np.inf,
+    exponent=2,
+    flavour="geometric",
+    **kwargs,
+):
     """Calculates ring-score from a PDiagram object.
 
     Parameters
@@ -199,76 +208,66 @@ def ring_score_from_distance_matrix(D,
         _description_
     """
 
-    pdgm = pdiagram_from_distance_matrix(D,
-                                    persistence = persistence,
-                                    dim = dim,
-                                    **kwargs)
-    return ring_score_from_pdiagram(pdgm,
-                                    flavour = flavour,
-                                    exponent = exponent,
-                                    nb_pers = nb_pers)
+    pdgm = pdiagram_from_distance_matrix(D, persistence=persistence, dim=dim, **kwargs)
+    return ring_score_from_pdiagram(
+        pdgm, flavour=flavour, exponent=exponent, nb_pers=nb_pers
+    )
 
 
-def ring_score_from_pdiagram(pdgm,
-                             score_type = 'length',
-                             flavour = 'geometric',
-                             nb_pers = np.inf,
-                             exponent = 2):
+def ring_score_from_pdiagram(
+    pdgm, score_type="length", flavour="geometric", nb_pers=np.inf, exponent=2
+):
     """Calculates ring-score from a PDiagram object."""
     trimmed_pdgm = pdgm.trimmed(nb_pers)
 
-    if score_type == 'length':
-        score = ring_score_from_sequence(trimmed_pdgm.plengths,
-                                         flavour = flavour,
-                                         nb_pers = nb_pers,
-                                         exponent = exponent)
-    elif score_type == 'ratio':
-        score = ring_score_from_sequence(trimmed_pdgm.pratios,
-                                            flavour = flavour,
-                                            nb_pers = nb_pers,
-                                            exponent = exponent)
-    elif score_type == 'diameter':
-        score = ring_score_from_sequence(trimmed_pdgm.plengths,
-                                         flavour = flavour,
-                                         nb_pers = nb_pers,
-                                         exponent = exponent)
-        score *= trimmed_pdgm.signal/trimmed_pdgm.diameter * (2/np.sqrt(3))
+    if score_type == "length":
+        score = ring_score_from_sequence(
+            trimmed_pdgm.plengths, flavour=flavour, nb_pers=nb_pers, exponent=exponent
+        )
+    elif score_type == "ratio":
+        score = ring_score_from_sequence(
+            trimmed_pdgm.pratios, flavour=flavour, nb_pers=nb_pers, exponent=exponent
+        )
+    elif score_type == "diameter":
+        score = ring_score_from_sequence(
+            trimmed_pdgm.plengths, flavour=flavour, nb_pers=nb_pers, exponent=exponent
+        )
+        score *= trimmed_pdgm.signal / trimmed_pdgm.diameter * (2 / np.sqrt(3))
 
     else:
         raise Exception(f"Score type `{score_type}` unknown.")
 
     return score
 
+
 # -----------------------------------------------------------------------------
 # ----------------------- PERSISTENCE DIAGRAM FUNCTIONS -----------------------
 # -----------------------------------------------------------------------------
-def pdiagram_from_point_cloud(X,
-                            metric = 'euclidean',
-                            dim = 1,
-                            persistence = 'VietorisRipsPersistence',
-                            **kwargs):
+def pdiagram_from_point_cloud(
+    X, metric="euclidean", dim=1, persistence="VietorisRipsPersistence", **kwargs
+):
     """Constructs a PDiagram object from a point cloud.
 
     This function wraps persistent homolgy calculation from giotto-tda."""
 
-    if persistence == 'VietorisRipsPersistence':
-        D = pwdistance_from_point_cloud(X,
-                                        metric = metric)
-        pdgm = pdiagram_from_distance_matrix(D,
-                                        dim = dim,
-                                        persistence = persistence,
-                                        kwargs = kwargs)
+    if persistence == "VietorisRipsPersistence":
+        D = pwdistance_from_point_cloud(X, metric=metric)
+        pdgm = pdiagram_from_distance_matrix(
+            D, dim=dim, persistence=persistence, kwargs=kwargs
+        )
     return pdgm
 
 
-def pdiagram_from_network(G,
-                        metric = 'net_flow',
-                        use_weights = None,
-                        store_weights = None,
-                        new_weight_name = None,
-                        overwrite_weights = False,
-                        verbose = False,
-                        **kwargs):
+def pdiagram_from_network(
+    G,
+    metric="net_flow",
+    use_weights=None,
+    store_weights=None,
+    new_weight_name=None,
+    overwrite_weights=False,
+    verbose=False,
+    **kwargs,
+):
     """Constructs a PDiagram object from a networkx graph.
 
     This function is not available yet. NEEDS TESTING!!!!
@@ -297,19 +296,17 @@ def pdiagram_from_network(G,
         _description_
     """
 
-    D = pwdistance_from_network(G, metric = metric, verbose = verbose)
+    D = pwdistance_from_network(G, metric=metric, verbose=verbose)
     return pdiagram_from_distance_matrix(D)
 
-def pdiagram_from_distance_matrix(D,
-                                persistence = 'VietorisRipsPersistence',
-                                dim = 1,
-                                **kwargs):
-    """Constructs a PDiagram object from a distance matrix.
-    """
-    if persistence == 'VietorisRipsPersistence':
-        VR = VietorisRipsPersistence(metric = "precomputed",
-                                     homology_dimensions = tuple(range(dim+1)))
+
+def pdiagram_from_distance_matrix(
+    D, persistence="VietorisRipsPersistence", dim=1, **kwargs
+):
+    """Constructs a PDiagram object from a distance matrix."""
+    if persistence == "VietorisRipsPersistence":
+        VR = VietorisRipsPersistence(
+            metric="precomputed", homology_dimensions=tuple(range(dim + 1))
+        )
         pdgm = VR.fit_transform([D])[0]
-    return PDiagram.from_gtda(pdgm,
-                        dim = dim,
-                        diameter = D.max())
+    return PDiagram.from_gtda(pdgm, dim=dim, diameter=D.max())

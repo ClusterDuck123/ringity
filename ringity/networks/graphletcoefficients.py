@@ -33,7 +33,7 @@ def clustering_coefficient(G, weight = None):
     Returns clustering coefficient.
     This function will ignore self-loops.
     """
-    A = nx.to_scipy_sparse_matrix(G, format='lil', weight = weight)
+    A = nx.to_scipy_sparse_array(G, format='lil', weight = weight)
     A.setdiag(0)
     A = csc_matrix(A)
     A.eliminate_zeros()

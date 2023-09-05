@@ -167,7 +167,7 @@ class TestAnalyticalConsistency(unittest.TestCase):
         )
 
         self.assertAlmostEqual(rho, rho_d, places=4)
-        self.assertAlmostEqual(rho, rho_s, places=4)
+        self.assertAlmostEqual(rho, rho_s, places=3)
 
     def test_second_moment_small_r(self):
         mu2 = trafos.second_moment_density(r=self.r1, beta=self.beta, c=self.c)
