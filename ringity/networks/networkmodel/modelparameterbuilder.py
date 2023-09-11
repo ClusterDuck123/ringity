@@ -1,6 +1,7 @@
 import numpy as np
 from ringity.networks.networkmodel.transformations import rate_to_beta
 from ringity.networks.networkmodel.param_utils import (
+    governing_equation,
     infer_response_parameter,
     infer_coupling_parameter,
     infer_rate_parameter,
@@ -50,7 +51,7 @@ class ModelParameterBuilder:
     @property
     def rate(self):
         return self._rate
-    
+
     @property
     def delay(self):
         return rate_to_beta(self._rate)
@@ -114,7 +115,7 @@ class ModelParameterBuilder:
 
         self.distribution = distn_arg
 
-    def infer_missing_parameters(self):
+    def infer_missing_parameters(self, verbose=False):
         """Completes the set of network paramters, if possible.
 
         Besides of the network size (e.g. number of nodes), each
@@ -134,8 +135,19 @@ class ModelParameterBuilder:
         nb_params = sum(1 for _ in params if _ is not None)
 
         if nb_params == 4:
-            print(params)
-            CHECK_PARAMS_CONSISTENCY
+            if verbose:
+                print(params)
+            eps = governing_equation(
+                density=self.density,
+                coupling=self.coupling,
+                response=self.response,
+                rate=self.rate,
+            )
+            if eps > 1e-6:
+                raise AttributeError(
+                    f"Parameters are inconsistent with model constraints. "
+                    f"Equation is not satisfied: {eps}"
+                )
         elif nb_params < 3:
             raise AttributeError(
                 "Not enough parameters given to infer " f"redundant ones. {nb_params}"
