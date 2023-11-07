@@ -1,4 +1,5 @@
 import networkx as nx
+import ringity.networks.networkmodel.distributions
 
 from scipy.spatial.distance import squareform
 from ringity.networks.networkmodel.networkbuilder import NetworkBuilder

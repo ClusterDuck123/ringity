@@ -1,6 +1,6 @@
 name = "ringity"
-__author__ = "M. K. Youssef, et al."
-__version__ = "0.3a4"
+__author__ = "M. K. Youssef"
+__version__ = "0.3a5"
 
 # FUNCTIONS
 from ringity.utils.plotting import set_theme
