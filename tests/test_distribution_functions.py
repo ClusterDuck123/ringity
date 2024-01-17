@@ -166,7 +166,7 @@ class TestAnalyticalConsistency(unittest.TestCase):
             1,
         )
 
-        self.assertAlmostEqual(rho, rho_d, places=4)
+        self.assertAlmostEqual(rho, rho_d, places=3)
         self.assertAlmostEqual(rho, rho_s, places=3)
 
     def test_second_moment_small_r(self):

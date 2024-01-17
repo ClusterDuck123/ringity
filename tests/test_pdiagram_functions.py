@@ -1,14 +1,11 @@
-import os
 import unittest
 import networkx as nx
 import ringity as rng
 import ringity.networks.centralities as cents
 
 from pathlib import Path
-from ringity.utils import exceptions
 
-DIRNAME_RINGITY = Path(os.path.dirname(rng.__file__))
-DIRNAME_TEST_DATA = DIRNAME_RINGITY / '_tests' / 'test_data'
+DIRNAME_TEST_DATA = Path('test_data')
 
 FNAME_PDGM = DIRNAME_TEST_DATA / 'lipid_coexp_dgm.txt'
 FNAME_NETWORK = DIRNAME_TEST_DATA / 'lipid_coexp_network.txt'

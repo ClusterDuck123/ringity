@@ -11,10 +11,8 @@ from ringity.ringscore.metric2ringscore import (
                             entropy_ring_score)
 from ringity.tda.pdiagram.generators import random_pdgm
 
-DIRNAME_RINGITY = Path(os.path.dirname(rng.__file__))
-DIRNAME_TMP = DIRNAME_RINGITY / '_tests' / 'test_data' / 'tmp'
+DIRNAME_TMP = Path('test_data') / 'tmp'
 FNAME_PDGM = DIRNAME_TMP / 'random_dgm.txt'
-
 
 class TestReadAndWrite(unittest.TestCase):
     def test_save_and_load(self):
