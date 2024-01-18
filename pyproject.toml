@@ -7,6 +7,27 @@ requires = [
     "networkx",
     "scipy",
     "pandas",
-    "giotto-tda"
+    "ripser"
 ]
 build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "ringity"
+version = "0.0.1"
+authors = [
+  { name="Markus K. Youssef", email="mk.youssef@hotmail.com" },
+]
+description = "Calculate ring score for various data structures"
+readme = "README.rst"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 3 - Alpha",
+]
+
+[project.urls]
+Homepage = "https://github.com/ClusterDuck123/ringity"
+Issues = "https://github.com/kiri93/ringity/issues"

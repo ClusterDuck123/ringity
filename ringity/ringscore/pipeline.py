@@ -4,10 +4,8 @@ from ringity.ringscore.data2metric import (
     pwdistance_from_point_cloud,
 )
 from ringity.tda.pdiagram.pdiagram import PDiagram
+from ringity.tda import phomology
 
-from gtda.homology import (
-    VietorisRipsPersistence,
-)  # WE SHOULD GET RID OF THIS IMPORT HERE
 from scipy.spatial.distance import is_valid_dm
 
 import numpy as np
@@ -303,10 +301,7 @@ def pdiagram_from_network(
 def pdiagram_from_distance_matrix(
     D, persistence="VietorisRipsPersistence", dim=1, **kwargs
 ):
-    """Constructs a PDiagram object from a distance matrix."""
-    if persistence == "VietorisRipsPersistence":
-        VR = VietorisRipsPersistence(
-            metric="precomputed", homology_dimensions=tuple(range(dim + 1))
-        )
-        pdgm = VR.fit_transform([D])[0]
-    return PDiagram.from_gtda(pdgm, dim=dim, diameter=D.max())
+    pdgm = phomology.pdiagram_from_distance_matrix(
+        D, persistence=persistence, dim=dim, **kwargs
+    )
+    return pdgm
