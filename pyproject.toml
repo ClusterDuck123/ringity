@@ -1,21 +1,20 @@
 # ---------------------------- BUILD-SYSTEM ---------------------------- #
 
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel",
-    "matplotlib",
-    "numba",
-    "networkx",
-    "scipy",
-    "pandas",
-    "ripser",         # MAKE CONDITIONAL
-]
+requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 # ------------------------------ PROJECT ------------------------------ #
 
 [project]
+dependencies = [
+    "matplotlib",
+    "numba",
+    "networkx",
+    "scipy",
+    "pandas",
+    "ripser",     # MAKE CONDITIONAL
+]
 name = "ringity"
 dynamic = ["version"]
 authors = [{ name = "Markus K. Youssef", email = "mk.youssef@hotmail.com" }]
@@ -47,6 +46,11 @@ py-modules = []
 
 [tool.setuptools.dynamic]
 version = { attr = "ringity.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["*"]
+namespaces = false
 
 [tool.setuptools.package-data]
 "*" = ["*.txt", "*.rst"]
