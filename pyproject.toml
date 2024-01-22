@@ -55,3 +55,4 @@ namespaces = false
 [tool.setuptools.package-data]
 "*" = ["*.txt", "*.rst"]
 "ringity" = ["data/*.csv"]
+# TRY TO INCLUDE RUNME.py 

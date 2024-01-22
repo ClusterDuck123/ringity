@@ -1,5 +1,12 @@
 import networkx as nx
-import plotly.graph_objects as go
+import importlib.util
+
+plotly_spec = importlib.util.find_spec("plotly")
+
+if plotly_spec is None:
+    pass # TODO: Deal with this dependency properly
+else:
+    import plotly.graph_objects as go
 
 from ringity.utils.plotting.styling import CEMM_COL1, CEMM_COL2
 
