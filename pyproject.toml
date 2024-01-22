@@ -1,3 +1,5 @@
+# ---------------------------- BUILD-SYSTEM ---------------------------- #
+
 [build-system]
 requires = [
     "setuptools>=42",
@@ -7,27 +9,45 @@ requires = [
     "networkx",
     "scipy",
     "pandas",
-    "ripser"
+    "ripser",         # MAKE CONDITIONAL
 ]
 build-backend = "setuptools.build_meta"
 
+# ------------------------------ PROJECT ------------------------------ #
 
 [project]
 name = "ringity"
-version = "0.0.1"
-authors = [
-  { name="Markus K. Youssef", email="mk.youssef@hotmail.com" },
-]
-description = "Calculate ring score for various data structures"
-readme = "README.rst"
+dynamic = ["version"]
+authors = [{ name = "Markus K. Youssef", email = "mk.youssef@hotmail.com" }]
+description = "Calculates ring scores for various data structures"
 requires-python = ">=3.8"
+readme = { file = "README.txt", content-type = "text/x-rst" }
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Development Status :: 3 - Alpha",
 ]
+keywords = ["network", "ring-structure", "tda"]
 
 [project.urls]
 Homepage = "https://github.com/ClusterDuck123/ringity"
 Issues = "https://github.com/kiri93/ringity/issues"
+
+[project.optional-dependencies]
+giotto-tda = ["giotto-tda"]
+plotting = ["plotly"]
+
+# -------------------------------- TOOL -------------------------------- #
+
+[tool.setuptools]
+py-modules = []
+
+[tool.setuptools.dynamic]
+version = { attr = "ringity.__version__" }
+
+[tool.setuptools.package-data]
+"*" = ["*.txt", "*.rst"]
+"ringity" = ["data/*.csv"]

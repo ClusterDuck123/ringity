@@ -19,8 +19,6 @@ else:
         from gtda.homology import VietorisRipsPersistence
         PHOMOLOGY = "gtda"
 
-from gtda.homology import VietorisRipsPersistence  # CHANGE FOR FUTURE: OPTIONAL IMPORT
-
 # =============================================================================
 #  ----------------------- VIETORIS-RIPS PERSISTENCE -------------------------
 # =============================================================================
