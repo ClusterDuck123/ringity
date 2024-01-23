@@ -20,7 +20,7 @@ dynamic = ["version"]
 authors = [{ name = "Markus K. Youssef", email = "mk.youssef@hotmail.com" }]
 description = "Calculates ring scores for various data structures"
 requires-python = ">=3.8"
-readme = { file = "README.txt", content-type = "text/x-rst" }
+readme = { file = "README.rst", content-type = "text/x-rst" }
 classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
@@ -48,11 +48,10 @@ py-modules = []
 version = { attr = "ringity.__version__" }
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["src", "tests"]
 include = ["*"]
 namespaces = false
 
 [tool.setuptools.package-data]
-"*" = ["*.txt", "*.rst"]
+"*" = ["*.txt", "*.rst", "*.py"] # tests/RUNME.py still not included
 "ringity" = ["data/*.csv"]
-# TRY TO INCLUDE RUNME.py 
