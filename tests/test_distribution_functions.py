@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
 import networkx as nx
-import ringity.networks.networkmodel.distributions as dists
-import ringity.networks.networkmodel.transformations as trafos
+import ringity.networkmodel.distributions as dists
+import ringity.networkmodel.transformations as trafos
 
 from scipy.integrate import quad
 from scipy.spatial.distance import squareform
@@ -207,7 +207,7 @@ class TestDegreeDistributionEmpiricaly(unittest.TestCase):
         for i in range(n_ensemble):
             thetas = dists.delaydist.rvs(size=self.N, beta=self.beta)
 
-            D = trafos.pw_circular_distance(thetas)
+            D = trafos.pw_angular_distance(thetas)
             P = trafos.interaction_probability(D, r=self.r, c=self.c)
 
             R = np.random.uniform(size=self.N * (self.N - 1) // 2)

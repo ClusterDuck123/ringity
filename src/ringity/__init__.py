@@ -27,7 +27,7 @@ from ringity.ringscore import (
 # MODULES
 from ringity.ringscore import (statistics)
 
-from ringity.networks.networkmodel import network_model
+from ringity.networkmodel import network_model
 import ringity.networks.geometricnetworks as geometric_networks
 
 from ringity.utils.plotting import (

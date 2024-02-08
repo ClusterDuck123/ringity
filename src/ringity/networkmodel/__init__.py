@@ -1,9 +1,9 @@
 import networkx as nx
-import ringity.networks.networkmodel.distributions
+import ringity.networkmodel.distributions
 
 from scipy.spatial.distance import squareform
-from ringity.networks.networkmodel.networkbuilder import NetworkBuilder
-from ringity.networks.networkmodel.param_utils import parse_canonical_parameters
+from ringity.networkmodel.networkbuilder import NetworkBuilder
+from ringity.networkmodel.param_utils import parse_canonical_parameters
 
 def network_model(N,
                   response = None,

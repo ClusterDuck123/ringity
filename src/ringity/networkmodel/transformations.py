@@ -93,7 +93,7 @@ def global_density(r, c, beta=None, rate=None) -> float:
     rate = _get_rate(beta=beta, rate=rate)
 
     if np.isclose(rate, 0):
-        return r*c
+        return r * c
 
     l = 2 * np.pi * r  # Response length
     numerator = np.cosh(rate * np.pi) - np.cosh(rate * np.pi - rate * l)
@@ -110,7 +110,7 @@ def local_density(theta, r, c, beta=None, rate=None) -> float:
     rate = _get_rate(beta=beta, rate=rate)
 
     if np.isclose(rate, 0):
-        return r*c
+        return r * c
 
     l = 2 * np.pi * r  # Response length
     s_min = np.clip((2 * r - 1) / r, 0, 1)
@@ -243,10 +243,16 @@ def get_canonical_prob_name(prob_name):
 # =============================================================================
 
 
-def pw_circular_distance(x, metric="euclidean"):
+def pw_angular_distance(x, metric="euclidean"):
     abs_dists = pdist(x.reshape(-1, 1), metric=metric)
     circ_dists = np.pi - abs(abs_dists - np.pi)
     return circ_dists
+
+
+def angular_distance(x, y):
+    abs_dist = abs(x - y)
+    circ_dist = np.pi - abs(abs_dist - np.pi)
+    return circ_dist
 
 
 def box_cosine_similarity(dist, box_length):

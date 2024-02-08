@@ -3,12 +3,12 @@ import numpy as np
 import ringity as rng
 import networkx as nx
 
-from ringity.networks.networkmodel.param_utils import (
+from ringity.networkmodel.param_utils import (
                                         infer_density_parameter,
                                         infer_rate_parameter,
                                         infer_response_parameter,
                                         infer_coupling_parameter)
-from ringity.networks.networkmodel.transformations import beta_to_rate
+from ringity.networkmodel.transformations import beta_to_rate
 
 class TestExponentialNetworkModel(unittest.TestCase):
     def setUp(self):

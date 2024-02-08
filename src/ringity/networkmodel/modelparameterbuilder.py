@@ -1,6 +1,6 @@
 import numpy as np
-from ringity.networks.networkmodel.transformations import rate_to_beta
-from ringity.networks.networkmodel.param_utils import (
+from ringity.networkmodel.transformations import rate_to_beta
+from ringity.networkmodel.param_utils import (
     governing_equation,
     infer_response_parameter,
     infer_coupling_parameter,

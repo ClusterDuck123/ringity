@@ -1,5 +1,5 @@
-from scipy.spatial.distance import pdist, squareform
-from ringity.networks.networkmodel.transformations import (
+from scipy.spatial.distance import squareform
+from ringity.networkmodel.transformations import (
                                     string_to_distribution,
                                     string_to_similarity_function,
                                     string_to_probability_function
@@ -8,8 +8,8 @@ from ringity.networks.networkmodel.transformations import (
 import numpy as np
 import scipy.stats as ss
 
-from ringity.networks.networkmodel.modelparameterbuilder import ModelParameterBuilder
-from ringity.networks.networkmodel.transformations import pw_circular_distance
+from ringity.networkmodel.modelparameterbuilder import ModelParameterBuilder
+from ringity.networkmodel.transformations import pw_angular_distance
 
 """This module describes the NetworkBuilder class.
 
@@ -266,7 +266,7 @@ class NetworkBuilder:
 
 
     def calculate_distances(self, circular = True, metric = 'euclidean'):
-        self.distances = pw_circular_distance(self.positions, metric = metric)
+        self.distances = pw_angular_distance(self.positions, metric = metric)
 
     def calculate_similarities(self, sim_func = 'box_cosine', r = None):
         if r is not None:
