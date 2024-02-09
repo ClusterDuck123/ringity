@@ -8,7 +8,7 @@ from ringity.networkmodel._analytical_expressions import (
     _local_clustering_integral_noconstants,
     _local_clustering_integral_xy_symmetry,
     _local_clustering_integral_transformed,
-    _local_clustering_integral_dbltransformed
+    _local_clustering_integral_dbltransformed,
 )
 
 # Default integration precision parameters
@@ -28,16 +28,16 @@ class TestLocalClusteringCoefficient(unittest.TestCase):
 
         self.thetas = np.random.uniform(0, 2 * np.pi, size=[n_ensemble, n_thetas])
 
-    # def test_noconstants(self):
-    #     for beta, r, c, thetas in zip(self.betas, self.rs, self.cs, self.thetas):
-    #         for theta_i in thetas:
-    #             I1 = _local_clustering_integral_classic(
-    #                 theta_i, r, c, beta, epsabs=DEFAULT_EPSABS, epsrel=DEFAULT_EPSREL
-    #             )
-    #             I2 = _local_clustering_integral_noconstants(
-    #                 theta_i, r, c, beta, epsabs=DEFAULT_EPSABS, epsrel=DEFAULT_EPSREL
-    #             )
-    #             self.assertAlmostEqual(I1, I2, delta=1e-3)
+    def test_noconstants(self):
+        for beta, r, c, thetas in zip(self.betas, self.rs, self.cs, self.thetas):
+            for theta_i in thetas:
+                I1 = _local_clustering_integral_classic(
+                    theta_i, r, c, beta, epsabs=DEFAULT_EPSABS, epsrel=DEFAULT_EPSREL
+                )
+                I2 = _local_clustering_integral_noconstants(
+                    theta_i, r, c, beta, epsabs=DEFAULT_EPSABS, epsrel=DEFAULT_EPSREL
+                )
+                self.assertAlmostEqual(I1, I2, delta=1e-4)
 
     def test_xy_symmetry(self):
         for beta, r, c, thetas in zip(self.betas, self.rs, self.cs, self.thetas):
@@ -50,28 +50,27 @@ class TestLocalClusteringCoefficient(unittest.TestCase):
                 )
                 self.assertAlmostEqual(I1, I2, delta=1e-4)
 
-    # def test_single_transformation(self):
-    #     for beta, r, c, thetas in zip(self.betas, self.rs, self.cs, self.thetas):
-    #         for theta_i in thetas:
-    #             I1 = _local_clustering_integral_xy_symmetry(
-    #                 theta_i, r, c, beta, epsabs=DEFAULT_EPSABS, epsrel=DEFAULT_EPSREL
-    #             )
-    #             I2 = _local_clustering_integral_transformed(
-    #                 theta_i, r, c, beta, epsabs=DEFAULT_EPSABS, epsrel=DEFAULT_EPSREL
-    #             )
-    #             self.assertAlmostEqual(I1, I2, delta=1e-3)
+    def test_single_transformation(self):
+        for beta, r, c, thetas in zip(self.betas, self.rs, self.cs, self.thetas):
+            for theta_i in thetas:
+                I1 = _local_clustering_integral_xy_symmetry(
+                    theta_i, r, c, beta, epsabs=DEFAULT_EPSABS, epsrel=DEFAULT_EPSREL
+                )
+                I2 = _local_clustering_integral_transformed(
+                    theta_i, r, c, beta, epsabs=DEFAULT_EPSABS, epsrel=DEFAULT_EPSREL
+                )
+                self.assertAlmostEqual(I1, I2, delta=1e-4)
 
-    # def test_double_transformation(self):
-    #     for beta, r, c, thetas in zip(self.betas, self.rs, self.cs, self.thetas):
-    #         for theta_i in thetas:
-    #             I1 = _local_clustering_integral_transformed(
-    #                 theta_i, r, c, beta, epsabs=DEFAULT_EPSABS, epsrel=DEFAULT_EPSREL
-    #             )
-    #             I2 = _local_clustering_integral_dbltransformed(
-    #                 theta_i, r, c, beta, epsabs=DEFAULT_EPSABS, epsrel=DEFAULT_EPSREL
-    #             )
-    #             self.assertAlmostEqual(I1, I2, delta=1e-3)
-
+    def test_double_transformation(self):
+        for beta, r, c, thetas in zip(self.betas, self.rs, self.cs, self.thetas):
+            for theta_i in thetas:
+                I1 = _local_clustering_integral_transformed(
+                    theta_i, r, c, beta, epsabs=DEFAULT_EPSABS, epsrel=DEFAULT_EPSREL
+                )
+                I2 = _local_clustering_integral_dbltransformed(
+                    theta_i, r, c, beta, epsabs=DEFAULT_EPSABS, epsrel=DEFAULT_EPSREL
+                )
+                self.assertAlmostEqual(I1, I2, delta=1e-4)
 
 
 if __name__ == "__main__":
