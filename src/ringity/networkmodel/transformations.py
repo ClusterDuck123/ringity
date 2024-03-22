@@ -88,16 +88,16 @@ def global_response(rho, c, beta=None, rate=None) -> float:
 
 
 def global_density(r, c, beta=None, rate=None) -> float:
-    if np.isclose(beta, 0):
-        return c
+
     rate = _get_rate(beta=beta, rate=rate)
+    if np.isinf(rate):
+        return c
 
     if np.isclose(rate, 0):
         return r * c
 
-    l = 2 * np.pi * r  # Response length
-    numerator = np.cosh(rate * np.pi) - np.cosh(rate * np.pi - rate * l)
-    denominator = l * rate * np.sinh(rate * np.pi)
+    numerator = np.cosh(rate * np.pi) - np.cosh(rate * np.pi * (1 - 2 * r))
+    denominator = 2 * np.pi * r * rate * np.sinh(rate * np.pi)
     return c * (1 - numerator / denominator)
 
 
@@ -105,9 +105,9 @@ def local_density(theta, r, c, beta=None, rate=None) -> float:
     """
     Local density function"""
 
-    if np.isclose(beta, 0):
-        return c
     rate = _get_rate(beta=beta, rate=rate)
+    if np.isinf(rate):
+        return c
 
     if np.isclose(rate, 0):
         return r * c
@@ -261,12 +261,9 @@ def box_cosine_similarity(dist, box_length):
     if box_length == 0:
         return np.where(dist == 0, 1, 0)
 
-    x1 = (box_length - dist).clip(0)
+    x1 = np.where(dist > box_length, 0, box_length - dist)
     # For box lengths larger than half of the circle there is a second overlap
-    if box_length <= np.pi:
-        x2 = 0
-    else:
-        x2 = (dist - (2 * np.pi - box_length)).clip(0)
+    x2 = np.where(dist < 2 * np.pi - box_length, 0, box_length - (2 * np.pi - dist))
 
     total_overlap = x1 + x2
     return total_overlap / box_length
