@@ -33,6 +33,19 @@ def beta_to_rate(beta):
         rate = np.tan(np.pi * (1 - beta) / 2)
     return rate
 
+#  ----------------------------- ACTIVITY FUNCTIONS ---------------------------
+
+def local_avg_activity(theta, r, beta=None, rate=None):
+    rate = _get_rate(beta=beta, rate=rate)
+    theta = theta % (2*np.pi)
+
+    Z = -np.expm1(-2*np.pi*rate)
+
+    A =     np.exp(-rate*(theta - 2*np.pi*r))
+    B = Z + np.exp(-rate*(theta + 2*np.pi*(1 - r)))
+    value = np.where(theta >= 2*np.pi*r, A, B) - np.exp(-rate*theta)
+
+    return value / Z
 
 #  ----------------------------- DENSITY FUNCTIONS ---------------------------
 
