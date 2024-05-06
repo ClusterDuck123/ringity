@@ -100,21 +100,6 @@ class ModelParameterBuilder:
     # ---------------------------- METHODS -----------------------------
     # ------------------------------------------------------------------
 
-    def set_distribution(self, distn_arg, **kwargs):
-        """Takes either a frozen distribution from scipy.stats or a string
-        specifying a parametrized family of distributions and sets the property
-        `frozen_distribution` to the corresponding frozen distribution. `**kwargs`
-        will be used to specify the parameters of the distribution.
-        """
-
-        # Check if string or scipy distribution
-        if isinstance(distn_arg, str):
-            distn_arg = string_to_distribution(distn_name=distn_arg, **kwargs)
-        elif not isinstance(distn_arg, ss._distn_infrastructure.rv_frozen):
-            raise TypeError(f"Type of {distn_arg} unknown.")
-
-        self.distribution = distn_arg
-
     def infer_missing_parameters(self, verbose=False):
         """Completes the set of network paramters, if possible.
 

@@ -8,7 +8,7 @@ from ringity.networkmodel.transformations import (
 import numpy as np
 import scipy.stats as ss
 
-from ringity.networkmodel.modelparameterbuilder import ModelParameterBuilder
+
 from ringity.networkmodel.transformations import pw_angular_distance
 
 """This module describes the NetworkBuilder class.
@@ -45,7 +45,6 @@ class NetworkBuilder:
         self._response = None
         self._coupling = None
         self._density = None
-        self.model_parameters = ModelParameterBuilder()
 
 # ------------------------------------------------------------------
 # --------------------------- PROPERTIES ---------------------------
@@ -275,7 +274,7 @@ class NetworkBuilder:
         if isinstance(sim_func, str):
             sim_func = string_to_similarity_function(sim_name = sim_func)
         elif not callable(sim_func):
-            raise TypeError(f"Type of {distn_arg} unknown.")
+            raise TypeError(f"Type of {sim_func} unknown.")
 
         self.similarities = sim_func(squareform(self.distances),
                                      box_length = 2*np.pi*self.response)
@@ -288,7 +287,7 @@ class NetworkBuilder:
         if isinstance(prob_func, str):
             prob_func = string_to_probability_function(prob_name = prob_func)
         elif not callable(prob_func):
-            raise TypeError(f"Type of {distn_arg} unknown.")
+            raise TypeError(f"Type of {prob_func} unknown.")
 
         self.probabilities = prob_func(self._similarities,
                                        slope = slope,

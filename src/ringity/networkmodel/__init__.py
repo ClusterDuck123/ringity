@@ -1,8 +1,8 @@
 import networkx as nx
-import ringity.networkmodel.distributions
 
 from scipy.spatial.distance import squareform
 from ringity.networkmodel.networkbuilder import NetworkBuilder
+from ringity.networkmodel.modelparameterbuilder import ModelParameterBuilder
 from ringity.networkmodel.param_utils import parse_canonical_parameters
 
 def network_model(N,
@@ -28,33 +28,15 @@ def network_model(N,
     """
 
     network_builder = NetworkBuilder(random_state = random_state)
-
-    params = {
-        'rate': rate, 'beta': beta,
-        'response': response, 'r': r, 'a': a, 'alpha': alpha,
-        'coupling': coupling, 'c': c, 'K': K,
-        'density': density, 'rho': rho}
-
-    model_params = parse_canonical_parameters(params)
-
-    model_parameters = network_builder.model_parameters
-
-    model_parameters.size = N
-    model_parameters.rate = model_params['rate']
-    model_parameters.response = model_params['response']
-    model_parameters.coupling = model_params['coupling']
-    model_parameters.density = model_params['density']
-
-    # THIS NEEDS TO BE MOVED TO NETWORKBUILDER CLASS: E.G. set_parameters()
-    # network_builder.set_parameters()
-
-    model_parameters.infer_missing_parameters()
-
-    if verbose:
-        print(f"Response parameter was set  to: r = {network_builder.response}")
-        print(f"Rate parameter was set to:   rate = {network_builder.rate}")
-        print(f"Coupling parameter was set to:  c = {network_builder.coupling}")
-        print(f"Density parameter was set to: rho = {network_builder.density}")
+    network_builder.model_parameters = ModelParameterBuilder()
+    
+    set_model_parameters(network_builder.model_parameters, N=N,
+                         rate=rate, beta = beta,
+                         response = response, r = r, a =  a, alpha = alpha,
+                         coupling = coupling, c = c, K = K,
+                         density = density, rho = rho,
+                         verbose = verbose
+                         )
 
     network_builder.build_model()
 
@@ -76,3 +58,37 @@ def network_model(N,
         return output[0]
     else:
         return output
+    
+
+def set_model_parameters(model_parameters, N,
+                         rate, beta,
+                         response, r, a, alpha,
+                         coupling, c, K,
+                         density, rho,
+                         verbose
+                         ):
+    params = {
+        'N': N,
+        'rate': rate, 'beta': beta,
+        'response': response, 'r': r, 'a': a, 'alpha': alpha,
+        'coupling': coupling, 'c': c, 'K': K,
+        'density': density, 'rho': rho}
+
+    model_params = parse_canonical_parameters(params)
+
+    model_parameters.size = N
+    model_parameters.rate = model_params['rate']
+    model_parameters.response = model_params['response']
+    model_parameters.coupling = model_params['coupling']
+    model_parameters.density = model_params['density']
+
+    # THIS NEEDS TO BE MOVED TO NETWORKBUILDER CLASS: E.G. set_parameters()
+    # network_builder.set_parameters()
+
+    model_parameters.infer_missing_parameters()
+
+    if verbose:
+        print(f"Response parameter was set  to: r = {model_parameters.response}")
+        print(f"Rate parameter was set to:   rate = {model_parameters.rate}")
+        print(f"Coupling parameter was set to:  c = {model_parameters.coupling}")
+        print(f"Density parameter was set to: rho = {model_parameters.density}")
