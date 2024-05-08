@@ -2,7 +2,6 @@ import networkx as nx
 
 from scipy.spatial.distance import squareform
 from ringity.networkmodel.networkbuilder import NetworkBuilder
-from ringity.networkmodel.modelparameterbuilder import ModelParameterBuilder
 from ringity.networkmodel.param_utils import parse_canonical_parameters
 
 def network_model(N,
@@ -28,8 +27,8 @@ def network_model(N,
     """
 
     network_builder = NetworkBuilder(random_state = random_state)
-    network_builder.model_parameters = ModelParameterBuilder()
     
+
     set_model_parameters(network_builder.model_parameters, N=N,
                          rate=rate, beta = beta,
                          response = response, r = r, a =  a, alpha = alpha,

@@ -8,7 +8,7 @@ from ringity.networkmodel.transformations import (
 import numpy as np
 import scipy.stats as ss
 
-
+from ringity.networkmodel.modelparameterbuilder import ModelParameterBuilder
 from ringity.networkmodel.transformations import pw_angular_distance
 
 """This module describes the NetworkBuilder class.
@@ -45,6 +45,7 @@ class NetworkBuilder:
         self._response = None
         self._coupling = None
         self._density = None
+        self.model_parameters = ModelParameterBuilder()
 
 # ------------------------------------------------------------------
 # --------------------------- PROPERTIES ---------------------------
@@ -169,20 +170,18 @@ class NetworkBuilder:
             if self.coupling == 0:
                 assert self.density == 0 # move to builder
                 self.model = "Empty (c = 0)"
-                self._build_general_model()
             if self.response == 1:
                 self.model = "ER (r = 1)"
-                self._build_general_model()
             if self.response == 0:
                 assert self.density == 0 # move to builder
                 self.model = "Empty (r = 0)"
-                self._build_general_model()
             if self.density == 1:
                 self.model = "Complete (rho = 1)"
-                self._build_general_model()
             if not hasattr(self, 'model'):
                 self.model = "General"
-                self._build_general_model()
+            
+            self._build_general_model()
+            
 
     # THINK ABOUT MOVING THESE METHODS OUTSIDE OF THE CLASS
     def _build_general_model(self):

@@ -74,15 +74,15 @@ def pwdistance_from_adjacency_matrix(A,
     D = floyd_warshall(A)
     return D
 
-def pwdistance_from_network(G, 
-                        metric = 'net_flow', 
-                        use_weights = None,
-                        store_weights = True,
-                        remove_self_loops = True,
-                        new_weight_name = None,
-                        overwrite_weights = False,
-                        verbose = False,
-                        **kwargs):
+
+def pwdistance_from_network(
+    G,
+    metric="net_flow",
+    use_weights=None,
+    store_weights=True,
+    remove_self_loops=True,
+    verbose=False,
+):
     """Calculate pairwise distances from a given network.
 
     Parameters
@@ -94,7 +94,7 @@ def pwdistance_from_network(G,
     use_weights : _type_, optional
         _description_, by default None
     store_weights : bool, optional
-        Stores calculated weights as edge attributes if `metric` 
+        Stores calculated weights as edge attributes if `metric`
         corresponds to a centrality measure. By default True.
     new_weight_name : _type_, optional
         _description_, by default None
@@ -107,38 +107,40 @@ def pwdistance_from_network(G,
     -------
     _type_
         _description_
-    """                        
+    """
     if not store_weights:
         G = G.copy()
 
     if (nx.number_of_selfloops(G) > 0) and remove_self_loops:
         if verbose:
-            print('Self loops in graph detected. They will be removed!')
+            print("Self loops in graph detected. They will be removed!")
         G.remove_edges_from(nx.selfloop_edges(G))
+    if isinstance(use_weights, str):
+        metric = use_weights
+        if verbose:
+            print('metric was set to use_weights.')
 
     # Check if metric is stored as edge attribute
-    induction_status = _check_weight_induction(G, 
-                                        metric = metric,
-                                        use_weights = use_weights,
-                                        verbose = verbose)
+    induction_status = _check_weight_induction(
+        G, metric=metric, use_weights=use_weights, verbose=verbose
+    )
     if induction_status:
-        induce_edge_weights(G, metric = metric, verbose = verbose)
+        induce_edge_weights(G, metric=metric, verbose=verbose)
 
-    spl_status = _check_spl_calculation(G, 
-                                    induction_status = induction_status,
-                                    metric = metric,
-                                    verbose = verbose)
+    spl_status = _check_spl_calculation(
+        G, induction_status=induction_status, metric=metric, verbose=verbose
+    )
     if spl_status:
-        A = nx.to_numpy_array(G, weight = metric)
+        A = nx.to_numpy_array(G, weight=metric)
         D = floyd_warshall(A)
     else:
-        if metric.lower() == 'resistance':
+        if metric.lower() == "resistance":
             D = cents.resistance(G)
-        elif metric.lower() == 'spl':
-            A = nx.to_numpy_array(G, weight = None)
+        elif metric.lower() == "spl":
+            A = nx.to_numpy_array(G, weight=None)
             D = floyd_warshall(A)
     return D
-    
+
 
 def induce_edge_weights(G, metric = 'net_flow', verbose = False):
     if metric.lower() == 'net_flow':
@@ -150,7 +152,6 @@ def induce_edge_weights(G, metric = 'net_flow', verbose = False):
     else:
         raise Exception(f'Centrality measure {metric} unknown.')
     nx.set_edge_attributes(G, ew_dict, metric)
-    
 
 
 def _check_weight_induction(G, metric, use_weights, verbose):
@@ -163,7 +164,7 @@ def _check_weight_induction(G, metric, use_weights, verbose):
     elif nx.get_edge_attributes(G, metric):
         if verbose and use_weights:
             print(
-                f'Weights named `{metric}` detected.' 
+                f'Weights named `{metric}` detected. ' 
                 f'They will be used for distance calculation.')
         return False
     elif use_weights is True:
@@ -183,7 +184,7 @@ def _check_weight_induction(G, metric, use_weights, verbose):
                 f'No weights named `{metric}` detected. ' 
                 f'Centrality measure `{metric}` will be calculated.')
         return True
-    
+
 def _check_spl_calculation(G, induction_status, metric, verbose):
     if induction_status:
         if verbose:

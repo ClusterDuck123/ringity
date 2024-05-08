@@ -149,6 +149,7 @@ def ring_score_from_network(
     metric="net_flow",
     metric_params={},
     dim=1,
+    use_weights=None,
     **kwargs,
 ):
     """Calculate ring score from network.
@@ -167,6 +168,7 @@ def ring_score_from_network(
         metric=metric,
         metric_params=metric_params,
         dim=dim,
+        use_weights=None,
         **kwargs,
     )
     return ring_score_from_pdiagram(
@@ -260,9 +262,8 @@ def pdiagram_from_network(
     G,
     metric="net_flow",
     use_weights=None,
-    store_weights=None,
-    new_weight_name=None,
-    overwrite_weights=False,
+    store_weights = True,
+    remove_self_loops = True,
     verbose=False,
     **kwargs,
 ):
@@ -278,13 +279,6 @@ def pdiagram_from_network(
         _description_, by default 'net_flow'
     use_weights : bool, optional
         _description_, by default None
-    store_weights : bool, optional
-        Weights will only be stored if a centrality measure is
-        used for distance calculations! By default None.
-    new_weight_name : _type_, optional
-        _description_, by default None
-    overwrite_weights : bool, optional
-        _description_, by default False
     verbose : bool, optional
         _description_, by default False
 
@@ -294,7 +288,14 @@ def pdiagram_from_network(
         _description_
     """
 
-    D = pwdistance_from_network(G, metric=metric, verbose=verbose)
+    D = pwdistance_from_network(
+        G,
+        metric=metric,
+        verbose=verbose,
+        use_weights=use_weights,
+        store_weights=store_weights,
+        remove_self_loops=remove_self_loops,
+    )
     return pdiagram_from_distance_matrix(D)
 
 
