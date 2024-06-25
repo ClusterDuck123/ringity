@@ -255,6 +255,16 @@ def pdf_similarity(t, r, beta=None, rate=None):
     normalization = l * rate / np.sinh(np.pi * rate)
     return support * values * normalization
 
+def pdf_unnormalized_similarity(x, beta, r):
+    rate, support = _compute_rate_and_support(
+        condition=(0 <= x) & (x <= 2*np.pi*r),
+        beta=beta,
+        rate=None,
+    )
+    values = np.cosh(rate * (np.pi*(1 - 2 * r) + x))
+    normalization = rate / np.sinh(np.pi * rate)
+    return support * values * normalization
+
 
 def cdf_similarity(t, r, beta=None, rate=None):
     """

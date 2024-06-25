@@ -33,19 +33,22 @@ def beta_to_rate(beta):
         rate = np.tan(np.pi * (1 - beta) / 2)
     return rate
 
+
 #  ----------------------------- ACTIVITY FUNCTIONS ---------------------------
+
 
 def local_avg_activity(theta, r, beta=None, rate=None):
     rate = _get_rate(beta=beta, rate=rate)
-    theta = theta % (2*np.pi)
+    theta = theta % (2 * np.pi)
 
-    Z = -np.expm1(-2*np.pi*rate)
+    Z = -np.expm1(-2 * np.pi * rate)
 
-    A =     np.exp(-rate*(theta - 2*np.pi*r))
-    B = Z + np.exp(-rate*(theta + 2*np.pi*(1 - r)))
-    value = np.where(theta >= 2*np.pi*r, A, B) - np.exp(-rate*theta)
+    A = np.exp(-rate * (theta - 2 * np.pi * r))
+    B = Z + np.exp(-rate * (theta + 2 * np.pi * (1 - r)))
+    value = np.where(theta >= 2 * np.pi * r, A, B) - np.exp(-rate * theta)
 
     return value / Z
+
 
 #  ----------------------------- DENSITY FUNCTIONS ---------------------------
 
@@ -304,3 +307,26 @@ def interaction_probability(d, r, c):
     s_min = 1 - np.clip((1 - r) / r, 0, 1)  # Minimal similarity
     s = np.clip(1 - s_min - d / l, 0, 1) + s_min  # Similarity
     return c * s
+
+
+# =============================================================================
+#  --------------------------------- 3H TRAFOS ------------------------------
+# =============================================================================
+
+
+def hysteresis(r, beta=None, rate=None) -> float:
+    rate = _get_rate(beta=beta, rate=rate)
+    numer = np.sinh(np.pi * rate * r)
+    denom = np.exp(np.pi * rate * (1 - r)) * np.sinh(np.pi * rate)
+    return numer / denom
+
+
+def heterogeneity(r, beta=None, rate=None) -> float:
+    rate = _get_rate(beta=beta, rate=rate)
+    numer = np.sinh(np.pi * rate * r) * np.sinh(np.pi * rate * (1 - r))
+    denom = np.pi * r * rate * np.sinh(rate * np.pi)
+    return numer / denom
+
+
+def homophily(r, c) -> float:
+    return 2 * np.arctan(c / (2 * np.pi * r)) / np.pi
