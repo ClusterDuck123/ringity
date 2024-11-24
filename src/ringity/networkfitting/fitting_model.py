@@ -1,4 +1,3 @@
-import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize
@@ -216,8 +215,3 @@ def position_hist(n_nodes, rpositions, n_bins=None,color='k'):
     ax.axis("tight")
     
     return fig,m,lambda_,x_0 
-
-
-
-
-
