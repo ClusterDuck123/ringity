@@ -130,7 +130,7 @@ def make_similar_network_model_random(G_true, network_model):
 def run_analysis(G):
     self = PositionGraph(G)
     # self.positions = positions
-    k = np.sqrt(2 * np.pi / len(self.nodelist))
+    k = 0.1*np.sqrt(2 * np.pi / len(self.nodelist))
     self.make_circular_spring_embedding(k=k, verbose=True)
     self.smooth_neighborhood_widths()
     self.recenter_and_reorient()
