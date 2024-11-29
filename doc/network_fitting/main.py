@@ -113,9 +113,9 @@ def make_similar_network_model_random(G_true, network_model):
         beta = 0.7 + 0.3 * np.random.rand()
         r = 0.5 * np.random.rand()
 
-        positions, G = rg.network_model(
-            N, rho=density, beta=beta, a=r, return_positions=True
-        )
+        G,positions = rg.network_model(
+            N, rho=density, beta=beta, r=r, return_positions=True
+        )   
         G, positions = get_largest_component_with_positions(G, positions)
 
         parameters = {"beta": beta, "r": r, "density": density}
