@@ -182,10 +182,10 @@ def save_values_to_json(folder, filename, parameters, fitter_c, fitter_w):
 
     os.makedirs(folder, exist_ok=True)
     file_path = folder / filename
-
+    
     with open(file_path, "w") as f:
         json.dump(data, f, indent=4)
-
+    print(f"saved to {file_path}")
 
 def edge_points(ax, G, p_dict, fontsize=15, color="k"):
 
@@ -325,7 +325,7 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
     ax.axis("tight")
 
     fig.savefig(f"{folder}/fig_3_fit.png")
-
+    print(f"saved to {folder}")
 
 def is_true(x):
     return x.lower() == "true"
