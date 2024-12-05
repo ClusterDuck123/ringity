@@ -19,3 +19,5 @@ doc/private
 # Rest
 .vscode
 
+doc/network_fitting/test/
+doc/network_fitting/test_network_model/

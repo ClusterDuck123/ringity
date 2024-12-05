@@ -45,8 +45,8 @@ COLOR_DICT = {
 # ------------------------ FUNCTIONS --------------------------
 
 
-def main(network_name, network_model, make_figures, folder, uuid):
-    if uuid:
+def main(network_name, network_model, make_figures, folder, unique):
+    if unique:
         suffix = str(uuid.uuid4())
     else:
         suffix = "test"
@@ -345,7 +345,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", default="none")
     parser.add_argument("--make_figs", default="true", type=is_true)
     parser.add_argument("--output_folder", default="test")
-    parser.add_argument("--uuid", default="true", type=is_true)
+    parser.add_argument("--unique", default="true", type=is_true)
 
     args = parser.parse_args(sys.argv[1:])
 
@@ -356,5 +356,5 @@ if __name__ == "__main__":
         network_model=args.model,
         make_figures=args.make_figs,
         folder=args.output_folder,
-        uuid=args.uuid,
+        unique=args.unique,
     )
