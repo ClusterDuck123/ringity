@@ -24,8 +24,7 @@ import sys
 
 # ---------------------- GLOBAL VARIABLES ----------------------
 
-DATA_DIR = Path("..") / "data"
-EMPIRICALNET_DIR = DATA_DIR / "empirical_networks"
+EMPIRICALNET_DIR = Path("data/empirical_networks")
 COLOR_SCHEME = {
     "Jasmine": "#ffd07b",
     "Glaucous": "#577399",
