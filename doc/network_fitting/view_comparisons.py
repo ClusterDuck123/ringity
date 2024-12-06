@@ -40,7 +40,7 @@ def main():
     tmp=particular_network_df['parameters_choice_network_model']=="configuration"
     configuration_values = list(particular_network_df.loc[tmp,"fitter_w"].values)
     
-    tmp=particular_network_df['parameters_choice_network_model']=="this<_model"
+    tmp=particular_network_df['parameters_choice_network_model']=="this_model"
     this_paper_values    = list(particular_network_df.loc[tmp,"fitter_w"].values)
     
     tmp=particular_network_df['parameters_choice_network_model']=="none"
