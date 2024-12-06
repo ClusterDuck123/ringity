@@ -57,7 +57,7 @@ def main(network_name, network_model, make_figures, folder, unique):
     G_true = load_network(network_name)
     G, parameters = make_similar_network_model_random(G_true, network_model)
     positions, fitter = run_analysis(G)
-    parameters["choice"] = {"network_name":network_model,"network_model":network_model,"suffix":suffix}
+    parameters["choice"] = {"network_name":network_name,"network_model":network_model,"suffix":suffix}
     filename = f"{suffix}.json"
     save_values_to_json(
         folder=dirname,
