@@ -28,6 +28,13 @@ def incorporate_json_values(out, raw_json, prefix = None):
         raw_json (dict): a dict that holds part of the raw (and still possibly hierachical) json file
         prefix (str): The prefix to the key names in the flattened version, necessary to avoid redundant names. Defaults to None, which triggers substitution with the empty string.
     """
+
+    # spiritually, lists are just dictionaries with integer keys
+    if type(raw_json) == list:
+        raw_json = dict(enumerate(raw_json))
+
+    # Now, until we're at the lowest level, raw_json will be a dict
+    # so keep iteratively unpacking
     if type(raw_json) == dict:
         
         # ensure there are no leading or trailing 
@@ -39,7 +46,11 @@ def incorporate_json_values(out, raw_json, prefix = None):
         
         for i,v in raw_json.items():
             incorporate_json_values(out, v, prefix=f"{prefix}{i}")
-    else:
+    
+        
+    else: # if neither a list or dict, it's a value
+        assert type(raw_json) in [float,int,str]
+        
         out[prefix] = raw_json
         
     
