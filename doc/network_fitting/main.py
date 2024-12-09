@@ -24,8 +24,7 @@ import sys
 
 # ---------------------- GLOBAL VARIABLES ----------------------
 
-DATA_DIR = Path("..") / "data"
-EMPIRICALNET_DIR = DATA_DIR / "empirical_networks"
+EMPIRICALNET_DIR = Path("data/empirical_networks")
 COLOR_SCHEME = {
     "Jasmine": "#ffd07b",
     "Glaucous": "#577399",
@@ -57,7 +56,7 @@ def main(network_name, network_model, make_figures, folder, unique):
     G_true = load_network(network_name)
     G, parameters = make_similar_network_model_random(G_true, network_model)
     positions, fitter = run_analysis(G)
-    parameters["choice"] = {"network_name":network_model,"network_model":network_model,"suffix":suffix}
+    parameters["choice"] = {"network_name":network_name,"network_model":network_model,"suffix":suffix}
     filename = f"{suffix}.json"
     save_values_to_json(
         folder=dirname,
