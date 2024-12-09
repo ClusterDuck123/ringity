@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
+import os
 import scipy.stats
 
 
@@ -25,40 +25,46 @@ COLOR_DICT = {
 }
 
 
-def main():
+def main(input_file, output_folder):
     
-    df = pd.read_csv("data/network_fitting_stats.csv",
+    
+    df = pd.read_csv(input_file,
                      index_col=0
                      )
     
-    name = "gene_corrected"
+    n_samples = 100
+    for name in ["immune","fibro","gene_corrected","soil","lipid"]:
     
-    particular_network_df = df.loc[df["parameters_choice_network_name"]==name,:]
-    
-    color = COLOR_DICT[name]
-    
-    tmp=particular_network_df['parameters_choice_network_model']=="configuration"
-    configuration_values = list(particular_network_df.loc[tmp,"fitter_w"].values)
-    
-    tmp=particular_network_df['parameters_choice_network_model']=="this_model"
-    this_paper_values    = list(particular_network_df.loc[tmp,"fitter_w"].values)
-    
-    tmp=particular_network_df['parameters_choice_network_model']=="none"
-    true_value = particular_network_df.loc[tmp,"fitter_w"].mean()
-    print(configuration_values, this_paper_values, true_value, color)
-    draw_figure(configuration_values, this_paper_values, true_value, color)
-    
-    
-    
-    
-    
+        subfolder = f"{output_folder}/{name}/"
+        
+        particular_network_df = df.loc[df["parameters_choice_network_name"]==name,:]
+        
+        color = COLOR_DICT[name]
+        
+        tmp=particular_network_df['parameters_choice_network_model']=="configuration"
+        configuration_values = list(particular_network_df.loc[tmp,"fitter_w"].sample(n_samples).values)
+        
+        tmp=particular_network_df['parameters_choice_network_model']=="this_paper"
+        this_paper_values    = list(particular_network_df.loc[tmp,"fitter_w"].sample(n_samples).values)
+        
+        # 
+        tmp=particular_network_df['parameters_choice_network_model']=="none"
+        true_value = particular_network_df.loc[tmp,"fitter_w"].mean()
+        draw_figure(subfolder, configuration_values, this_paper_values, true_value, color)
+        
+        
+        
+        
+        
     
     
 import seaborn as sns
 
 
-def draw_figure(configuration_values, this_paper_values, true_value,color='k'):
+def draw_figure(folder, configuration_values, this_paper_values, true_value,color='k'):
 
+    os.makedirs(folder, exist_ok=True)
+    
     test = scipy.stats.ttest_ind(true_value,
                                  configuration_values
                                  )
@@ -77,9 +83,9 @@ def draw_figure(configuration_values, this_paper_values, true_value,color='k'):
     x1, x2 = 1,2   
     y, h = np.max(configuration_values) + 0.2, 0.5
     draw_significance_stars(ax,test.pvalue,x1,x2,y,h)
-    fig.savefig(f"test/comparison.png", dpi=500)
+    fig.savefig(f"{folder}/comparison.png", dpi=500,bbox_inches="tight")
     
-    fp = open(f"test/pvalue.txt", 'w')
+    fp = open(f"{folder}/pvalue.txt", 'w')
     fp.write(str(test.pvalue))
     fp.close()
 
@@ -106,7 +112,8 @@ def draw_significance_stars(ax,pvalue,x1,x2,y,h,fontsize=20):
     ax.set_ylim((ymin,ymax+1))
     
     
-
-main()
+input_file = "data/network_fitting_stats.csv"
+output_folder = "figures/network_fitting/"
+main(input_file, output_folder)
     
     
