@@ -219,7 +219,7 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
         color=color,
     )
     ax.axis("tight")
-    fig.savefig(f"{folder}/fig_1_pos.png")
+    fig.savefig(f"{folder}/raw_embedding.png",dpi=500,bbox_inches="tight",transparent=True)
 
     fig, ax = plt.subplots()
     edge_points(
@@ -230,7 +230,7 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
         color=color,
     )
     ax.axis("tight")
-    fig.savefig(f"{folder}/fig_2_pos.png")
+    fig.savefig(f"{folder}/recovered_positions.png",dpi=500,bbox_inches="tight",transparent=True)
 
     fig1 = fitter.links_by_distance()
 
@@ -253,9 +253,9 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
     fig2 = fitter.neighbor_proportion()
     fig3 = fitter.draw_edge_edge_and_fit()
 
-    fig1.savefig(f"{folder}/fig_1_fit.png")
-    fig2.savefig(f"{folder}/fig_2_fit.png")
-    fig3.savefig(f"{folder}/fig_3_fit.png")
+    fig1.savefig(f"{folder}/links_by_distance.png",dpi=500,bbox_inches="tight",transparent=True)
+    fig2.savefig(f"{folder}/neighbor_proportion.png",dpi=500,bbox_inches="tight",transparent=True)
+    fig3.savefig(f"{folder}/draw_edge_edge_and_fit.png",dpi=500,bbox_inches="tight",transparent=True)
 
     fig, ax = plt.subplots()
     ax.scatter(
@@ -267,7 +267,7 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
     ax.set_xlabel("True Proportion")
     ax.set_ylabel("Fit Function")
     ax.axis("tight")
-    fig.savefig(f"{folder}/goodness_of_fit.png")
+    fig.savefig(f"{folder}/goodness_of_fit.png",dpi=500,bbox_inches="tight",transparent=True)
 
     fig, ax = plt.subplots()
     ax.hist(
@@ -288,7 +288,7 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
     ax.set_xlabel("Position", fontsize=fontsize)
     ax.set_ylabel("Density", fontsize=fontsize)
     ax.axis("tight")
-    fig.savefig(f"{folder}/rpos_bins.png")
+    fig.savefig(f"{folder}/rpos_bins.png",dpi=500,bbox_inches="tight",transparent=True)
 
     fig, ax = plt.subplots()
     ax.scatter(
@@ -300,7 +300,7 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
     ax.set_xlabel("True Proportion")
     ax.set_ylabel("Fit Function")
     ax.axis("tight")
-    fig.savefig(f"{folder}/goodness_of_fit.png")
+    fig.savefig(f"{folder}/goodness_of_fit.png",dpi=500,bbox_inches="tight",transparent=True)
 
     fig, ax = plt.subplots()
     ax.hist(
@@ -323,7 +323,7 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
 
     ax.axis("tight")
 
-    fig.savefig(f"{folder}/fig_3_fit.png")
+    fig.savefig(f"{folder}/fig_3_fit.png",dpi=500,bbox_inches="tight",transparent=True)
     print(f"saved to {folder}")
 
 def is_true(x):
