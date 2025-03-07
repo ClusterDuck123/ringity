@@ -13,6 +13,7 @@ import scipy.sparse
 from kuramoto import Kuramoto
 import uuid
 import os
+import tqdm
 
 import ringity
 
@@ -22,15 +23,15 @@ class MyModInstance:
                 n_nodes = 500,
                 r = 0.1, 
                 beta=0.9,
-                density = 0.1
+                c = 0.1
                 ):
 
         self.n_nodes=n_nodes
         self.r=r 
         self.beta=beta
-        self.density=density
+        self.c=c
         
-        self.graph_nx,self.positions = ringity.network_model(n_nodes,density=density,r=r,beta=beta,return_positions=True)
+        self.graph_nx,self.positions = ringity.network_model(n_nodes,c=c,r=r,beta=beta,return_positions=True)
         ringity.networkmodel.transformations
         self.ring_score = ringity.ring_score(self.graph_nx)
 
@@ -39,8 +40,8 @@ class MyModInstance:
 
     def run(self,
             n_runs=10,
-            dt = 0.01,
-            T = 1
+            dt = 0.001,
+            T = 1000
             ):
         
         self.runs = [Run(self.adj_mat,
@@ -98,13 +99,13 @@ class Run:
     
     def __init__(self,
                  adj_mat,
-                 dt = 0.01,
-                 T = 10,
+                 dt = 0.001,
+                 T = 1000,
                  angles_vec = None
                  ):
         
         self.n_nodes = adj_mat.shape[0]
-        self.natfreqs = np.random.randn(self.n_nodes)
+        self.natfreqs = 1+0.15*np.random.randn(self.n_nodes)
 
         self.T = T
         self.dt = dt
@@ -156,10 +157,10 @@ for i in range(10):
 """
 
 import itertools as it
-beta_values = np.linspace(0.7,0.999,11)
-r_values = np.linspace(0.05,0.35,11)
+beta_values = [0.8, 0.85, 0.9, 0.95, 1.0]
+r_values = [0.1, 0.15, 0.2, 0.25]
 param_pairs = list(it.product(r_values,beta_values))
-for i in range(100):
+for i in tqdm.trange(50):
     for r,beta in param_pairs:#tqdm.tqdm(param_pairs):
     
 
@@ -169,19 +170,16 @@ for i in range(100):
                         n_nodes = 500,
                         r = r, 
                         beta=beta,
-                        density = 0.03
+                        c=0.1
                         )
             
             print("success!",
                 r,
                 beta
                 )
+        
             
-            # run parameters
-            T = 100000
-            dt = T/1000
-            
-            graph_obj.run(n_runs=1,T=T,dt=dt)
+            graph_obj.run(n_runs=1000)
             graph_obj.classify_runs()
 
             uuid_ = str(uuid.uuid4())
