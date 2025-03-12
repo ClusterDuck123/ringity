@@ -62,7 +62,7 @@ class MyModInstance:
         params = {"n_nodes":self.n_nodes,
                   "r":self.r,
                   "beta":self.beta,
-                  "density":self.density,
+                  "c":self.c,
                   "ring_score":self.ring_score}
         
         fp = open(f"{folder}/network_params.json","w")
@@ -74,26 +74,9 @@ class MyModInstance:
             pd.Series(self.positions).to_csv(f"{folder}/positions.csv")
         
         for run in self.runs:
+            run.save_run(folder,verbose=verbose)
             
-            uuid_ = str(uuid.uuid4())
-            os.makedirs(f"{folder}/runs/{uuid_}/",exist_ok=True)
-            
-            if verbose:
-                pd.DataFrame(run.activity).to_csv(f"{folder}/runs/{uuid_}/full.csv")
-                pd.DataFrame(run.natfreqs).to_csv(f"{folder}/runs/{uuid_}/natfreqs.csv")
-            
-            params = {"dt":run.dt,"T":run.T}
-            fp = open(f"{folder}/runs/{uuid_}/run_params.json","w")
-            json.dump(params,fp)
-            fp.close()
-            
-            try:
-                params = {"mean":run.mean,"std":run.std,"terminal_length":run.terminal_length}
-                fp = open(f"{folder}/runs/{uuid_}/run_summary.json","w")
-                json.dump(params,fp)
-                fp.close()
-            except AttributeError as e:
-                print(e)
+
 
 class Run:
     
@@ -111,7 +94,7 @@ class Run:
         self.dt = dt
         
         # Instantiate model with parameters
-        model = Kuramoto(coupling=3, dt=dt, T=T, n_nodes=self.n_nodes,natfreqs=self.natfreqs)
+        model = Kuramoto(coupling=1.0, dt=dt, T=T, n_nodes=self.n_nodes,natfreqs=self.natfreqs)
         self.timeframe = np.linspace(0,T,int(T//dt)+1)
 
         # Run simulation - output is time series for all nodes (node vs time)
@@ -127,6 +110,28 @@ class Run:
         self.mean=np.mean(terminal_activity_values)
         self.std = np.std(terminal_activity_values)
         return (self.mean,self.std)
+        
+    def save_run(self,folder,verbose=False):
+        
+        uuid_ = str(uuid.uuid4())
+        os.makedirs(f"{folder}/runs/{uuid_}/",exist_ok=True)
+        
+        if verbose:
+            pd.DataFrame(self.activity).to_csv(f"{folder}/runs/{uuid_}/full.csv")
+            pd.DataFrame(self.natfreqs).to_csv(f"{folder}/runs/{uuid_}/natfreqs.csv")
+        
+        params = {"dt":self.dt,"T":self.T}
+        fp = open(f"{folder}/runs/{uuid_}/run_params.json","w")
+        json.dump(params,fp)
+        fp.close()
+        
+        try:
+            params = {"mean":self.mean,"std":self.std,"terminal_length":self.terminal_length}
+            fp = open(f"{folder}/runs/{uuid_}/run_summary.json","w")
+            json.dump(params,fp)
+            fp.close()
+        except AttributeError as e:
+            print(e)
 
 """
 os.makedirs("data/", exist_ok=True)
@@ -157,38 +162,40 @@ for i in range(10):
 """
 
 import itertools as it
-beta_values = [0.8, 0.85, 0.9, 0.95, 1.0]
-r_values = [0.1, 0.15, 0.2, 0.25]
-param_pairs = list(it.product(r_values,beta_values))
-for i in tqdm.trange(50):
-    for r,beta in param_pairs:#tqdm.tqdm(param_pairs):
-    
 
-        try:
-            # randomly generate ringy graph
-            graph_obj = MyModInstance(
-                        n_nodes = 500,
-                        r = r, 
-                        beta=beta,
-                        c=0.1
-                        )
-            
-            print("success!",
-                r,
-                beta
-                )
+if __name__ == "__main__":
+    beta_values = [0.8, 0.85, 0.9, 0.95, 1.0]
+    r_values = [0.1, 0.15, 0.2, 0.25]
+    param_pairs = list(it.product(r_values,beta_values))
+    for i in tqdm.trange(50):
+        for r,beta in param_pairs:#tqdm.tqdm(param_pairs):
         
-            
-            graph_obj.run(n_runs=1000)
-            graph_obj.classify_runs()
 
-            uuid_ = str(uuid.uuid4())
-            folder = f"data/concise/parameter_array/network-{uuid_}"
-            os.makedirs(folder,exist_ok=True)
-            graph_obj.save_info(folder,verbose=False)
+            try:
+                # randomly generate ringy graph
+                graph_obj = MyModInstance(
+                            n_nodes = 500,
+                            r = r, 
+                            beta=beta,
+                            c=0.1
+                            )
+                
+                print("success!",
+                    r,
+                    beta
+                    )
             
-        except Exception as e:
-            #print(e)
-            pass
+                
+                graph_obj.run(n_runs=1000)
+                graph_obj.classify_runs()
+
+                uuid_ = str(uuid.uuid4())
+                folder = f"data/concise/parameter_array/network-{uuid_}"
+                os.makedirs(folder,exist_ok=True)
+                graph_obj.save_info(folder,verbose=False)
+                
+            except Exception as e:
+                #print(e)
+                pass
 
 
