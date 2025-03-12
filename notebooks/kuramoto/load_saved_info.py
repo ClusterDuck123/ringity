@@ -25,7 +25,7 @@ class NetworkLoader:
             self.n_nodes = params["n_nodes"]
             self.r = params["r"]
             self.beta = params["beta"]
-            self.density = params["density"]
+            self.c = params["c"]
             self.ring_score = params["ring_score"]
         
         # Load adjacency matrix if verbose
@@ -45,7 +45,8 @@ class NetworkLoader:
                     run_params = json.load(fp)
                     run_data["dt"] = run_params["dt"]
                     run_data["T"] = run_params["T"]
-                    run_data["natfreqs"] = run_params["natfreqs"]
+                
+                run_data["natfreqs"] = pd.read_csv(f"{run_path}/natfreqs.csv").values
                 
                 # Load run summary if available
                 summary_path = f"{run_path}/run_summary.json"

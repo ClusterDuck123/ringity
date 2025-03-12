@@ -4,6 +4,7 @@ from load_saved_info import NetworkLoader
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import tqdm
 
 # load all the summaries networks and their runs
 # load them into a dict keyed by the network's parameter values
@@ -21,7 +22,7 @@ for subfolder in os.listdir("data/concise/parameter_array_outdated"):
 network_array_dict = out
 
 out = []
-for param_pair,network_list in network_array_dict.items():
+for param_pair,network_list in tqdm.tqdm(network_array_dict.items()):
     
     n_total = len(network_list)
     n_asynchronous = 0
