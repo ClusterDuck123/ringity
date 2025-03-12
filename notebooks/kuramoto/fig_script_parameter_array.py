@@ -1,8 +1,5 @@
 import os
-import networkx as nx
 from load_saved_info import NetworkLoader
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import tqdm
 
@@ -14,34 +11,49 @@ for subfolder in os.listdir("data/concise/parameter_array_outdated"):
     try:
         loader = NetworkLoader(folder, verbose=False)
         try:
-            out[round(loader.beta,3),round(loader.r,3)].append(loader)
+            out[round(loader.beta, 3), round(loader.r, 3)].append(loader)
         except KeyError:
-            out[round(loader.beta,3),round(loader.r,3)] = [loader]
+            out[round(loader.beta, 3), round(loader.r, 3)] = [loader]
     except FileNotFoundError:
-        print("ow!")    
+        print("ow!")
 network_array_dict = out
 
 out = []
+<<<<<<< HEAD
 for param_pair,network_list in tqdm.tqdm(network_array_dict.items()):
     
+=======
+for param_pair, network_list in network_array_dict.items():
+
+>>>>>>> origin/kuramoto
     n_total = len(network_list)
     n_asynchronous = 0
     n_coherent = 0
     n_traveling = 0
-    
+
     for network in network_list:
         std = network.runs[0]["std"]
         mean = network.runs[0]["mean"]
-        
-        
+
         if std > 0.00001:
-            
+
             if mean > 0.999999:
                 n_coherent += 1
             else:
-                n_traveling += 1   
+                n_traveling += 1
         else:
             n_asynchronous += 1
-        
-        out.append([param_pair[0],param_pair[1],n_total ,n_asynchronous,n_coherent,n_traveling])
-pd.DataFrame(out,columns=["beta","r","n_total" ,"n_asynchronous","n_coherent","n_traveling"])
+
+        out.append(
+            [
+                param_pair[0],
+                param_pair[1],
+                n_total,
+                n_asynchronous,
+                n_coherent,
+                n_traveling,
+            ]
+        )
+pd.DataFrame(
+    out, columns=["beta", "r", "n_total", "n_asynchronous", "n_coherent", "n_traveling"]
+)
