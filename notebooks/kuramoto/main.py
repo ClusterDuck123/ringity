@@ -165,28 +165,27 @@ def main():
     r_values = [0.1, 0.15, 0.2, 0.25]
     param_pairs = list(it.product(r_values, beta_values))
 
-    for i in tqdm.trange(50):
-        for r, beta in param_pairs:  # tqdm.tqdm(param_pairs):
-            try:
-                # randomly generate ringy graph
-                graph_obj = MyModInstance(n_nodes=n_nodes, r=r, beta=beta, c=0.1)
+    n_reps = 50
+    for _,(r, beta) in tqdm.tqdm(it.product(range(n_reps),param_pairs),total=n_reps*len(param_pairs)):  # tqdm.tqdm(param_pairs):
+        try:
+            # randomly generate ringy graph
+            graph_obj = MyModInstance(n_nodes=n_nodes, r=r, beta=beta, c=0.1)
 
-                print("success!", r, beta)
+            print("success!", r, beta)
 
-                graph_obj.run(n_runs=n_runs)
-                graph_obj.classify_runs()
+            graph_obj.run(n_runs=n_runs)
+            graph_obj.classify_runs()
 
-                uuid_ = str(uuid.uuid4())
-                folder = f"data/concise/parameter_array/network-{uuid_}"
-                os.makedirs(folder, exist_ok=True)
-                graph_obj.save_info(folder, verbose=False)
-                for i in range(10):
-                    graph_obj.run_and_save(folder)
-                    
+            uuid_ = str(uuid.uuid4())
+            folder = f"data/concise/parameter_array/network-{uuid_}"
+            os.makedirs(folder, exist_ok=True)
+            graph_obj.save_info(folder, verbose=False)
+            graph_obj.run_and_save(folder)
+                
 
-            except Exception as e:
-                # print(e)
-                pass
+        except Exception as e:
+            # print(e)
+            pass
 
 if __name__ == "__main__":
     main()
