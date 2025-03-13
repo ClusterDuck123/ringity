@@ -64,10 +64,10 @@ class MyModInstance:
         if verbose:
             pd.DataFrame(self.adj_mat).to_csv(f"{folder}/network.csv")
             pd.Series(self.positions).to_csv(f"{folder}/positions.csv")
-
-        for run in self.runs:
-
-            run.save_run(folder,verbose=verbose)
+            
+    def run_and_save(self,folder):
+        run = Run(self.adj_mat, dt=self.dt, T=self.T)
+        run.save_run(folder)
 
 class Run:
 
@@ -180,6 +180,9 @@ def main():
                 folder = f"data/concise/parameter_array/network-{uuid_}"
                 os.makedirs(folder, exist_ok=True)
                 graph_obj.save_info(folder, verbose=False)
+                for i in range(10):
+                    graph_obj.run_and_save(folder)
+                    
 
             except Exception as e:
                 # print(e)
