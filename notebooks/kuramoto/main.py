@@ -88,7 +88,7 @@ class Run:
         self.phase_coherence = Kuramoto.phase_coherence(self.activity)
 
     def classify_run(self, terminal_length=100):
-        terminal_length = 100
+
         terminal_activity_values = self.phase_coherence[-terminal_length:]
         self.terminal_length = terminal_length
         self.mean = np.mean(terminal_activity_values)
@@ -172,9 +172,6 @@ def main():
             graph_obj = MyModInstance(n_nodes=n_nodes, r=r, beta=beta, c=0.1)
 
             print("success!", r, beta)
-
-            graph_obj.run(n_runs=n_runs)
-            graph_obj.classify_runs()
 
             uuid_ = str(uuid.uuid4())
             folder = f"data/concise/parameter_array/network-{uuid_}"
