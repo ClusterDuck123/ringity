@@ -2,8 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import ringity as rng
 from itertools import product
+from main import MyModInstance,Run
 import uuid
 import os
+import os
+import pandas as pd
+import tqdm
+
 
 # ------------------------------------------------------------------------
 # Global settings / theme
@@ -15,7 +20,113 @@ DOT_SIZE = 1500
 SCATTER_VMIN = 0.6
 SCATTER_VMAX = 1.0
 
+def main(top_folder):
+    
+    beta_centers,r_centers = np.linspace(0.8,1.0,5),np.linspace(0.1,0.25,4)
+    print(beta_centers)
+    n_beta_vals,n_r_vals = len(beta_centers),len(r_centers)
+    
+    parameter_network_dict = load_and_sort_networks_by_parameter(top_folder,beta_centers,r_centers)
+    
+    coherences = np.zeros((n_beta_vals,n_r_vals))
+    fractions  = np.zeros((n_beta_vals,n_r_vals))
+    
+    for parameter_index_pair, networks in parameter_network_dict.items():
+        
+        
+        
+        i,j = parameter_index_pair
+        runs = runs_from_networks(networks)
+        
+        
+        terminal_length, threshold  = 10, 0.001
+        
+        
+        fractions[i,j] = 1-proportion_asynch(runs,terminal_length, threshold)
+        coherences[i,j] = average_terminal_phase_coherence(runs, terminal_length, threshold )
+    
+    fig = full_figure(coherences, fractions)
+    plt.show()
+        
+        
+        
+    
+    
 
+def load_and_sort_networks_by_parameter(top_folder, beta_centers,r_centers):
+    # load all the summaries networks and their runs
+    # load them into a dict keyed by the network's parameter values
+    
+    beta_bin_starts = (beta_centers[:-1]+beta_centers[1:])/2
+    r_bin_starts    = (r_centers[:-1]+r_centers[1:])/2
+    
+
+    
+    print(beta_bin_starts)
+    out = {}
+    for subfolder in os.listdir(top_folder):
+        folder = os.path.join(top_folder,subfolder)
+        try:
+            network = MyModInstance.load_instance(folder)
+            network.folder = folder
+            
+        
+            i = np.digitize(network.beta, beta_bin_starts)
+            j = np.digitize(network.r, r_bin_starts)
+            
+            print(network.beta, beta_bin_starts)
+            print(i)
+            
+            try:
+                out[i,j].append(network)
+            except KeyError:
+                out[i,j] = [network]
+            
+        except FileNotFoundError as e:
+            print(e)
+            
+    return out
+
+def load_runs_from_folder(folder):
+    
+    out = []
+    for subfolder in os.listdir(folder):
+        full_subfolder_path = os.path.join(folder, subfolder)
+        try:
+            out.append(Run.load_run(full_subfolder_path))
+        except Exception as e:
+            print(e)
+    return out
+        
+
+def is_asynch(run, terminal_length, threshold):
+    return np.std(run.phase_coherence[-terminal_length:]) > threshold
+
+def proportion_asynch(runs, terminal_length, threshold):
+    classification = [is_asynch(run, terminal_length, threshold) for run in runs]
+    return sum(classification)/len(classification)
+
+def average_terminal_phase_coherence(runs, terminal_length, threshold):
+    
+    all_terminal_phase_coherence = []
+    for run in runs:
+        if not is_asynch(run,terminal_length, threshold):
+            all_terminal_phase_coherence.append(np.mean(run.phase_coherence[-terminal_length:]))
+    
+    return np.mean(all_terminal_phase_coherence)
+            
+def runs_from_networks(networks):
+    
+    out = []
+    for network in networks:
+        run_folder = os.path.join(network.folder, "runs/")
+        out.extend(load_runs_from_folder(run_folder))
+    
+    return out
+
+
+        
+    
 def dot_plot(
     coherences: np.ndarray,
     fractions: np.ndarray,
@@ -128,26 +239,8 @@ def dot_plot(
     return ax
 
 
-def main():
-    # --------------------------------------------------------------------
-    # Example data
-    # --------------------------------------------------------------------
-    coherences = np.array([
-        [0.00, 0.05, 0.11, 0.16],
-        [0.21, 0.26, 0.32, 0.37],
-        [0.42, 0.47, 0.53, 0.58],
-        [0.63, 0.68, 0.74, 0.79],
-        [0.84, 0.89, 0.95, 1.00],
-    ])
-
-    fractions = np.array([
-        [0.00, 0.05, 0.11, 0.16],
-        [0.21, 0.26, 0.32, 0.37],
-        [0.42, 0.47, 0.53, 0.58],
-        [0.63, 0.68, 0.74, 0.79],
-        [0.84, 0.89, 0.95, 1.00],
-    ])
-
+    
+def full_figure(coherences, fractions):
     # --------------------------------------------------------------------
     # Create figure and draw the plot
     # --------------------------------------------------------------------
@@ -183,8 +276,34 @@ def main():
     ax.set_ylabel(r"Delay Parameter ($\beta$)")
     ax.set_title("Synchronization Behaviour", size=24)
 
+    return fig
+
+
+def example_figure():
+    # --------------------------------------------------------------------
+    # Example data
+    # --------------------------------------------------------------------
+    coherences = np.array([
+        [0.00, 0.05, 0.11, 0.16],
+        [0.21, 0.26, 0.32, 0.37],
+        [0.42, 0.47, 0.53, 0.58],
+        [0.63, 0.68, 0.74, 0.79],
+        [0.84, 0.89, 0.95, 1.00],
+    ])
+
+    fractions = np.array([
+        [0.00, 0.05, 0.11, 0.16],
+        [0.21, 0.26, 0.32, 0.37],
+        [0.42, 0.47, 0.53, 0.58],
+        [0.63, 0.68, 0.74, 0.79],
+        [0.84, 0.89, 0.95, 1.00],
+    ])
+    
+    fig = full_figure(coherences, fractions)
     plt.show()
+    
 
-
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+    #main()
+#example_figure()
+main("test/")

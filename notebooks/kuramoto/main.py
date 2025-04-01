@@ -1,188 +1,174 @@
 import numpy as np
 import networkx as nx
-import ringity.networkmodel
-import ringity.networkmodel.modelparameterbuilder
-import ringity.networkmodel.transformations
+import ringity
 import json
 import pandas as pd
-from kuramoto import Kuramoto
-import uuid
 import os
+import uuid
 import tqdm
-
 import argparse
 import itertools as it
-
-import ringity
-
+from kuramoto import Kuramoto
 
 class MyModInstance:
-
-    def __init__(self, n_nodes=500, r=0.1, beta=0.9, c=0.1):
-
+    """
+    Represents a modular instance of a network with a given number of nodes, connectivity, and parameters.
+    Can generate and simulate networks using Kuramoto dynamics.
+    """
+    def __init__(self, n_nodes=200, r=0.1, beta=0.9, c=1.0, from_scratch=True):
+        """
+        Initializes the network with given parameters.
+        """
         self.n_nodes = n_nodes
         self.r = r
         self.beta = beta
         self.c = c
+        self.runs = []
 
+        if from_scratch:
+            self.initialize_network()
+        else:
+            self.adj_mat = None
+            self.ring_score = None
+
+    def initialize_network(self):
+        """Generates a new network and computes its properties."""
         self.graph_nx, self.positions = ringity.network_model(
-            n_nodes, c=c, r=r, beta=beta, return_positions=True
+            self.n_nodes, c=self.c, r=self.r, beta=self.beta, return_positions=True
         )
-        ringity.networkmodel.transformations
         self.ring_score = ringity.ring_score(self.graph_nx)
-
-        # extract adjacency
         self.adj_mat = nx.to_numpy_array(self.graph_nx)
-
-    def run(self, n_runs=10, dt=0.001, T=1000):
-
+        
+    def run(self, dt=0.001, T=1000):
+        """Runs one simulation and returns the Run object."""
+        return Run(self.adj_mat, dt=dt, T=T)
+          
+    def run_many(self, n_runs=10, dt=0.001, T=1000):
+        """Runs multiple simulations of the network."""
         self.runs = [Run(self.adj_mat, dt=dt, T=T) for _ in range(n_runs)]
+    
+    def save_json(self, data, path):
+        """Helper function to save a dictionary as a JSON file."""
+        with open(path, "w") as fp:
+            json.dump(data, fp)
 
-    def classify_runs(self):
-        for i in self.runs:
-            i.classify_run()
-
-
-    def save_info(self, folder, verbose=False):
-
-        os.makedirs(f"{folder}/", exist_ok=True)
+    def save_info(self, folder, verbose=True):
+        """Saves network parameters and adjacency matrix to a folder."""
+        os.makedirs(folder, exist_ok=True)
         os.makedirs(f"{folder}/runs", exist_ok=True)
 
         params = {
             "n_nodes": self.n_nodes,
             "r": self.r,
             "beta": self.beta,
-            "density": self.density,
+            "c": self.c,
             "ring_score": self.ring_score,
         }
-
-        fp = open(f"{folder}/network_params.json", "w")
-        json.dump(params, fp)
-
-        fp.close()
+        self.save_json(params, f"{folder}/network_params.json")
 
         if verbose:
             pd.DataFrame(self.adj_mat).to_csv(f"{folder}/network.csv")
             pd.Series(self.positions).to_csv(f"{folder}/positions.csv")
-            
-    def run_and_save(self,folder):
-        run = Run(self.adj_mat, dt=self.dt, T=self.T)
-        run.save_run(folder)
+
+    def run_and_save(self, folder, verbose=False,dt=0.001, T=1000):
+        """Runs a single simulation and saves the results."""
+        run = Run(self.adj_mat,dt=dt, T=T)
+        run.save_run(folder, verbose=verbose)
+
+    @staticmethod
+    def load_instance(folder):
+        """Loads a saved MyModInstance from a folder."""
+        with open(f"{folder}/network_params.json", "r") as fp:
+            params = json.load(fp)
+        
+        instance = MyModInstance(
+            n_nodes=params["n_nodes"],
+            r=params["r"],
+            beta=params["beta"],
+            c=params["c"],
+            from_scratch=False
+        )
+        instance.ring_score = params["ring_score"]
+        instance.adj_mat = pd.read_csv(f"{folder}/network.csv", index_col=0).values
+        instance.positions = pd.read_csv(f"{folder}/positions.csv", index_col=0).values
+        return instance
 
 class Run:
-
-    def __init__(self, adj_mat, dt=0.001, T=1000, angles_vec=None):
-
-        self.n_nodes = adj_mat.shape[0]
-        self.natfreqs = 1 + 0.15 * np.random.randn(self.n_nodes)
-
+    """Represents a single run of a Kuramoto model simulation on a given network."""
+    def __init__(self, adj_mat, dt=0.001, T=1000, angles_vec=None, from_scratch=True):
+        """Initializes a Kuramoto simulation."""
+        self.n_nodes = adj_mat.shape[0] if adj_mat is not None else 200
         self.T = T
         self.dt = dt
+        self.timeframe = np.linspace(0, T, int(T // dt) + 1)
 
-        # Instantiate model with parameters
-        model = Kuramoto(coupling=1.0, dt=dt, T=T, n_nodes=self.n_nodes,natfreqs=self.natfreqs)
-        self.timeframe = np.linspace(0,T,int(T//dt)+1)
-
-        # Run simulation - output is time series for all nodes (node vs time)
-        self.activity = model.run(adj_mat=adj_mat, angles_vec=angles_vec)
+        self.adj_mat = adj_mat
+        self.angles_vec = angles_vec 
+        
+        if from_scratch:
+            self.natfreqs = 1 + 0.15 * np.random.randn(self.n_nodes)
+            self.initialize_simulation()
+    
+    def initialize_simulation(self):
+        """Sets up and runs the Kuramoto simulation."""
+        
+        model = Kuramoto(coupling=1.0, dt=self.dt, T=self.T, n_nodes=self.n_nodes, natfreqs=self.natfreqs)
+        self.activity = model.run(adj_mat=self.adj_mat, angles_vec=self.angles_vec)
         self.phase_coherence = Kuramoto.phase_coherence(self.activity)
+        self.init_conditions = self.activity[:, 0]
+    
+    def save_run(self, folder, verbose=False):
+        """Saves simulation results to a specified folder."""
+        run_id = str(uuid.uuid4())
+        run_folder = f"{folder}/runs/{run_id}"
+        os.makedirs(run_folder, exist_ok=True)
 
-    def classify_run(self, terminal_length=100):
-
-        terminal_activity_values = self.phase_coherence[-terminal_length:]
-        self.terminal_length = terminal_length
-        self.mean = np.mean(terminal_activity_values)
-        self.std = np.std(terminal_activity_values)
-
-        return (self.mean,self.std)
-        
-    def save_run(self,folder,verbose=False):
-        
-        uuid_ = str(uuid.uuid4())
-        os.makedirs(f"{folder}/runs/{uuid_}/",exist_ok=True)
+        pd.DataFrame(self.phase_coherence).to_csv(f"{run_folder}/phase_coherence.csv")
+        pd.DataFrame(self.natfreqs).to_csv(f"{run_folder}/natfreqs.csv")
+        pd.DataFrame(self.init_conditions).to_csv(f"{run_folder}/init_conditions.csv")
         
         if verbose:
-            pd.DataFrame(self.activity).to_csv(f"{folder}/runs/{uuid_}/full.csv")
-            pd.DataFrame(self.natfreqs).to_csv(f"{folder}/runs/{uuid_}/natfreqs.csv")
+            pd.DataFrame(self.activity).to_csv(f"{run_folder}/full.csv")
+
+        with open(f"{run_folder}/run_params.json", "w") as fp:
+            json.dump({"dt": self.dt, "T": self.T}, fp)
+
+    @staticmethod
+    def load_run(run_folder,verbose=False):
+        """Loads a saved Run from a folder."""
+        with open(f"{run_folder}/run_params.json", "r") as fp:
+            params = json.load(fp)
         
-        params = {"dt":self.dt,"T":self.T}
-        fp = open(f"{folder}/runs/{uuid_}/run_params.json","w")
-        json.dump(params,fp)
-        fp.close()
+        run = Run(None, dt=params["dt"], T=params["T"], from_scratch=False)
+        run.phase_coherence = pd.read_csv(f"{run_folder}/phase_coherence.csv", index_col=0).values
+        run.natfreqs = pd.read_csv(f"{run_folder}/natfreqs.csv", index_col=0).values.flatten()
+        run.init_conditions = pd.read_csv(f"{run_folder}/init_conditions.csv", index_col=0).values
         
-        try:
-            params = {"mean":self.mean,"std":self.std,"terminal_length":self.terminal_length}
-            fp = open(f"{folder}/runs/{uuid_}/run_summary.json","w")
-            json.dump(params,fp)
-            fp.close()
-        except AttributeError as e:
-            print(e)
-
-        return (self.mean, self.std)
-
-
-
-"""
-os.makedirs("data/", exist_ok=True)
-for i in range(10):
-    
-    try:
-        # randomly generate ringy graph
-        graph_obj = MyModInstance(
-                    n_nodes = 500,
-                    r = 0.3*np.random.rand(), 
-                    beta=0.7+0.3*np.random.rand(),
-                    density = 0.05*np.random.rand()
-                    )
-        
-        # run parameters
-        T = 100000
-        dt = T/1000
-        
-        graph_obj.run(n_runs=20,T=T,dt=dt)
-        graph_obj.classify_runs()
-
-        uuid_ = str(uuid.uuid4())
-        folder = f"data/verbose/network-{uuid_}"
-        os.makedirs(folder,exist_ok=True)
-        graph_obj.save_info(folder,verbose=True)
-    except Exception as e:
-        print(e)
-"""
+        if verbose:
+            run.activity = pd.read_csv(f"{run_folder}/full.csv", index_col=0).values
+            
+        return run
 
 def main():
+    """Main function to run batch simulations of Kuramoto models with different parameters."""
     parser = argparse.ArgumentParser(description="Run Kuramoto simulation.")
-    parser.add_argument("--n_runs", type=int, default=1000,
-                        help="Number of runs (default 1000)")
-    parser.add_argument("--n_nodes", type=int, default=500,
-                        help="Number of nodes (default 500)")
+    parser.add_argument("--n_runs", type=int, default=1000, help="Number of runs (default 1000)")
+    parser.add_argument("--n_nodes", type=int, default=200, help="Number of nodes (default 200)")
     args = parser.parse_args()
-
-    n_runs = args.n_runs
-    n_nodes = args.n_nodes
-
+    
     beta_values = [0.8, 0.85, 0.9, 0.95, 1.0]
     r_values = [0.1, 0.15, 0.2, 0.25]
     param_pairs = list(it.product(r_values, beta_values))
-
-    n_reps = 50
-    for _,(r, beta) in tqdm.tqdm(it.product(range(n_reps),param_pairs),total=n_reps*len(param_pairs)):  # tqdm.tqdm(param_pairs):
+    
+    for _, (r, beta) in tqdm.tqdm(it.product(range(50), param_pairs), total=50 * len(param_pairs)):
         try:
-            # randomly generate ringy graph
-            graph_obj = MyModInstance(n_nodes=n_nodes, r=r, beta=beta, c=0.1)
-
-            print("success!", r, beta)
-
-            uuid_ = str(uuid.uuid4())
-            folder = f"data/concise/parameter_array/network-{uuid_}"
+            graph_obj = MyModInstance(n_nodes=args.n_nodes, r=r, beta=beta, c=1.0)
+            folder = f"data/concise/parameter_array/network-{uuid.uuid4()}"
             os.makedirs(folder, exist_ok=True)
             graph_obj.save_info(folder, verbose=False)
             graph_obj.run_and_save(folder)
-                
-
         except Exception as e:
-            # print(e)
-            pass
+            print(f"Error in simulation: {e}")
 
 if __name__ == "__main__":
     main()
