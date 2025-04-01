@@ -22,14 +22,14 @@ A second script `load_network_run_kuramoto.py`, is run 1000 times in parallel fo
 A helper script, `load_network_run_kuramoto.sbatch` manages the paralellized workload on slurm, with the correct time and memory requirements.
 
 
-specific runs, showing particular behaviours are selected, re-ran, and saved with more detail in `select_and_rerun_interesting.py` and visualised in more detail in `detailed_run_visualisation.py.
+specific runs, showing particular behaviours are selected, re-ran, and saved with more detail in `select_and_rerun_interesting.py` and visualised in more detail in `detailed_run_visualisation.py. <-TODO
 
 
 
 The run summaries are then loaded to create dotplot in  `parameter_array_dotplot.py`
 
 
-`ring_score_vs_dynamics_scatterplot.py`
+`ring_score_vs_dynamics_scatterplot.py` <-TODO
 
 
 
