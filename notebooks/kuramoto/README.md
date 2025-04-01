@@ -29,7 +29,7 @@ specific runs, showing particular behaviours are selected, re-ran, and saved wit
 The run summaries are then loaded to create dotplot in  `parameter_array_dotplot.py`
 
 
-ring_score_vs_dynamics_scatterplot.py.py
+`ring_score_vs_dynamics_scatterplot.py`
 
 
 
