@@ -18,7 +18,7 @@ def make_and_save_network(output_folder, n_nodes,r,beta,c):
             graph_obj.save_info(folder, verbose=True)
             break
         except ringity.utils.exceptions.DisconnectedGraphError:
-            print("Network disconnected, retrying...")
+            pass#print("Network disconnected, retrying...")
         
 
 def main():
@@ -43,16 +43,7 @@ def main():
         
         make_and_save_network(output_folder, args.n_nodes,r,beta,args.c)
 
-#make_and_save_network("test_network", 50, 0.1, 0.9, 1.0)
-#main()
 
-beta_values = [0.8, 0.85, 0.9, 0.95, 1.0]
-r_values    = [0.1, 0.15, 0.2, 0.25]
+main()
 
-param_pairs = list(it.product(r_values, beta_values))
-
-n_reps = 5
-for _, (r, beta) in tqdm.tqdm(it.product(range(n_reps), param_pairs), total=5 * len(param_pairs)):
-    
-    make_and_save_network("test", 30,r,beta,1.0)
 
