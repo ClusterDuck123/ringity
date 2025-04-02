@@ -90,7 +90,7 @@ class MyModInstance:
         )
         instance.ring_score = params["ring_score"]
         instance.adj_mat = pd.read_csv(f"{folder}/network.csv", index_col=0).values
-        instance.positions = pd.read_csv(f"{folder}/positions.csv", index_col=0).values
+        instance.positions = pd.read_csv(f"{folder}/positions.csv", index_col=0).values.flatten()
         return instance
 
 class Run:
@@ -123,13 +123,17 @@ class Run:
         run_folder = f"{folder}/runs/{run_id}"
         os.makedirs(run_folder, exist_ok=True)
 
-        pd.DataFrame(self.phase_coherence).to_csv(f"{run_folder}/phase_coherence.csv")
+        
         pd.DataFrame(self.natfreqs).to_csv(f"{run_folder}/natfreqs.csv")
         pd.DataFrame(self.init_conditions).to_csv(f"{run_folder}/init_conditions.csv")
         
         if verbose:
+            pd.DataFrame(self.phase_coherence).to_csv(f"{run_folder}/phase_coherence.csv")
             pd.DataFrame(self.activity).to_csv(f"{run_folder}/full.csv")
 
+        with open(f"{run_folder}/run_stats.json", "w") as fp:
+            json.dump({"": self., "T": self.T}, fp)
+            
         with open(f"{run_folder}/run_params.json", "w") as fp:
             json.dump({"dt": self.dt, "T": self.T}, fp)
 
@@ -140,10 +144,15 @@ class Run:
             params = json.load(fp)
         
         run = Run(None, dt=params["dt"], T=params["T"], from_scratch=False)
-        run.phase_coherence = pd.read_csv(f"{run_folder}/phase_coherence.csv", index_col=0).values
         run.natfreqs = pd.read_csv(f"{run_folder}/natfreqs.csv", index_col=0).values.flatten()
-        run.init_conditions = pd.read_csv(f"{run_folder}/init_conditions.csv", index_col=0).values
+        run.init_conditions = pd.read_csv(f"{run_folder}/init_conditions.csv", index_col=0).values.flatten()
         
+        try:
+            run.phase_coherence = pd.read_csv(f"{run_folder}/phase_coherence.csv", index_col=0).values.flatten()
+        except FileNotFoundError:
+            pass
+
+
         if verbose:
             run.activity = pd.read_csv(f"{run_folder}/full.csv", index_col=0).values
             
