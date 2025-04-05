@@ -117,8 +117,17 @@ class Run:
         self.phase_coherence = Kuramoto.phase_coherence(self.activity)
         self.init_conditions = self.activity[:, 0]
     
+    def calculate_stats(self, terminal_length=200):
+        
+        self.terminal_length = terminal_length
+        self.terminal_mean = np.mean(self.phase_coherence[-terminal_length:])
+        self.terminal_std  = np.std( self.phase_coherence[-terminal_length:])
+        
     def save_run(self, folder, verbose=False):
         """Saves simulation results to a specified folder."""
+        
+        self.calculate_stats()
+            
         run_id = str(uuid.uuid4())
         run_folder = f"{folder}/runs/{run_id}"
         os.makedirs(run_folder, exist_ok=True)
@@ -132,7 +141,9 @@ class Run:
             pd.DataFrame(self.activity).to_csv(f"{run_folder}/full.csv")
 
         with open(f"{run_folder}/run_stats.json", "w") as fp:
-            json.dump({"": self., "T": self.T}, fp)
+            json.dump({"terminal_length": self.terminal_length,
+                       "terminal_std": self.terminal_std,
+                       "terminal_mean": self.terminal_mean}, fp)
             
         with open(f"{run_folder}/run_params.json", "w") as fp:
             json.dump({"dt": self.dt, "T": self.T}, fp)
@@ -148,10 +159,18 @@ class Run:
         run.init_conditions = pd.read_csv(f"{run_folder}/init_conditions.csv", index_col=0).values.flatten()
         
         try:
-            run.phase_coherence = pd.read_csv(f"{run_folder}/phase_coherence.csv", index_col=0).values.flatten()
+            with open(f"{run_folder}/run_stats.json", "r") as fp:
+                stats = json.load(fp)
+                for i,v in stats.items():
+                    run.__setattr__(i,v)
         except FileNotFoundError:
             pass
 
+        try:
+            run.phase_coherence = pd.read_csv(f"{run_folder}/phase_coherence.csv", index_col=0).values.flatten()
+        except FileNotFoundError:
+            pass
+        
 
         if verbose:
             run.activity = pd.read_csv(f"{run_folder}/full.csv", index_col=0).values

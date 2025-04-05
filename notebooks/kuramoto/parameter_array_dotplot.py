@@ -24,25 +24,23 @@ SCATTER_VMAX = 1.0
 def main():
     
     parser = argparse.ArgumentParser(description="Create dotplot showing dependnce of synchronicity and coherence on parameter values of network construction")
-    parser.add_argument("--i", type=str, default="test_network", help="The input folder containing the networks.")
-    parser.add_argument("--o", type=str, default="test_network", help="output filename.")
-    parser.add_argument("--terminal_length", type=int, default=10, help="terminal network.")
+    parser.add_argument("--i", type=str, default="test", help="The input folder containing the networks.")
+    parser.add_argument("--o", type=str, default="test_dotplot.png", help="output filename.")
     parser.add_argument("--threshold", type=float, default=0.001, help="threshold for determining asynchronicity")
 
     args = parser.parse_args()
     
     
-    terminal_length = args.terminal_length
     threshold  = args.threshold 
     
     input_folder = args.i
     
-    fig = load_data_and_create_figure(input_folder,terminal_length, threshold)
+    fig = load_data_and_create_figure(input_folder, threshold)
     
     output_file = args.o
     fig.savefig(output_file)
     
-def load_data_and_create_figure(top_folder,terminal_length, threshold):
+def load_data_and_create_figure(top_folder, threshold):
     
     beta_centers,r_centers = np.linspace(0.8,1.0,5),np.linspace(0.1,0.25,4)
     n_beta_vals,n_r_vals = len(beta_centers),len(r_centers)
@@ -59,11 +57,15 @@ def load_data_and_create_figure(top_folder,terminal_length, threshold):
         i,j = parameter_index_pair
         runs = runs_from_networks(networks)
         
+        print(runs)
         
-        
+        try:
     
-        fractions[i,j] = 1-proportion_asynch(runs,terminal_length, threshold)
-        coherences[i,j] = average_terminal_phase_coherence(runs, terminal_length, threshold )
+            fractions[i,j] = 1-proportion_asynch(runs,threshold)
+            coherences[i,j] = average_terminal_phase_coherence(runs, threshold )
+        except ZeroDivisionError:
+            print("There are no run instances for parameter index pair ", i,j)
+            print("REMOVE THIS CATCH STEMENT FROM PRODUCTION! THIS SHOULD THROW!")
     
     fig = full_figure(coherences, fractions)
     return fig
@@ -112,26 +114,27 @@ def load_runs_from_folder(folder):
     out = []
     for subfolder in os.listdir(folder):
         full_subfolder_path = os.path.join(folder, subfolder)
-        try:
-            out.append(Run.load_run(full_subfolder_path))
-        except Exception as e:
-            print(e)
+
+        out.append(Run.load_run(full_subfolder_path))
+
+
     return out
         
 
-def is_asynch(run, terminal_length, threshold):
-    return np.std(run.phase_coherence[-terminal_length:]) > threshold
+def is_asynch(run, threshold):
+    return      run.terminal_std > threshold
 
-def proportion_asynch(runs, terminal_length, threshold):
-    classification = [is_asynch(run, terminal_length, threshold) for run in runs]
+def proportion_asynch(runs, threshold):
+    classification = [is_asynch(run, threshold) for run in runs]
     return sum(classification)/len(classification)
 
-def average_terminal_phase_coherence(runs, terminal_length, threshold):
+def average_terminal_phase_coherence(runs, threshold):
     
     all_terminal_phase_coherence = []
     for run in runs:
-        if not is_asynch(run,terminal_length, threshold):
-            all_terminal_phase_coherence.append(np.mean(run.phase_coherence[-terminal_length:]))
+        if not is_asynch(run, threshold):
+            
+            all_terminal_phase_coherence.append(run.terminal_mean)
     
     return np.mean(all_terminal_phase_coherence)
             
