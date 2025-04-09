@@ -39,6 +39,7 @@ def main():
     
     output_file = args.o
     fig.savefig(output_file)
+    print("figure written to {output_file}")
     
 def load_data_and_create_figure(top_folder, threshold):
     
