@@ -114,8 +114,11 @@ def load_runs_from_folder(folder):
     out = []
     for subfolder in os.listdir(folder):
         full_subfolder_path = os.path.join(folder, subfolder)
-
-        out.append(Run.load_run(full_subfolder_path))
+        try:
+            out.append(Run.load_run(full_subfolder_path))
+        except FileNotFoundError as e:
+            print(e)
+            
 
 
     return out
