@@ -57,7 +57,7 @@ def load_data_and_create_figure(top_folder, threshold):
         i,j = parameter_index_pair
         runs = runs_from_networks(networks)
         
-        print(runs)
+        print(f"for beta={beta_centers[i]} and r={r_centers[j]} we have {len(runs)} runs")
         
         try:
     
@@ -83,8 +83,6 @@ def load_and_sort_networks_by_parameter(top_folder, beta_centers,r_centers):
     r_bin_starts    = (r_centers[:-1]+r_centers[1:])/2
     
 
-    
-    print(beta_bin_starts)
     out = {}
     for subfolder in os.listdir(top_folder):
         folder = os.path.join(top_folder,subfolder)
@@ -96,8 +94,6 @@ def load_and_sort_networks_by_parameter(top_folder, beta_centers,r_centers):
             i = np.digitize(network.beta, beta_bin_starts)
             j = np.digitize(network.r, r_bin_starts)
             
-            print(network.beta, beta_bin_starts)
-            print(i)
             
             try:
                 out[i,j].append(network)
@@ -105,7 +101,7 @@ def load_and_sort_networks_by_parameter(top_folder, beta_centers,r_centers):
                 out[i,j] = [network]
             
         except FileNotFoundError as e:
-            print(e)
+            pass
             
     return out
 
@@ -117,7 +113,7 @@ def load_runs_from_folder(folder):
         try:
             out.append(Run.load_run(full_subfolder_path))
         except FileNotFoundError as e:
-            print(e)
+            pass
             
 
 
