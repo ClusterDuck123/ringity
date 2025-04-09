@@ -123,7 +123,7 @@ class Run:
         self.terminal_mean = np.mean(self.phase_coherence[-terminal_length:])
         self.terminal_std  = np.std( self.phase_coherence[-terminal_length:])
         
-    def save_run(self, folder, verbose=False):
+    def save_run(self, folder, verbose=False,verbose_mid = False):
         """Saves simulation results to a specified folder."""
         
         self.calculate_stats()
@@ -133,11 +133,14 @@ class Run:
         os.makedirs(run_folder, exist_ok=True)
 
         
-        pd.DataFrame(self.natfreqs).to_csv(f"{run_folder}/natfreqs.csv")
-        pd.DataFrame(self.init_conditions).to_csv(f"{run_folder}/init_conditions.csv")
+
+        
+        if verbose_mid:
+            pd.DataFrame(self.natfreqs).to_csv(f"{run_folder}/natfreqs.csv")
+            pd.DataFrame(self.init_conditions).to_csv(f"{run_folder}/init_conditions.csv")
+            pd.DataFrame(self.phase_coherence).to_csv(f"{run_folder}/phase_coherence.csv")
         
         if verbose:
-            pd.DataFrame(self.phase_coherence).to_csv(f"{run_folder}/phase_coherence.csv")
             pd.DataFrame(self.activity).to_csv(f"{run_folder}/full.csv")
 
         with open(f"{run_folder}/run_stats.json", "w") as fp:
@@ -155,9 +158,16 @@ class Run:
             params = json.load(fp)
         
         run = Run(None, dt=params["dt"], T=params["T"], from_scratch=False)
-        run.natfreqs = pd.read_csv(f"{run_folder}/natfreqs.csv", index_col=0).values.flatten()
-        run.init_conditions = pd.read_csv(f"{run_folder}/init_conditions.csv", index_col=0).values.flatten()
+        try:
+            run.natfreqs = pd.read_csv(f"{run_folder}/natfreqs.csv", index_col=0).values.flatten()
+        except FileNotFoundError:
+            pass
         
+        try:
+            run.init_conditions = pd.read_csv(f"{run_folder}/init_conditions.csv", index_col=0).values.flatten()
+        except FileNotFoundError:
+            pass
+                
         try:
             with open(f"{run_folder}/run_stats.json", "r") as fp:
                 stats = json.load(fp)
