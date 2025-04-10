@@ -85,7 +85,7 @@ def load_and_sort_networks_by_parameter(top_folder, beta_centers,r_centers):
     
 
     out = {}
-    for subfolder in os.listdir(top_folder):
+    for subfolder in tqdm.tqdm(os.listdir(top_folder)):
         folder = os.path.join(top_folder,subfolder)
         try:
             network = MyModInstance.load_instance(folder)
