@@ -51,7 +51,9 @@ def load_runs_from_folder(folder):
     for subfolder in os.listdir(folder):
         full_subfolder_path = os.path.join(folder, subfolder)
         try:
-            out.append(Run.load_run(full_subfolder_path))
+            run = Run.load_run(full_subfolder_path)
+            run.folder = full_subfolder_path
+            out.append(run)
         except FileNotFoundError as e:
             pass
             
@@ -69,13 +71,13 @@ for subfolder in tqdm.tqdm(os.listdir(top_folder)):
         network.folder = folder
         run_folder = os.path.join(network.folder, "runs/")
         runs = load_runs_from_folder(run_folder)
-        network.beta
+
         for run in runs:
-            out.append([network.beta, network.r,network.ring_score, run.terminal_mean,run.terminal_std, run.terminal_length])
+            out.append([network.folder, run.folder, network.n_nodes, network.beta, network.c, network.r,network.ring_score, run.terminal_mean,run.terminal_std, run.terminal_length])
     except FileNotFoundError as e:
         pass
        
-df = pd.DataFrame(out,columns=["network_beta", "network_r","network_ring_score", "run_terminal_mean","run_terminal_std", "run_terminal_length"])
+df = pd.DataFrame(out,columns=["network_folder", "run_folder", "n_nodes", "beta", "c", "r","ring_score", "run_terminal_mean","run_terminal_std", "run_terminal_length"])
 df.to_csv("test.csv")
 
 if False:

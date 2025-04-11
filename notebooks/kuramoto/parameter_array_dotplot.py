@@ -24,7 +24,7 @@ SCATTER_VMAX = 1.0
 def main():
     
     parser = argparse.ArgumentParser(description="Create dotplot showing dependnce of synchronicity and coherence on parameter values of network construction")
-    parser.add_argument("--i", type=str, default="test", help="The input folder containing the networks.")
+    parser.add_argument("--i", type=str, default="test.csv", help="The input file containing the network and run info.")
     parser.add_argument("--o", type=str, default="test_dotplot.png", help="output filename.")
     parser.add_argument("--threshold", type=float, default=0.001, help="threshold for determining asynchronicity")
 
@@ -33,20 +33,21 @@ def main():
     
     threshold  = args.threshold 
     
-    input_folder = args.i
+    input_file = args.i
     
-    fig = load_data_and_create_figure(input_folder, threshold)
-    
+    input_df = pd.read_csv(input_file,index_col=0)
+    coherences, fractions = create_figure(input_df, threshold)
+    fig = full_figure(coherences, fractions)
     output_file = args.o
     fig.savefig(output_file)
-    print("figure written to {output_file}")
+    print(f"figure written to {output_file}")
     
-def load_data_and_create_figure(top_folder, threshold):
+def create_figure(input_df, threshold):
     
     beta_centers,r_centers = np.linspace(0.8,1.0,5),np.linspace(0.1,0.25,4)
     n_beta_vals,n_r_vals = len(beta_centers),len(r_centers)
     
-    parameter_network_dict = load_and_sort_networks_by_parameter(top_folder,beta_centers,r_centers)
+    parameter_network_dict = sort_networks_by_parameter(input_df,beta_centers,r_centers)
     
     coherences = np.zeros((n_beta_vals,n_r_vals))
     fractions  = np.zeros((n_beta_vals,n_r_vals))
@@ -56,7 +57,7 @@ def load_data_and_create_figure(top_folder, threshold):
         
         
         i,j = parameter_index_pair
-        runs = runs_from_networks(networks)
+        runs = runs_from_networks(input_df,networks)
         
         print(f"for beta={beta_centers[i]} and r={r_centers[j]} we have {len(runs)} runs")
         
@@ -68,28 +69,34 @@ def load_data_and_create_figure(top_folder, threshold):
             print("There are no run instances for parameter index pair ", i,j)
             print("REMOVE THIS CATCH STEMENT FROM PRODUCTION! THIS SHOULD THROW!")
     
-    fig = full_figure(coherences, fractions)
-    return fig
+    
+    return coherences, fractions
         
         
         
     
     
 
-def load_and_sort_networks_by_parameter(top_folder, beta_centers,r_centers):
+def sort_networks_by_parameter(input_df, beta_centers,r_centers):
     # load all the summaries networks and their runs
     # load them into a dict keyed by the network's parameter values
     
     beta_bin_starts = (beta_centers[:-1]+beta_centers[1:])/2
     r_bin_starts    = (r_centers[:-1]+r_centers[1:])/2
     
-
+    network_df = input_df.drop_duplicates(subset=["network_folder"])
     out = {}
-    for subfolder in tqdm.tqdm(os.listdir(top_folder)):
-        folder = os.path.join(top_folder,subfolder)
+    print(input_df)
+    print(network_df)
+    for _,network_d in network_df.iterrows():
         try:
-            network = MyModInstance.load_instance(folder)
-            network.folder = folder
+            network = MyModInstance(n_nodes=network_d["n_nodes"],
+                                    c=network_d["c"],
+                                    beta=network_d["beta"],
+                                    r=network_d["r"],
+                                    from_scratch=False)
+            network.folder = network_d["network_folder"]
+            network.ring_score = network_d["ring_score"]
             
         
             i = np.digitize(network.beta, beta_bin_starts)
@@ -97,29 +104,33 @@ def load_and_sort_networks_by_parameter(top_folder, beta_centers,r_centers):
             
             
             try:
-                out[i,j].append(network)
+                out[i,j].append(network.folder)
             except KeyError:
-                out[i,j] = [network]
+                out[i,j] = [network.folder]
             
         except FileNotFoundError as e:
             pass
             
     return out
 
-def load_runs_from_folder(folder):
+def runs_from_networks(input_df,networks):
     
     out = []
-    for subfolder in os.listdir(folder):
-        full_subfolder_path = os.path.join(folder, subfolder)
-        try:
-            out.append(Run.load_run(full_subfolder_path))
-        except FileNotFoundError as e:
-            pass
+    for network in networks:
+        runs_for_network = input_df[input_df.network_folder == network]
+        for _,run_stats in runs_for_network.iterrows():
+            run = Run(adj_mat=None,from_scratch=False
+                      )
+            run.terminal_length = run_stats["run_terminal_length"]
+            run.terminal_mean = run_stats["run_terminal_mean"]
+            run.terminal_std = run_stats["run_terminal_std"]
             
-
-
-    return out
+            out.append(run)
+            
         
+        
+    
+    return out
 
 def is_asynch(run, threshold):
     return      run.terminal_std > threshold
@@ -138,14 +149,6 @@ def average_terminal_phase_coherence(runs, threshold):
     
     return np.mean(all_terminal_phase_coherence)
             
-def runs_from_networks(networks):
-    
-    out = []
-    for network in networks:
-        run_folder = os.path.join(network.folder, "runs/")
-        out.extend(load_runs_from_folder(run_folder))
-    
-    return out
 
 
         
@@ -328,3 +331,11 @@ def example_figure():
 
 if __name__ == "__main__":
     main()
+    """
+    input_file="test.csv"
+    input_df = pd.read_csv(input_file,index_col=0)
+    beta_centers,r_centers = np.linspace(0.8,1.0,5),np.linspace(0.1,0.25,4)
+    out = sort_networks_by_parameter(input_df,beta_centers,r_centers)
+    print(out[1,0])
+    networks = out[1,0]
+    print(runs_from_networks(networks))""" 
