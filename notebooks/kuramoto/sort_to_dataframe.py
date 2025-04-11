@@ -3,6 +3,8 @@ import tqdm
 import numpy as np
 import os
 import pandas as pd
+import uuid
+import argparse
 
 def load_and_sort_networks_by_parameter(top_folder, beta_centers,r_centers):
     # load all the summaries networks and their runs
@@ -56,40 +58,39 @@ def load_runs_from_folder(folder):
             out.append(run)
         except FileNotFoundError as e:
             pass
-            
 
 
     return out
 
+def main():
+    parser = argparse.ArgumentParser(description="Gather the outputs from the runs into one big .csv file to reduce filnember usage.")
+    parser.add_argument("--i", type=str, default="test/", help="The input folder")
+    parser.add_argument("--o", type=str, default="test_csv/", help="The output folder")
 
-out=[]
-top_folder = "test/"
-for subfolder in tqdm.tqdm(os.listdir(top_folder)):
-    folder = os.path.join(top_folder,subfolder)
-    try:
-        network = MyModInstance.load_instance(folder)
-        network.folder = folder
-        run_folder = os.path.join(network.folder, "runs/")
-        runs = load_runs_from_folder(run_folder)
+    args = parser.parse_args()
 
-        for run in runs:
-            out.append([network.folder, run.folder, network.n_nodes, network.beta, network.c, network.r,network.ring_score, run.terminal_mean,run.terminal_std, run.terminal_length])
-    except FileNotFoundError as e:
-        pass
-       
-df = pd.DataFrame(out,columns=["network_folder", "run_folder", "n_nodes", "beta", "c", "r","ring_score", "run_terminal_mean","run_terminal_std", "run_terminal_length"])
-df.to_csv("test.csv")
+    top_folder = args.i
+    output_folder = args.o
+    os.makedirs(output_folder,exist_ok=True)
 
-if False:
-    
-    
-    beta_centers,r_centers = np.linspace(0.8,1.0,5),np.linspace(0.1,0.25,4)
-    n_beta_vals,n_r_vals = len(beta_centers),len(r_centers)
+    out=[]
 
-    parameter_network_dict = load_and_sort_networks_by_parameter(top_folder,beta_centers,r_centers)
+    for subfolder in tqdm.tqdm(os.listdir(top_folder)):
+        folder = os.path.join(top_folder,subfolder)
+        try:
+            network = MyModInstance.load_instance(folder)
+            network.folder = folder
+            run_folder = os.path.join(network.folder, "runs/")
+            runs = load_runs_from_folder(run_folder)
 
-    for parameter_index_pair, networks in parameter_network_dict.items():
+            for run in runs:
+                out.append([network.folder, run.folder, network.n_nodes, network.beta, network.c, network.r,network.ring_score, run.terminal_mean,run.terminal_std, run.terminal_length])
+        except FileNotFoundError as e:
+            pass
         
-        i,j = parameter_index_pair
-        runs = runs_from_networks(networks)
-    
+    df = pd.DataFrame(out,columns=["network_folder", "run_folder", "n_nodes", "beta", "c", "r","ring_score", "run_terminal_mean","run_terminal_std", "run_terminal_length"])
+    output_file = os.path.join(output_folder, str(uuid.uuid4())+".csv")
+    df.to_csv(output_file)
+
+if __name__ == "__main__":
+    main()
