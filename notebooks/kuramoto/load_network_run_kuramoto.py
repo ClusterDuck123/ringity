@@ -8,15 +8,13 @@ import tqdm
 import uuid
 import os
 
-def run_and_save(network_folder,T,dt):
+def run_and_save(network_folder,T,dt,terminal_length,verbose=False):
     
     graph_obj = MyModInstance.load_instance(network_folder)
     
     run = graph_obj.run(T=T,dt=dt)
-    
-
   
-    run.save_run(network_folder, verbose=False)
+    run.save_run(network_folder, verbose_mid=verbose,terminal_length=terminal_length)
 
     
     
@@ -26,14 +24,19 @@ def main():
     parser.add_argument("--i", type=str, default="test_network", help="The output folder")
     parser.add_argument("--T", type=float, default=1000, help="Time to run the system for (not the number of timesteps! that is floor(T/dt))")
     parser.add_argument("--dt", type=float, default=0.001, help="time interval per step")
-
+    parser.add_argument("--verbose", type=bool, default=False, help="how  much info is saved")
+    parser.add_argument("--terminal_length", type=int, default=200, help="numer of timpoeints from end to use to calculate terminal mean and terminal std")
 
     args = parser.parse_args()
     
-    input_folder  = args.i
+    input_folder = args.i
 
     for subfolder in tqdm.tqdm(os.listdir(input_folder)):
-        run_and_save(os.path.join(input_folder, subfolder),args.T,args.dt)
+        run_and_save(os.path.join(input_folder, subfolder),
+                     args.T,args.dt,
+                     args.terminal_length,
+                     verbose=args.verbose
+                     )
 
 
 
