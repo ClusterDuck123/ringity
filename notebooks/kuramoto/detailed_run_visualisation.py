@@ -1,4 +1,4 @@
-from main import MyModInstance,Run
+from main import MyModInstance, Run
 import ringity 
 import kuramoto
 import matplotlib.pyplot as plt
@@ -13,7 +13,30 @@ import imageio  # To save as GIF
 
 def main(input_folder):
     
-    input_folder
+    print(os.listdir(input_folder))
+    for subfolder in os.listdir(input_folder):
+        run_folder_prefix = os.path.join(input_folder,subfolder, "runs")
+        for run_folder_suffix in os.listdir(run_folder_prefix):
+            
+            run_folder = os.path.join(run_folder_prefix,run_folder_suffix)
+            
+            print("loading from", run_folder)
+            run = Run.load_run(run_folder,verbose=True)
+            
+            print("calculate coherence...")
+            run.phase_coherence = kuramoto.Kuramoto.phase_coherence(run.activity)
+            
+            print("drawing figure...")
+            fig = draw_phase_coherence(run)
+            fig.savefig(os.path.join(run_folder,"phase_coherence.png"))
+            
+            print()
+            print()
+            print()
+            
+            
+            
+
     
     
 
@@ -38,7 +61,7 @@ def draw_phase_coherence(run):
     ax.set_ylim((0,1))
     
 
-    fig.suptitle(run.phase_coherence.flatten()[-10000:].std())
+    #fig.suptitle(run.phase_coherence.flatten()[-10000:].std())
     
     
     return fig
@@ -123,4 +146,4 @@ def draw_gif_positions(output_file, network, positions, activity,stride=100):
     animation.save(output_file, writer="pillow")
     print("GIF is written")
     
-main()
+main("rerun_pa/")
