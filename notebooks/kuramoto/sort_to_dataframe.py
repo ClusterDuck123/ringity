@@ -64,8 +64,8 @@ def load_runs_from_folder(folder):
 
 def main():
     parser = argparse.ArgumentParser(description="Gather the outputs from the runs into one big .csv file to reduce filnember usage.")
-    parser.add_argument("--i", type=str, default="test/", help="The input folder")
-    parser.add_argument("--o", type=str, default="test_csv/", help="The output folder")
+    parser.add_argument("--i", type=str, default="parameter_array/", help="The input folder")
+    parser.add_argument("--o", type=str, default="parameter_array_csv/", help="The output folder")
 
     args = parser.parse_args()
 
