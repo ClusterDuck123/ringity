@@ -24,8 +24,8 @@ SCATTER_VMAX = 1.0
 def main():
     
     parser = argparse.ArgumentParser(description="Create dotplot showing dependnce of synchronicity and coherence on parameter values of network construction")
-    parser.add_argument("--i", type=str, default="test.csv", help="The input file containing the network and run info.")
-    parser.add_argument("--o", type=str, default="test_dotplot.png", help="output filename.")
+    parser.add_argument("--i", type=str, default="parameter_array_csv/acd72081-919f-4386-a812-35d5b0b7f15d.csv", help="The input file containing the network and run info.")
+    parser.add_argument("--o", type=str, default="dotplot/thresh_0_001.png", help="output filename.")
     parser.add_argument("--threshold", type=float, default=0.001, help="threshold for determining asynchronicity")
 
     args = parser.parse_args()
@@ -48,7 +48,8 @@ def create_figure(input_df, threshold):
     n_beta_vals,n_r_vals = len(beta_centers),len(r_centers)
     
     parameter_network_dict = sort_networks_by_parameter(input_df,beta_centers,r_centers)
-    
+
+
     coherences = np.zeros((n_beta_vals,n_r_vals))
     fractions  = np.zeros((n_beta_vals,n_r_vals))
     
@@ -57,8 +58,11 @@ def create_figure(input_df, threshold):
         
         
         i,j = parameter_index_pair
-        runs = runs_from_networks(input_df,networks)
         
+
+    
+        runs = runs_from_networks(input_df,networks)
+
         print(f"for beta={beta_centers[i]} and r={r_centers[j]} we have {len(runs)} runs")
         
         try:
@@ -86,9 +90,9 @@ def sort_networks_by_parameter(input_df, beta_centers,r_centers):
     
     network_df = input_df.drop_duplicates(subset=["network_folder"])
     out = {}
-    print(input_df)
-    print(network_df)
+
     for _,network_d in network_df.iterrows():
+
         try:
             network = MyModInstance(n_nodes=network_d["n_nodes"],
                                     c=network_d["c"],
@@ -119,13 +123,16 @@ def runs_from_networks(input_df,networks):
     for network in networks:
         runs_for_network = input_df[input_df.network_folder == network]
         for _,run_stats in runs_for_network.iterrows():
-            run = Run(adj_mat=None,from_scratch=False
-                      )
-            run.terminal_length = run_stats["run_terminal_length"]
-            run.terminal_mean = run_stats["run_terminal_mean"]
-            run.terminal_std = run_stats["run_terminal_std"]
             
-            out.append(run)
+            #print(run_stats)
+            
+            #run = Run(adj_mat=None,from_scratch=False
+            #          )
+            #run.terminal_length = run_stats["run_terminal_length"]
+            #run.terminal_mean = run_stats["run_terminal_mean"]
+            #run.terminal_std = run_stats["run_terminal_std"]
+            
+            out.append(run_stats)
             
         
         
@@ -133,7 +140,7 @@ def runs_from_networks(input_df,networks):
     return out
 
 def is_asynch(run, threshold):
-    return      run.terminal_std > threshold
+    return run["run_terminal_std"] > threshold
 
 def proportion_asynch(runs, threshold):
     classification = [is_asynch(run, threshold) for run in runs]
@@ -145,7 +152,7 @@ def average_terminal_phase_coherence(runs, threshold):
     for run in runs:
         if not is_asynch(run, threshold):
             
-            all_terminal_phase_coherence.append(run.terminal_mean)
+            all_terminal_phase_coherence.append(run["run_terminal_mean"])
     
     return np.mean(all_terminal_phase_coherence)
             
