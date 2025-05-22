@@ -64,14 +64,10 @@ def create_figure(input_df, threshold):
         runs = runs_from_networks(input_df,networks)
 
         print(f"for beta={beta_centers[i]} and r={r_centers[j]} we have {len(runs)} runs")
-        
-        try:
-    
-            fractions[i,j] = 1-proportion_asynch(runs,threshold)
-            coherences[i,j] = average_terminal_phase_coherence(runs, threshold )
-        except ZeroDivisionError:
-            print("There are no run instances for parameter index pair ", i,j)
-            print("REMOVE THIS CATCH STEMENT FROM PRODUCTION! THIS SHOULD THROW!")
+
+        fractions[i,j] = 1-proportion_asynch(runs,threshold)
+        coherences[i,j] = average_terminal_phase_coherence(runs, threshold )
+
     
     
     return coherences, fractions
@@ -279,8 +275,8 @@ def full_figure(coherences, fractions):
     # --------------------------------------------------------------------
     fig, ax = plt.subplots(figsize=(7.5, 6))
     dot_plot(
-        coherences,
-        fractions,
+        coherences[:,::-1],
+        fractions[:,::-1],
         scale_by="area",  # or "length"
         ax=ax,
         with_fraction_labels=True,
@@ -337,6 +333,7 @@ def example_figure():
     
 
 if __name__ == "__main__":
+    
     main()
     """
     input_file="test.csv"
