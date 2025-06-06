@@ -160,6 +160,7 @@ class Run:
             json.dump({"dt": self.dt, "T": self.T}, fp)
             
         self.run_id = run_id
+        self.run_folder = run_folder
         
 
     @staticmethod
