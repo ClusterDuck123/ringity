@@ -13,7 +13,11 @@ try:
 except IndexError:
     input_file = "data/homophily_scores.csv"
     
-
+try:
+    output_file = sys.argv[2]
+except IndexError:
+    output_file = "figures/control_homophily_violin_plots/"
+    
 df = pd.read_csv(input_file, index_col=0)
 
 assert (df.columns == ['network_file', 'embedding_file', 'embedding_iterations',
@@ -40,7 +44,7 @@ for network in df["network"].unique():
     ax.set_ylabel("Homophily Score")
     plt.suptitle(network+str(res.pvalue))
     
-    plt.show()
+    fig.savefig(output_file)
     
     
     
