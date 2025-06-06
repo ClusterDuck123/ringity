@@ -1,5 +1,5 @@
 import ringity.ringscore
-from main import MyModInstance
+from core import MyModInstance
 
 import itertools as it 
 import argparse
@@ -11,17 +11,18 @@ from pathlib import Path
 import os
 import fcntl 
 
-def append_to_summary_file(network, run, summary_info_file):
+def append_to_summary_file(network, run, summary_info_file,terminal_length=200):
     
+    run.calculate_stats(terminal_length=terminal_length)
     try:
         network.folder
     except AttributeError:
-        network.folder == "unsaved"
+        network.folder = "unsaved"
         
     try:
         run.folder
     except AttributeError:
-        run.folder == "unsaved"
+        run.folder = "unsaved"
         
         
     info = {"n_nodes": network.n_nodes,
@@ -30,7 +31,7 @@ def append_to_summary_file(network, run, summary_info_file):
             "c": network.c,
             "ring_score": network.ring_score,
             "network_folder":network.folder,
-            "terminal_length": run.terminal_length,
+            "terminal_length": terminal_length,
             "terminal_std": run.terminal_std,
             "terminal_mean": run.terminal_mean,
             "run_folder" : run.folder,
@@ -93,7 +94,7 @@ def main():
                     )
 
     if args.summary_info_file != "none":
-        append_to_summary_file(network, run, args.summary_info_file)
+        append_to_summary_file(network, run, args.summary_info_file,args.terminal_length)
 
 main()
 
