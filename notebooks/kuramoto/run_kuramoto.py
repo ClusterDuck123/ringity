@@ -13,17 +13,29 @@ import fcntl
 
 def append_to_summary_file(network, run, summary_info_file):
     
+    try:
+        network.folder
+    except AttributeError:
+        network.folder == "unsaved"
+        
+    try:
+        run.folder
+    except AttributeError:
+        run.folder == "unsaved"
+        
+        
     info = {"n_nodes": network.n_nodes,
             "r": network.r,
             "beta": network.beta,
             "c": network.c,
             "ring_score": network.ring_score,
+            "network_folder":network.folder,
             "terminal_length": run.terminal_length,
             "terminal_std": run.terminal_std,
             "terminal_mean": run.terminal_mean,
+            "run_folder" : run.folder,
             "dt": run.dt, "T": run.T}
-        
-    
+
     print(info)
     info = pd.DataFrame([info])
     
@@ -57,7 +69,8 @@ def main():
     parser.add_argument("--T", type=float, default=1000, help="Time to run the system for (not the number of timesteps! that is floor(T/dt))")
     parser.add_argument("--dt", type=float, default=0.001, help="time interval per step")
     parser.add_argument("--verbose", type=bool, default=False, help="save more information, including full activity matrix of run")
-    parser.add_argument("--quiet", type=bool, default=False, help="save minimal information, not enough to re-reun the calculation")    
+    parser.add_argument("--quiet", type=bool, default=False, help="save minimal information, not enough to re-reun the calculation") 
+    parser.add_argument("--only-summary", type=bool, default=False, help="Only save to the summary info file, not to a folder")    
     parser.add_argument("--terminal_length", type=int, default=200, help="numer of timpoeints from end to use to calculate terminal mean and terminal std")
 
     args = parser.parse_args()
@@ -72,18 +85,15 @@ def main():
                         dt=args.dt
                         )
     
-    
-    run.save_run(input_folder,
-                    verbose=args.verbose,
-                    quiet=args.quiet,
-                    terminal_length=args.terminal_length
-                )
+    if not args.only_summary:
+        run.save_run(input_folder,
+                        verbose=args.verbose,
+                        quiet=args.quiet,
+                        terminal_length=args.terminal_length
+                    )
 
     if args.summary_info_file != "none":
         append_to_summary_file(network, run, args.summary_info_file)
-
-
-
 
 main()
 
