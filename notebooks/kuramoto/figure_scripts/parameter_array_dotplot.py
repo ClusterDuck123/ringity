@@ -24,9 +24,9 @@ SCATTER_VMAX = 1.0
 def main():
     
     parser = argparse.ArgumentParser(description="Create dotplot showing dependnce of synchronicity and coherence on parameter values of network construction")
-    parser.add_argument("--i", type=str, default="parameter_array_csv/acd72081-919f-4386-a812-35d5b0b7f15d.csv", help="The input file containing the network and run info.")
-    parser.add_argument("--o", type=str, default="dotplot/thresh_0_001.png", help="output filename.")
-    parser.add_argument("--threshold", type=float, default=0.001, help="threshold for determining asynchronicity")
+    parser.add_argument("--i", type=str, default="data/parameter_array_csv/acd72081-919f-4386-a812-35d5b0b7f15d.csv", help="The input file containing the network and run info.")
+    parser.add_argument("--o", type=str, default="figures/dotplot/thresh_0_00000001.svg", help="output filename.")
+    parser.add_argument("--threshold", type=float, default=0.00000001, help="threshold for determining asynchronicity")
 
     args = parser.parse_args()
     
@@ -63,8 +63,15 @@ def create_figure(input_df, threshold):
     
         runs = runs_from_networks(input_df,networks)
 
-        print(f"for beta={beta_centers[i]} and r={r_centers[j]} we have {len(runs)} runs")
+        print(f"for beta={beta_centers[i]} and r={r_centers[j]}\n at entry {(i,j)} we have {len(runs)} runs\n\n")
 
+        n_subsample = 5000
+        
+        assert len(runs) > n_subsample
+        
+        np.random.shuffle(runs)
+        runs = runs[:n_subsample]
+        
         fractions[i,j] = 1-proportion_asynch(runs,threshold)
         coherences[i,j] = average_terminal_phase_coherence(runs, threshold )
 
@@ -275,8 +282,8 @@ def full_figure(coherences, fractions):
     # --------------------------------------------------------------------
     fig, ax = plt.subplots(figsize=(7.5, 6))
     dot_plot(
-        coherences[:,::-1],
-        fractions[:,::-1],
+        coherences[::-1,:],
+        fractions[::-1,:],
         scale_by="area",  # or "length"
         ax=ax,
         with_fraction_labels=True,

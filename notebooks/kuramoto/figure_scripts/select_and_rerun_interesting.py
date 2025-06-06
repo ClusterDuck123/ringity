@@ -46,32 +46,37 @@ def main(args):
     
     #n_networks_saved = {"asynch":0, "traveling":0, "coherent":0}
     
+    print("scanning ", input_folder)
+    
     out = []
-    for network_folder in tqdm.tqdm(os.listdir(input_folder)):
+    for network_folder in os.listdir(input_folder):#tqdm.tqdm(os.listdir(input_folder)):
 
-        try:
-            folder = os.path.join(input_folder,network_folder)
-            network = MyModInstance.load_instance(folder)
-            network.folder = network_folder 
-            network.fullpath = folder
-            
-            run_folder = os.listdir(f"{folder}/runs/")[0]
-            run_path = os.path.join(folder, "runs", run_folder)
-            
-            
-            run = Run.load_run(run_path)
-            
-     
-            out.append([folder, run_folder,run.terminal_std, run.terminal_mean])
+        print("     in ", network_folder)
+
+        folder = os.path.join(input_folder,network_folder)
+        network = MyModInstance.load_instance(folder)
+        network.folder = network_folder 
+        network.fullpath = folder
         
-        except FileNotFoundError as e:
-            
-            pass
-        except IndexError as e:
-            
-            pass
+        run_folder = os.listdir(f"{folder}/runs/")[0]
+        print("          in ", run_folder)
+        run_path = os.path.join(folder, "runs", run_folder)
+        
+        
+        run = Run.load_run(run_path)
+    
+        print("extracted run!")
+        out.append([folder, run_folder,run.terminal_std, run.terminal_mean])
+        print([folder, run_folder,run.terminal_std, run.terminal_mean])
+
+        
+
+
     
     summary_stats = pd.DataFrame(out,columns=["network_folder", "folder","terminal_std", "terminal_mean"])
+    summary_stats.to_csv("test.csv")
+    
+    print(summary_stats)
     
     for i,v in summary_stats.sort_values("terminal_mean").iloc[:target_number].iterrows():
         
@@ -83,6 +88,7 @@ def main(args):
         network = MyModInstance.load_instance(network_folder)
         
         run_path = os.path.join(folder, "runs", run_folder)
+        print(run_path)
         assert os._exists(run_path)
         run = Run.load_run(run_path)
         
@@ -103,7 +109,7 @@ def main(args):
         
         rerun_and_save(network,run,output_folder,run_type)
 
-    for i,v in summary_stats.sort_values("terminal_std").iloc[-target_number:]:
+    for i,v in summary_stats.sort_values("terminal_std").iloc[-target_number:].iterrows():
         
         run_type = "asynchronous"
         
@@ -181,9 +187,9 @@ if __name__ == "__main__":
     parser.add_argument("--i", type=str, default="data/parameter_array/", help="The input folder")
     parser.add_argument("--o", type=str, default="data/rerun_pa/", help="The output folder")
 
-    #parser.add_argument("--terminal_length",      type=int,   default=100,   help="The number of final timesteps to take when classifying final behaviour.")
-    #parser.add_argument("--coherence_threshold",  type=float, default=0.5, help="Runs with final mean phase_coherence above 1 - coherence_threshold are coherent.")
-    #parser.add_argument("--asynchrony_threshold", type=float, default=0.000001, help="Runs with final st.dev. in phase_coherence above asynchrony_threshold are asynchronous.")
+    # parser.add_argument("--terminal_length",      type=int,   default=100,   help="The number of final timesteps to take when classifying final behaviour.")
+    # parser.add_argument("--coherence_threshold",  type=float, default=0.5, help="Runs with final mean phase_coherence above 1 - coherence_threshold are coherent.")
+    # parser.add_argument("--asynchrony_threshold", type=float, default=0.000001, help="Runs with final st.dev. in phase_coherence above asynchrony_threshold are asynchronous.")
     # previously default=0.0000000001
     
     parser.add_argument("--T", type=float, default=1000, help="Time to run the system for (not the number of timesteps! that is floor(T/dt))")

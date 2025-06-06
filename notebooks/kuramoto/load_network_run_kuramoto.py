@@ -6,37 +6,81 @@ import argparse
 import ringity
 import tqdm
 import uuid
+import pandas as pd
+from pathlib import Path
 import os
+import fcntl 
 
-def run_and_save(network_folder,T,dt,terminal_length,verbose=False):
+def append_to_summary_file(network, run, summary_info_file):
     
-    graph_obj = MyModInstance.load_instance(network_folder)
+    info = {"n_nodes": network.n_nodes,
+            "r": network.r,
+            "beta": network.beta,
+            "c": network.c,
+            "ring_score": network.ring_score,
+            "terminal_length": run.terminal_length,
+            "terminal_std": run.terminal_std,
+            "terminal_mean": run.terminal_mean,
+            "dt": run.dt, "T": run.T}
+        
     
-    run = graph_obj.run(T=T,dt=dt)
-  
-    run.save_run(network_folder, verbose_mid=verbose,terminal_length=terminal_length)
+    print(info)
+    info = pd.DataFrame([info])
+    
+    output_csv = Path(summary_info_file)
+    
+    if output_csv.is_file():
+    
+        fp = open(output_csv, "a")
+    
+        fcntl.flock(fp,fcntl.LOCK_EX)
+        info.to_csv(path_or_buf=fp, mode="a", header=None)
+        fcntl.flock(fp,fcntl.LOCK_UN)
+    else:
+        fp = open(output_csv, "w")
+        
+        fcntl.flock(fp,fcntl.LOCK_EX)
+        info.to_csv(path_or_buf=fp)
+        fcntl.flock(fp,fcntl.LOCK_UN)
+        
+    print("summary appended to", summary_info_file)
+
 
     
     
 def main():
-    """Main function to run batch simulations of Kuramoto models on loaded networks."""
+    """Main function to run batch simulations of Kuramoto models on loaded networks.
+    python load_network_run_kuramoto.py --i test5/network_673a0191-e9f5-45b7-8c26-127a5d278b6f/ --sumarry-info-file foo.csv"""
     parser = argparse.ArgumentParser(description="Run Kuramoto simulation.")
-    parser.add_argument("--i", type=str, default="test_network", help="The output folder")
+    parser.add_argument("--i", type=str, default="test_network", help="The input and output folder")
+    parser.add_argument("--summary-info-file", default="none", help="append compressed summary to this file")
     parser.add_argument("--T", type=float, default=1000, help="Time to run the system for (not the number of timesteps! that is floor(T/dt))")
     parser.add_argument("--dt", type=float, default=0.001, help="time interval per step")
-    parser.add_argument("--verbose", type=bool, default=False, help="how  much info is saved")
+    parser.add_argument("--verbose", type=bool, default=False, help="save more information, including full activity matrix of run")
+    parser.add_argument("--quiet", type=bool, default=False, help="save minimal information, not enough to re-reun the calculation")    
     parser.add_argument("--terminal_length", type=int, default=200, help="numer of timpoeints from end to use to calculate terminal mean and terminal std")
 
     args = parser.parse_args()
     
     input_folder = args.i
 
-    for subfolder in tqdm.tqdm(os.listdir(input_folder)):
-        run_and_save(os.path.join(input_folder, subfolder),
-                     args.T,args.dt,
-                     args.terminal_length,
-                     verbose=args.verbose
-                     )
+        
+    network = MyModInstance.load_instance(input_folder)
+
+    run = network.run(
+                        T=args.T,
+                        dt=args.dt
+                        )
+    
+    
+    run.save_run(input_folder,
+                    verbose=args.verbose,
+                    quiet=args.quiet,
+                    terminal_length=args.terminal_length
+                )
+
+    if args.summary_info_file != "none":
+        append_to_summary_file(network, run, args.summary_info_file)
 
 
 
