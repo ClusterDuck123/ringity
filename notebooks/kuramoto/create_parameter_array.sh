@@ -15,7 +15,7 @@ do
 
         for i in $(seq 1 1)
         do 
-           echo $i th iteration of "python make_network.py --output_folder data/parameter_array/ --n_nodes 200 --r $r --beta $beta --c 1.0"
+           echo iteration $1 of "python make_network.py --output_folder data/parameter_array/ --n_nodes 200 --r $r --beta $beta --c 1.0"
            python make_network.py --output_folder data/parameter_array/ --n_nodes 200 --r $r --beta $beta --c 1.0
         done;
 
