@@ -1,5 +1,5 @@
 import ringity.ringscore
-from main import MyModInstance
+from core import MyModInstance
 
 import itertools as it 
 import argparse
@@ -16,9 +16,10 @@ def make_and_save_network(output_folder, n_nodes,r,beta,c):
             folder = os.path.join(output_folder, f"network_{uuid.uuid4()}")
             os.makedirs(folder, exist_ok=True)
             graph_obj.save_info(folder, verbose=True)
+            print("network written to... ", folder)
             break
         except ringity.utils.exceptions.DisconnectedGraphError:
-            pass#print("Network disconnected, retrying...")
+            print("Network disconnected, retrying...")
       
 
 def make_parameter_array(output_folder):
@@ -39,13 +40,13 @@ def main():
     parser.add_argument("--n_nodes", type=int, required=True, help="Number of nodes.")
     parser.add_argument("--r", type=float, required=True, help="The r parameter of the network model, that controls homophily")
     parser.add_argument("--beta", type=float, required=True, help="The beta parameter of the network model, that controls distribution of delays")
-    parser.add_argument("--c", type=float, required=True, help="The  c parameter of the network model, that controls iverall interaction probability of nodes")
+    parser.add_argument("--c", type=float, required=True, help="The  c parameter of the network model, that controls overall interaction probability of nodes")
     parser.add_argument("--output_folder", type=str, required=True, help="The output folder")
 
     args = parser.parse_args()
     
 
-    print("network written to... ", args.output_folder)
+    
     
     make_and_save_network(args.output_folder, args.n_nodes, args.r, args.beta, args.c)
     
