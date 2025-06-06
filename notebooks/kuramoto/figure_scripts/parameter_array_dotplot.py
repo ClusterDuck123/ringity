@@ -55,12 +55,8 @@ def create_figure(input_df, threshold):
     
     for parameter_index_pair, networks in parameter_network_dict.items():
         
-        
-        
         i,j = parameter_index_pair
-        
 
-    
         runs = runs_from_networks(input_df,networks)
 
         print(f"for beta={beta_centers[i]} and r={r_centers[j]}\n at entry {(i,j)} we have {len(runs)} runs\n\n")
@@ -75,8 +71,6 @@ def create_figure(input_df, threshold):
         fractions[i,j] = 1-proportion_asynch(runs,threshold)
         coherences[i,j] = average_terminal_phase_coherence(runs, threshold )
 
-    
-    
     return coherences, fractions
         
         
@@ -98,9 +92,9 @@ def sort_networks_by_parameter(input_df, beta_centers,r_centers):
 
         try:
             network = MyModInstance(n_nodes=network_d["n_nodes"],
-                                    c=network_d["c"],
-                                    beta=network_d["beta"],
-                                    r=network_d["r"],
+                                    c      =network_d["c"],
+                                    beta   =network_d["beta"],
+                                    r      =network_d["r"],
                                     from_scratch=False)
             network.folder = network_d["network_folder"]
             network.ring_score = network_d["ring_score"]
