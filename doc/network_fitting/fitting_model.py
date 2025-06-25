@@ -13,6 +13,12 @@ rng.set_theme()
 from pathlib import Path
 from retrieve_positions import PositionGraph
 
+cmap = {"immune.gml":"#2D4452",
+        "fibro.gml":"#20313C",
+        "soil.gml":"#132027",
+        "lipid.gml":"#142935",
+        "gene.gml":"#102C3D"}
+    
 
 def truncated_exponential(theta, scale, decay_rate, truncation_point):
     """
@@ -769,6 +775,8 @@ def run_analysis(
 
     graph = load_network(network_file)
 
+    color = cmap[os.path.split(network_file)[1]]
+    
     if randomization == "configuration":
         graph = nx.configuration_model(list(dict(graph.degree()).values()))
         graph = nx.relabel_nodes(graph, str)
@@ -808,20 +816,20 @@ def run_analysis(
             
     if draw_figures or display_figures:
         
-        fig_connection_probability_by_section = analyzer.plot_connection_probability_by_section();
+        fig_connection_probability_by_section = analyzer.plot_connection_probability_by_section(color=color);
         fig_connection_probability_by_section.show()
         
-        fig_connection_probability = analyzer.plot_connection_probability();
+        fig_connection_probability = analyzer.plot_connection_probability(color=color);
         fig_connection_probability.suptitle("Step 2: Connection Probability vs Distance")
         
-        fig_plot_edge_positions = analyzer.plot_edge_positions();
+        fig_plot_edge_positions = analyzer.plot_edge_positions(color=color);
         fig_plot_edge_positions.suptitle("Step 3: Spatial Pattern of Connections")
         
         # Analyze position distribution
         fig_position_distribution, scale, decay_rate, trunc_point = analyze_position_distribution(
                                                                                                 len(graph.nodes()),
-                                                                                                positions
-                                                                                                );
+                                                                                                positions,
+                                                                                                color=color);
         fig_position_distribution.suptitle("Step 4: Node Position Distribution Analysis")
         
         print(f"\nPosition Distribution Parameters:")
@@ -837,6 +845,9 @@ def run_analysis(
         fig_connection_probability_by_section.show()
         plt.show()
         
+        fig_connection_probability.show()
+        plt.show()
+        
         fig_plot_edge_positions.show()
         plt.show()
         
@@ -848,6 +859,8 @@ def run_analysis(
         os.makedirs(figure_output_folder, exist_ok=True)
         fig_distance_histogram.savefig(figure_output_folder / "distance_histogram.pdf")
         fig_connection_probability_by_section.savefig(figure_output_folder / "connection_probability_by_section.pdf")
+        fig_connection_probability.savefig(figure_output_folder / "connection_probability.pdf")
+
         fig_plot_edge_positions.savefig(figure_output_folder / "plot_edge_positions.pdf")
         fig_position_distribution.savefig(figure_output_folder / "position_distribution.pdf")
         
