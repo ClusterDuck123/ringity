@@ -25,7 +25,7 @@ def estimate_tail_index(pratios):
     return alpha
 
 
-def l_transform(pratios, fit_pratios = None):
+def l_transform(pratios, fit_pratios=None):
     if fit_pratios is None:
         fit_pratios = pratios
     loglog_ratio = np.log(np.log(pratios))

@@ -21,3 +21,13 @@ doc/private
 
 doc/network_fitting/test/
 doc/network_fitting/test_network_model/
+
+# Python build artifacts
+build/
+dist/
+*.egg-info/
+
+# uv
+uv.lock
+
+

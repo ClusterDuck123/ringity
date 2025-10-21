@@ -1,7 +1,7 @@
 # ---------------------------- BUILD-SYSTEM ---------------------------- #
 
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=60", "setuptools-scm>=8", "wheel"]
 build-backend = "setuptools.build_meta"
 
 # ------------------------------ PROJECT ------------------------------ #
@@ -25,11 +25,12 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Development Status :: 3 - Alpha",
 ]
 keywords = ["network", "ring-structure", "tda"]
+license = "MIT"
+license-files = ["LICENSE.txt"]
 
 [project.urls]
 Homepage = "https://github.com/ClusterDuck123/ringity"
@@ -44,8 +45,7 @@ plotting = ["plotly"]
 [tool.setuptools]
 py-modules = []
 
-[tool.setuptools.dynamic]
-version = { attr = "ringity.__version__" }
+[tool.setuptools_scm]
 
 [tool.setuptools.packages.find]
 where = ["src", "tests"]
