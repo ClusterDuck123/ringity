@@ -118,7 +118,7 @@ class PositionGraph:
         iterations = 300  # 500
 
         # K NEEDS ADJUSTMENT
-        if k == None:
+        if k is None:
 
             k = 50 * 2 * np.pi / self.n_nodes
             if verbose:
@@ -175,7 +175,6 @@ class PositionGraph:
 
         self.pos = pos
 
-        pos_dict = dict(zip(self.nodelist, pos))
         unadjusted_embedding_array = np.mod(np.arctan2(pos[:, 0], pos[:, 1]), 2 * np.pi)
         self.unadjusted_embedding_array = (
             2
@@ -189,8 +188,6 @@ class PositionGraph:
         )
 
     def smooth_neighborhood_widths(self):
-
-        n_nodes = self.n_nodes
 
         self.nodelist_sorted_unadjusted = sorted(
             self.nodelist, key=self.unadjusted_embedding_dict.get

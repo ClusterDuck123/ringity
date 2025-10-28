@@ -69,7 +69,6 @@ class FitNetwork:
         ax.set_ylabel("Count", fontsize=15)
 
         ax.axis("tight")
-        xlim = ax.get_xlim()
 
         return fig
 
@@ -173,7 +172,7 @@ class FitNetwork:
 
 def position_hist(n_nodes, rpositions, n_bins=None, color="k"):
 
-    if n_bins == None:
+    if n_bins is None:
         n_bins = int(np.sqrt(n_nodes))
 
     fig, ax = plt.subplots()
