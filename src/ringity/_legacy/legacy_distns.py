@@ -10,21 +10,20 @@ from scipy.stats._distn_infrastructure import rv_generic, rv_frozen
 # =============================================================================
 
 DISTN_NAME2LEMMA = {
-    'normal' : 'norm',
-    'exponential' : 'expon',
-    'wrappedexponential' : 'wrappedexpon'
+    "normal": "norm",
+    "exponential": "expon",
+    "wrappedexponential": "wrappedexpon",
 }
 
-RINGITY_DISTN_NAMES_LIST = ['wrappedexpon']
-SCIPY_DISTN_NAMES_LIST = list(filter
-                (
-                lambda d: isinstance(getattr(ss, d), rv_generic),
-                dir(ss))
-                )
+RINGITY_DISTN_NAMES_LIST = ["wrappedexpon"]
+SCIPY_DISTN_NAMES_LIST = list(
+    filter(lambda d: isinstance(getattr(ss, d), rv_generic), dir(ss))
+)
 
 # =============================================================================
 #  ------------------------------ FUNCTIONS ----------------------------------
 # =============================================================================
+
 
 def _get_frozen_random_variable(distn_arg, **kwargs):
     if isinstance(distn_arg, rv_frozen):
@@ -39,8 +38,8 @@ def _get_frozen_random_variable(distn_arg, **kwargs):
         elif isinstance(distn_arg, rv_generic):
             rv_gen = distn_arg
         else:
-            raise ValueError(f'Type {type(distn_arg)} unknown.')
+            raise ValueError(f"Type {type(distn_arg)} unknown.")
         frozen_rv = rv_gen(**kwargs)
-        
+
     assert isinstance(frozen_rv, rv_frozen)
     return frozen_rv

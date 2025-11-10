@@ -16,8 +16,19 @@ E-MTAB-*
 doc/data/
 doc/private
 
+# Python build artifacts
+build/
+dist/
+*.egg-info/
+
 # Rest
 .vscode
 
-build/
+doc/network_fitting/test/
+doc/network_fitting/test_network_model/
 figures/
+
+# uv
+uv.lock
+
+

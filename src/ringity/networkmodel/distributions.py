@@ -181,7 +181,7 @@ def pdf_conditional_distance(x, theta, beta=None, rate=None):
         np.exp(-eps * rate * np.pi) * np.cosh(rate * x),
         np.cosh(rate * (x - np.pi)),
     )
-    normalization = rate * np.exp(eps * rate * theta0) / np.sinh(np.pi*rate)
+    normalization = rate * np.exp(eps * rate * theta0) / np.sinh(np.pi * rate)
     return support * values * normalization
 
 
@@ -255,13 +255,14 @@ def pdf_similarity(t, r, beta=None, rate=None):
     normalization = l * rate / np.sinh(np.pi * rate)
     return support * values * normalization
 
+
 def pdf_unnormalized_similarity(x, beta, r):
     rate, support = _compute_rate_and_support(
-        condition=(0 <= x) & (x <= 2*np.pi*r),
+        condition=(0 <= x) & (x <= 2 * np.pi * r),
         beta=beta,
         rate=None,
     )
-    values = np.cosh(rate * (np.pi*(1 - 2 * r) + x))
+    values = np.cosh(rate * (np.pi * (1 - 2 * r) + x))
     normalization = rate / np.sinh(np.pi * rate)
     return support * values * normalization
 
