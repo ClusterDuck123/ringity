@@ -11,13 +11,13 @@ python retrieve_positions.py --input-filename data/light_test/test_graph.gml --i
 networks=("lipid" "soil" "immune" "fibro")
 for network in ${networks[@]}
 do
-python fitting_model.py --network-file ../data/empirical_networks/$network.gml --figure-output-folder data/light_test/figures/$network/ 
+python fitting_model.py --network-file ../data/empirical_networks/$network.gml --figure-output-folder data/light_test/figures/$network/
 done
 
 output_file=data/light_test/homophily_scores.csv
 networks=("lipid" "soil" "immune" "fibro")
 for network in ${networks[@]}
-do  
+do
     for _ in $(seq 1 1)
     do
     python fitting_model.py --network-file ../data/empirical_networks/$network.gml --summary-output-file $output_file
@@ -26,7 +26,7 @@ done
 
 networks=("lipid" "soil" "immune" "fibro")
 for _ in $(seq 1 10)
-do  
+do
     for network in ${networks[@]}
     do
     python fitting_model.py --network-file ../data/empirical_networks/$network.gml --randomization configuration --summary-output-file $output_file

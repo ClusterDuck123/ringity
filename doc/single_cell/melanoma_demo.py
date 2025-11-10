@@ -8,10 +8,10 @@ experiment = "E-GEOD-81383"
 adata = sc.datasets.ebi_expression_atlas(experiment)
 
 # Get cell cycle genes
-cc_genes = rng.get_cell_cycle_genes(gene_id='ensembl')
+cc_genes = rng.get_cell_cycle_genes(gene_id="ensembl")
 
 # Calculate ring score of subspace
 for cell_line in adata.obs["Sample Characteristic[cell line]"].unique():
     adata_cl = adata[adata.obs["Sample Characteristic[cell line]"] == cell_line]
-    ring_score = rng.ring_score(adata_cl[:,cc_genes].X)
+    ring_score = rng.ring_score(adata_cl[:, cc_genes].X)
     print(f"{cell_line}: {ring_score}")

@@ -20,8 +20,6 @@ from .ringscore import (
 )
 
 # MODULES
-from .ringscore import statistics
-from .networkmodel import network_model
 from .utils.plotting import (
     plot,
     plot_X,
@@ -30,9 +28,6 @@ from .utils.plotting import (
     plot_seq,
     plot_degree_distribution,
 )
-
-from ringity.tda.pdiagram.readwrite import write_pdiagram, read_pdiagram
-from ringity.tda.pdiagram.pdiagram import PDiagram
 
 import sys
 
@@ -44,7 +39,7 @@ if (major, minor) < (3, 6):
     raise ImportError(msg)
 
 
-__all__ = ["set_theme", "ring_score_from_sequence"]
+__all__ = ["set_theme", "ring_score_from_sequence", "network_model"]
 
 
 def __getattr__(name: str):  # PEP 562
@@ -56,6 +51,10 @@ def __getattr__(name: str):  # PEP 562
         from .ringscore.metric2ringscore import ring_score_from_sequence
 
         return ring_score_from_sequence
+    if name == "network_model":
+        from .networkmodel import network_model
+
+        return network_model
     raise AttributeError(name)
 
 
@@ -70,8 +69,12 @@ if TYPE_CHECKING:
     from .ringscore.metric2ringscore import (
         ring_score_from_sequence as ring_score_from_sequence,
     )
+    from .networkmodel import network_model as network_model
 
 try:
     __version__ = _md.version("ringity")
 except _md.PackageNotFoundError:
-    __version__ = "0.0.0+dev"
+    try:
+        from ._version import version as __version__  # generated during build
+    except Exception:
+        __version__ = "0.0.0+dev"

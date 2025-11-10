@@ -68,7 +68,7 @@ def vonmises_circles(N, kappa, noise=0, seed=None):
 
 def annulus(N, r, noise=0, seed=None):
     """Generates sample points of a 2-dimensional \
-    Annulus with inner radius `r`. Outside radius 
+    Annulus with inner radius `r`. Outside radius
     is taken to be 1."""
 
     np.random.seed(seed=seed)

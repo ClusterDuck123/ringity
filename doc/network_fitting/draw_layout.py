@@ -50,26 +50,37 @@ def main(network_name, network_model, folder, unique):
     dirname = Path(folder) / f"{network_model}_{suffix}"
 
     os.makedirs(dirname, exist_ok=True)
-    
+
     color = COLOR_DICT[network_name]
-    
+
     G_true = load_network(network_name)
     G, parameters = make_similar_network_model_random(G_true, network_model)
-    
+
     pos = nx.spectral_layout(G)
-    pos = nx.spring_layout(G,pos=pos)
-    
+    pos = nx.spring_layout(G, pos=pos)
+
     n = len(G.nodes())
-    node_size = 1000/np.sqrt(n)
-    fig,ax = plt.subplots()
-    nx.draw_networkx_nodes(G,pos=pos,ax=ax,node_color=color,edgecolors='k',linewidths=1.0,node_size=node_size)
-    nx.draw_networkx_edges(G,pos=pos,ax=ax,alpha=0.1)
-    
+    node_size = 1000 / np.sqrt(n)
+    fig, ax = plt.subplots()
+    nx.draw_networkx_nodes(
+        G,
+        pos=pos,
+        ax=ax,
+        node_color=color,
+        edgecolors="k",
+        linewidths=1.0,
+        node_size=node_size,
+    )
+    nx.draw_networkx_edges(G, pos=pos, ax=ax, alpha=0.1)
+
     ax.axis("off")
-    
+
     print(f"{dirname}/spring_layout.png")
-    fig.savefig(f"{dirname}/spring_layout.png",dpi=300,bbox_inches="tight",transparent=True)
-   
+    fig.savefig(
+        f"{dirname}/spring_layout.png", dpi=300, bbox_inches="tight", transparent=True
+    )
+
+
 def load_network(name):
     G = nx.read_gml(EMPIRICALNET_DIR / f"{name}.gml")
     G.remove_edges_from(nx.selfloop_edges(G))
@@ -108,9 +119,9 @@ def make_similar_network_model_random(G_true, network_model):
         beta = 0.7 + 0.3 * np.random.rand()
         r = 0.5 * np.random.rand()
 
-        G,positions = rg.network_model(
+        G, positions = rg.network_model(
             N, rho=density, beta=beta, r=r, return_positions=True
-        )   
+        )
         G, positions = get_largest_component_with_positions(G, positions)
 
         parameters = {"beta": beta, "r": r, "density": density}
@@ -120,6 +131,7 @@ def make_similar_network_model_random(G_true, network_model):
     parameters["N"] = N
 
     return G, parameters
+
 
 def is_true(x):
     return x.lower() == "true"

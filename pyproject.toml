@@ -1,7 +1,7 @@
 # ---------------------------- BUILD-SYSTEM ---------------------------- #
 
 [build-system]
-requires = ["setuptools>=60", "setuptools-scm>=8", "wheel"]
+requires = ["setuptools>=60", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 # ------------------------------ PROJECT ------------------------------ #
@@ -17,7 +17,10 @@ dependencies = [
 ]
 name = "ringity"
 dynamic = ["version"]
-authors = [{ name = "Markus K. Youssef", email = "mk.youssef@hotmail.com" }]
+authors = [
+    { name = "Markus K. Youssef", email = "mk.youssef@hotmail.com" },
+    { name = "Joel Hancock" },
+]
 description = "Calculates ring scores for various data structures"
 requires-python = ">=3.8"
 readme = { file = "README.rst", content-type = "text/x-rst" }
@@ -42,10 +45,8 @@ plotting = ["plotly"]
 
 # -------------------------------- TOOL -------------------------------- #
 
-[tool.setuptools]
-py-modules = []
-
 [tool.setuptools_scm]
+write_to = "src/ringity/_version.py"
 
 [tool.setuptools.packages.find]
 where = ["src", "tests"]

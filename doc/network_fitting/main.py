@@ -56,7 +56,11 @@ def main(network_name, network_model, make_figures, folder, unique):
     G_true = load_network(network_name)
     G, parameters = make_similar_network_model_random(G_true, network_model)
     positions, fitter = run_analysis(G)
-    parameters["choice"] = {"network_name":network_name,"network_model":network_model,"suffix":suffix}
+    parameters["choice"] = {
+        "network_name": network_name,
+        "network_model": network_model,
+        "suffix": suffix,
+    }
     filename = f"{suffix}.json"
     save_values_to_json(
         folder=dirname,
@@ -112,9 +116,9 @@ def make_similar_network_model_random(G_true, network_model):
         beta = 0.7 + 0.3 * np.random.rand()
         r = 0.5 * np.random.rand()
 
-        G,positions = rg.network_model(
+        G, positions = rg.network_model(
             N, rho=density, beta=beta, r=r, return_positions=True
-        )   
+        )
         G, positions = get_largest_component_with_positions(G, positions)
 
         parameters = {"beta": beta, "r": r, "density": density}
@@ -129,7 +133,7 @@ def make_similar_network_model_random(G_true, network_model):
 def run_analysis(G):
     self = PositionGraph(G)
     # self.positions = positions
-    k = 0.1*np.sqrt(2 * np.pi / len(self.nodelist))
+    k = 0.1 * np.sqrt(2 * np.pi / len(self.nodelist))
     self.make_circular_spring_embedding(k=k, verbose=True)
     self.smooth_neighborhood_widths()
     self.recenter_and_reorient()
@@ -181,10 +185,11 @@ def save_values_to_json(folder, filename, parameters, fitter_c, fitter_w):
 
     os.makedirs(folder, exist_ok=True)
     file_path = folder / filename
-    
+
     with open(file_path, "w") as f:
         json.dump(data, f, indent=4)
     print(f"saved to {file_path}")
+
 
 def edge_points(ax, G, p_dict, fontsize=15, color="k"):
 
@@ -219,7 +224,9 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
         color=color,
     )
     ax.axis("tight")
-    fig.savefig(f"{folder}/raw_embedding.png",dpi=500,bbox_inches="tight",transparent=True)
+    fig.savefig(
+        f"{folder}/raw_embedding.png", dpi=500, bbox_inches="tight", transparent=True
+    )
 
     fig, ax = plt.subplots()
     edge_points(
@@ -230,7 +237,12 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
         color=color,
     )
     ax.axis("tight")
-    fig.savefig(f"{folder}/recovered_positions.png",dpi=500,bbox_inches="tight",transparent=True)
+    fig.savefig(
+        f"{folder}/recovered_positions.png",
+        dpi=500,
+        bbox_inches="tight",
+        transparent=True,
+    )
 
     fig1 = fitter.links_by_distance()
 
@@ -253,9 +265,24 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
     fig2 = fitter.neighbor_proportion()
     fig3 = fitter.draw_edge_edge_and_fit()
 
-    fig1.savefig(f"{folder}/links_by_distance.png",dpi=500,bbox_inches="tight",transparent=True)
-    fig2.savefig(f"{folder}/neighbor_proportion.png",dpi=500,bbox_inches="tight",transparent=True)
-    fig3.savefig(f"{folder}/draw_edge_edge_and_fit.png",dpi=500,bbox_inches="tight",transparent=True)
+    fig1.savefig(
+        f"{folder}/links_by_distance.png",
+        dpi=500,
+        bbox_inches="tight",
+        transparent=True,
+    )
+    fig2.savefig(
+        f"{folder}/neighbor_proportion.png",
+        dpi=500,
+        bbox_inches="tight",
+        transparent=True,
+    )
+    fig3.savefig(
+        f"{folder}/draw_edge_edge_and_fit.png",
+        dpi=500,
+        bbox_inches="tight",
+        transparent=True,
+    )
 
     fig, ax = plt.subplots()
     ax.scatter(
@@ -267,7 +294,9 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
     ax.set_xlabel("True Proportion")
     ax.set_ylabel("Fit Function")
     ax.axis("tight")
-    fig.savefig(f"{folder}/goodness_of_fit.png",dpi=500,bbox_inches="tight",transparent=True)
+    fig.savefig(
+        f"{folder}/goodness_of_fit.png", dpi=500, bbox_inches="tight", transparent=True
+    )
 
     fig, ax = plt.subplots()
     ax.hist(
@@ -288,7 +317,9 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
     ax.set_xlabel("Position", fontsize=fontsize)
     ax.set_ylabel("Density", fontsize=fontsize)
     ax.axis("tight")
-    fig.savefig(f"{folder}/rpos_bins.png",dpi=500,bbox_inches="tight",transparent=True)
+    fig.savefig(
+        f"{folder}/rpos_bins.png", dpi=500, bbox_inches="tight", transparent=True
+    )
 
     fig, ax = plt.subplots()
     ax.scatter(
@@ -300,7 +331,9 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
     ax.set_xlabel("True Proportion")
     ax.set_ylabel("Fit Function")
     ax.axis("tight")
-    fig.savefig(f"{folder}/goodness_of_fit.png",dpi=500,bbox_inches="tight",transparent=True)
+    fig.savefig(
+        f"{folder}/goodness_of_fit.png", dpi=500, bbox_inches="tight", transparent=True
+    )
 
     fig, ax = plt.subplots()
     ax.hist(
@@ -323,8 +356,11 @@ def save_figures(folder, G, fitter, self, fontsize=20, color="k"):
 
     ax.axis("tight")
 
-    fig.savefig(f"{folder}/fig_3_fit.png",dpi=500,bbox_inches="tight",transparent=True)
+    fig.savefig(
+        f"{folder}/fig_3_fit.png", dpi=500, bbox_inches="tight", transparent=True
+    )
     print(f"saved to {folder}")
+
 
 def is_true(x):
     return x.lower() == "true"

@@ -4,7 +4,7 @@ python retrieve_positions.py --input-filename test_graph.gml --input-true-positi
 networks=("lipid" "soil" "immune" "fibro" "gene")
 for network in ${networks[@]}
 do
-python fitting_model.py --network-file ../data/empirical_networks/$network.gml --figure-output-folder figures/$network/ 
+python fitting_model.py --network-file ../data/empirical_networks/$network.gml --figure-output-folder figures/$network/
 done
 
 output_file=data/homophily_scores.csv
@@ -26,7 +26,7 @@ do
     done
 done
 
-networks=("gene") 
+networks=("gene")
 for network in ${networks[@]}
 do
     for _ in $(seq 1 1)

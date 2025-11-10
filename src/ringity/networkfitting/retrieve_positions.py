@@ -96,7 +96,6 @@ def reconstruct_icdf(u_samples, ipdf_values):
 
 
 class PositionGraph:
-
     def __init__(self, G, network_type="positionless"):
 
         self.G = G

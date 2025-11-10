@@ -45,7 +45,7 @@ Calculate ring score as described in [2]:
     >>> X = np.array((np.cos(t),np.sin(t))).T
     >>> rng.ring_score(X)
     1
-    
+
 [2]: Paper not available yet.
 
 Install

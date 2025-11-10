@@ -1,4 +1,4 @@
-# Apple 
+# Apple
 *.DS_Store
 **/.DS_Store
 .DS_Store*
@@ -31,4 +31,9 @@ figures/
 # uv
 uv.lock
 
-
+# Images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
