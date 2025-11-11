@@ -9,7 +9,7 @@
 .. |version| image:: https://img.shields.io/github/v/tag/ClusterDuck123/ringity?style=social
     :target: https://github.com/ClusterDuck123/ringity/tags
 
-💍 ringity
+ringity
 ===========
 
 |DOI| |license| |version|
