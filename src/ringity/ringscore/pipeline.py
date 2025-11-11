@@ -262,8 +262,8 @@ def pdiagram_from_network(
     G,
     metric="net_flow",
     use_weights=None,
-    store_weights = True,
-    remove_self_loops = True,
+    store_weights=True,
+    remove_self_loops=True,
     verbose=False,
     **kwargs,
 ):

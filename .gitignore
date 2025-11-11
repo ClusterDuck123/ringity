@@ -1,4 +1,4 @@
-# Apple 
+# Apple
 *.DS_Store
 **/.DS_Store
 .DS_Store*
@@ -16,6 +16,26 @@ E-MTAB-*
 doc/data/
 doc/private
 
+# Python build artifacts
+build/
+dist/
+*.egg-info/
+
 # Rest
 .vscode
 
+doc/network_fitting/test/
+doc/network_fitting/test_network_model/
+figures/
+
+# uv
+uv.lock
+
+# Images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+src/ringity/_version.py

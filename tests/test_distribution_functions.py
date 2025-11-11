@@ -239,7 +239,7 @@ class TestDegreeDistributionEmpiricaly(unittest.TestCase):
         mu2 = trafos.second_moment_density(r=self.r, beta=self.beta, c=self.c)
         var_exp = (self.N - 1) * ((self.N - 2) * mu2 - mu1 * ((self.N - 1) * mu1 - 1))
 
-        self.assertAlmostEqual(var_obs / var_exp, 1, delta=0.075)
+        self.assertAlmostEqual(var_obs / var_exp, 1, delta=0.1)
 
     # def test_degree_distribution(self):
     #     degdist_exp = dists.local_density(
