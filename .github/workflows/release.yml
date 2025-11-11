@@ -1,0 +1,37 @@
+name: Build & Publish to PyPI
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v[0-9]+.*
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+
+      - name: Install build deps
+        run: python -m pip install --upgrade pip build twine setuptools_scm
+
+      - name: Build sdist & wheel
+        run: python -m build
+
+      - name: Twine check (metadata sanity)
+        run: python -m twine check dist/*
+
+      # TestPyPI dry-run for prereleases (optional: branch on tag pattern)
+      # - uses: pypa/gh-action-pypi-publish@release/v1
+      #   with: { repository-url: https://test.pypi.org/legacy/ }
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

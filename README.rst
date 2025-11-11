@@ -1,15 +1,16 @@
 .. |PyPI| image:: https://img.shields.io/pypi/v/ringity.svg
-   :target: https://pypi.org/project/ringity/
+    :target: https://pypi.org/project/ringity/
 .. |Python| image:: https://img.shields.io/pypi/pyversions/ringity.svg
-   :target: https://pypi.org/project/ringity/
+    :target: https://pypi.org/project/ringity/
 .. |License| image:: https://img.shields.io/pypi/l/ringity.svg
-   :target: https://github.com/ClusterDuck123/ringity/blob/main/LICENSE
+    :target: https://github.com/ClusterDuck123/ringity/blob/main/LICENSE.txt
 .. |DOI| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.4908927.svg
-   :target: https://doi.org/10.5281/zenodo.4908927
+    :target: https://doi.org/10.5281/zenodo.4908927
 .. |version| image:: https://img.shields.io/github/v/tag/ClusterDuck123/ringity?style=social
+    :target: https://github.com/ClusterDuck123/ringity/tags
 
-ringity
-=======
+💍 ringity
+===========
 
 |DOI| |license| |version|
 
@@ -19,8 +20,11 @@ ringity is a Python package to analyze various data structures with respect to t
 - **Issues:** https://github.com/ClusterDuck123/ringity/issues
 - **Docs:** “coming soon”
 
-Simple network example
-----------------------
+🚀 Quick Examples
+--------------------------
+
+Ring Score of Networks
+^^^^^^^^^^^^^^^^^^^^^^
 
 Calculate ring score as described in [1]:
 
@@ -35,8 +39,8 @@ Calculate ring score as described in [1]:
 
 [1]: Paper not available yet.
 
-Simple point cloud example
---------------------------
+Ring Score of Point Clouds
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Calculate ring score as described in [2]:
 
@@ -50,8 +54,8 @@ Calculate ring score as described in [2]:
 
 [2]: Paper not available yet.
 
-Install
--------
+📦 Install
+-----------
 
 Install the latest version of ringity:
 
@@ -59,27 +63,19 @@ Install the latest version of ringity:
 
    $ pip install ringity
 
-Latest Changes
---------------
-- Changed folder name `data` to `_data`
-- The persistence diagram class `PersistenceDiagram` has `ring_score` now as a method, not as a property. As a result, the function is now called via `dgm.ring_score()` instead of `dgm.ring_score`! (**Notice the change in brackets**) We apologize if this is breaking old code; such changes will be avoided in the future.
-- Integration of various ring-score "flavours".
-- Extended usage for point clouds.
-
-
-Bugs
-----
+🐞 Bugs
+---------
 
 Please report any bugs that you find `here <https://github.com/ClusterDuck123/ringity/issues>`_.
 Or, even better, fork the repository on `GitHub <https://github.com/ClusterDuck123/ringity/>`_
 and create a pull request. All inputs, suggestions and changes are more than welcome!
 
-License
--------
+📄 License
+-----------
 
 MIT — see `LICENSE <./LICENSE.txt>`_.
 
-How to cite
------------
+📚 How to cite
+---------------
 
 DOI: `10.5281/zenodo.4908927 <https://doi.org/10.5281/zenodo.4908927>`_

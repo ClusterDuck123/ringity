@@ -39,3 +39,11 @@ uv.lock
 *.svg
 
 src/ringity/_version.py
+
+/dist/
+/build/
+/*.egg-info/
+/*.egg
+/.venv
+__pycache__/
+*.pyc
