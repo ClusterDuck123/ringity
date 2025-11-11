@@ -8,6 +8,7 @@ ripser_spec = importlib.util.find_spec("ripser")
 
 if ripser_spec is not None:
     from ripser import ripser
+
     PHOMOLOGY = "ripser"
 else:
     gtda_spec = importlib.util.find_spec("gtda")
@@ -17,6 +18,7 @@ else:
         )
     else:
         from gtda.homology import VietorisRipsPersistence
+
         PHOMOLOGY = "gtda"
 
 # =============================================================================
@@ -51,9 +53,7 @@ def vietoris_rips_from_point_cloud(
     return PDiagram.from_gtda(pdgm)
 
 
-def pdiagram_from_distance_matrix(
-    D, dim=1, **kwargs
-):
+def pdiagram_from_distance_matrix(D, dim=1, **kwargs):
     """Constructs a PDiagram object from a distance matrix."""
     if PHOMOLOGY == "ripser":
         pdgm_rips = ripser(D, maxdim=dim, distance_matrix=True)["dgms"][dim]

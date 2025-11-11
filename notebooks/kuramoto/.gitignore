@@ -1,0 +1,6 @@
+data/*
+figures/*
+.venv/*
+__pycache__/*
+000000_archive/*
+test/*

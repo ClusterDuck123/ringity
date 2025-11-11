@@ -295,8 +295,7 @@ class PDiagram(list):
         try:
             item_iter = iter(item)
         except TypeError:
-            return PDiagramPoint(
-                super().__getitem__(item))
+            return PDiagramPoint(super().__getitem__(item))
         try:
             return type(self)(
                 super().__getitem__(item_iter), diameter=self.diameter, dim=self.dim

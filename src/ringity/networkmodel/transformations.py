@@ -6,7 +6,7 @@ from scipy.spatial.distance import pdist
 
 """ Utility module with functions leading up to the interaction probability function.
 
-The general philosophy of the network model is a series of transformations 
+The general philosophy of the network model is a series of transformations
 after a given set of distances defined via: distances -> similarities -> probabilities.
 """
 
