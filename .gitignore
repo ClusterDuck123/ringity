@@ -37,3 +37,5 @@ uv.lock
 *.jpeg
 *.gif
 *.svg
+
+src/ringity/_version.py
