@@ -77,7 +77,7 @@ and create a pull request. All inputs, suggestions and changes are more than wel
 License
 -------
 
-MIT — see `LICENSE <./LICENSE>`_.
+MIT — see `LICENSE <./LICENSE.txt>`_.
 
 How to cite
 -----------
