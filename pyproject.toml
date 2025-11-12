@@ -19,7 +19,7 @@ name = "ringity"
 dynamic = ["version"]
 authors = [
     { name = "Markus K. Youssef", email = "mk.youssef@hotmail.com" },
-    { name = "Joel Hancock" },
+    { name = "Joel Hancock", email = "joel@lbi-netmed.com" },
 ]
 description = "Calculates ring scores for various data structures"
 requires-python = ">=3.8"
