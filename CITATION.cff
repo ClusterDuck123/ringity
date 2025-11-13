@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: ringity
+version: 0.4a4
+doi: 10.5281/zenodo.17597211
+date-released: 2025-11-13
+authors:
+  - family-names: Youssef
+    given-names: Markus K.
+    orcid: https://orcid.org/0000-0002-5754-1938
+  - family-names: Hancock
+    given-names: Joel
+
+preferred-citation:
+  type: software
+  title: ringity
+  version: 0.4a4
+  doi: 10.5281/zenodo.17597211
+  authors:
+    - family-names: Youssef
+      given-names: Markus K.
