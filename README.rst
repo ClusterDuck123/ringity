@@ -4,15 +4,15 @@
     :target: https://pypi.org/project/ringity/
 .. |License| image:: https://img.shields.io/pypi/l/ringity.svg
     :target: https://github.com/ClusterDuck123/ringity/blob/main/LICENSE.txt
-.. |DOI| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.4908927.svg
-    :target: https://doi.org/10.5281/zenodo.4908927
-.. |version| image:: https://img.shields.io/github/v/tag/ClusterDuck123/ringity?style=social
+.. |DOI| image:: https://zenodo.org/badge/196970975.svg
+    :target: https://doi.org/10.5281/zenodo.4908926
+.. |Version| image:: https://img.shields.io/github/v/tag/ClusterDuck123/ringity?style=social
     :target: https://github.com/ClusterDuck123/ringity/tags
 
 ringity
 ===========
 
-|DOI| |license| |version|
+|DOI| |License| |Version|
 
 ringity is a Python package to analyze various data structures with respect to their ring structure.
 
@@ -63,6 +63,14 @@ Install the latest version of ringity:
 
    $ pip install ringity
 
+👋 Used ringity in your work?
+------------------------------
+
+Used ringity in a paper, preprint, thesis, talk, or project?
+We'd love to hear about it!
+
+Let us know by opening an issue: https://github.com/ClusterDuck123/ringity/issues
+
 🐞 Bugs
 ---------
 
@@ -78,4 +86,4 @@ MIT — see `LICENSE <./LICENSE.txt>`_.
 📚 How to cite
 ---------------
 
-DOI: `10.5281/zenodo.4908927 <https://doi.org/10.5281/zenodo.4908927>`_
+DOI: `10.5281/zenodo.4908926 <https://doi.org/10.5281/zenodo.4908926>`_
