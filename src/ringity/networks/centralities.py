@@ -2,7 +2,6 @@ from ringity.utils.exceptions import DisconnectedGraphError
 from numba import njit
 
 import scipy.sparse
-import scipy.stats
 import numpy as np
 import networkx as nx
 
@@ -17,32 +16,6 @@ def current_flow(G, inplace=False, new_weight_name=None, verbose=False):
         nx.set_edge_attributes(G, values=edge_dict, name=new_weight_name)
     else:
         return edge_dict
-
-
-@njit
-def potential_to_current_flow_edge(C, edge):
-    """Calculates the current flow for a single edge given the potential
-    matrix."""
-    u, v = edge
-    F_row = C[u] - C[v]
-    ranks = np.empty_like(F_row)  # calculate ranks using numpy's argsort function
-    ranks[np.argsort(F_row)] = np.arange(1, len(F_row) + 1)
-
-    return np.sum((2 * ranks - 1 - len(F_row)) * F_row)
-
-
-@njit
-def _current_flow_loop(C, row_idx, col_idx):
-    """Loops the function ``potential_to_current_flow_edge`` over all
-    edges defined via ``row_idx`` and ``col_idx``.
-
-    The purpose of this function is to use numba's decorator ``@njit``.
-    """
-    return [
-        potential_to_current_flow_edge(C, (u, v))
-        for (u, v) in zip(row_idx, col_idx)
-        if u <= v
-    ]
 
 
 def net_flow(G, inplace=False, new_weight_name=None, verbose=False):
@@ -72,6 +45,7 @@ def net_flow(G, inplace=False, new_weight_name=None, verbose=False):
         new_weight_name = "net_flow"
         # TO-DO: WHAT HAPPENS WHEN WEIGHT NAME ALREADY EXISTS?
 
+    # Stable integer labels 0..N-1
     node_label = dict(enumerate(G.nodes))
     if not nx.is_connected(G):
         raise DisconnectedGraphError
@@ -120,6 +94,32 @@ def net_flow(G, inplace=False, new_weight_name=None, verbose=False):
         nx.set_edge_attributes(G, values=edge_dict, name=new_weight_name)
     else:
         return edge_dict
+
+
+@njit
+def _current_flow_loop(C, row_idx, col_idx):
+    """Loops the function ``potential_to_current_flow_edge`` over all
+    edges defined via ``row_idx`` and ``col_idx``.
+
+    The purpose of this function is to use numba's decorator ``@njit``.
+    """
+    return [
+        potential_to_current_flow_edge(C, (u, v))
+        for (u, v) in zip(row_idx, col_idx)
+        if u <= v
+    ]
+
+
+@njit
+def potential_to_current_flow_edge(C, edge):
+    """Calculates the current flow for a single edge given the potential
+    matrix."""
+    u, v = edge
+    F_row = C[u] - C[v]
+    ranks = np.empty_like(F_row)  # calculate ranks using numpy's argsort function
+    ranks[np.argsort(F_row)] = np.arange(1, len(F_row) + 1)
+
+    return np.sum((2 * ranks - 1 - len(F_row)) * F_row)
 
 
 def resistance(G):

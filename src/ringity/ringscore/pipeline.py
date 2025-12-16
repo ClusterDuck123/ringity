@@ -11,6 +11,7 @@ from scipy.spatial.distance import is_valid_dm
 import numpy as np
 import networkx as nx
 import scipy.sparse
+import warnings
 
 
 # -----------------------------------------------------------------------------
@@ -287,6 +288,14 @@ def pdiagram_from_network(
     _type_
         _description_
     """
+
+    if nx.number_of_nodes(G) <= 0:
+        warnings.warn(
+            "Graph has no nodes; returning an empty PDiagram.",
+            category=UserWarning,
+            stacklevel=2,
+        )
+        return PDiagram()
 
     D = pwdistance_from_network(
         G,
