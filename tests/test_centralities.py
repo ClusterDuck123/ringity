@@ -2,7 +2,6 @@ import unittest
 import numpy as np
 import networkx as nx
 
-import ringity as rng
 import ringity._legacy.legacy_centralities as legacy
 import ringity.networks.centralities as cents
 

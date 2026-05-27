@@ -13,7 +13,7 @@ from ringity.ringscore.metric2ringscore import (
 from ringity.tda.pdiagram.generators import random_pdgm
 from ringity.tda.pdiagram.readwrite import write_pdiagram, read_pdiagram
 
-DIRNAME_TMP = Path("test_data") / "tmp"
+DIRNAME_TMP = Path(__file__).parent / "test_data" / "tmp"
 FNAME_PDGM = DIRNAME_TMP / "random_dgm.txt"
 
 

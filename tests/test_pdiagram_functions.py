@@ -6,7 +6,7 @@ import ringity.tda.pdiagram as pdgm
 
 from pathlib import Path
 
-DIRNAME_TEST_DATA = Path("test_data")
+DIRNAME_TEST_DATA = Path(__file__).parent / "test_data"
 
 FNAME_PDGM = DIRNAME_TEST_DATA / "lipid_coexp_dgm.txt"
 FNAME_NETWORK = DIRNAME_TEST_DATA / "lipid_coexp_network.txt"

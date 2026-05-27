@@ -28,9 +28,6 @@ doc/network_fitting/test/
 doc/network_fitting/test_network_model/
 figures/
 
-# uv
-uv.lock
-
 # Images
 *.png
 *.jpg
@@ -47,3 +44,4 @@ src/ringity/_version.py
 /.venv
 __pycache__/
 *.pyc
+tmp/

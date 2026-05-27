@@ -54,5 +54,14 @@ include = ["*"]
 namespaces = false
 
 [tool.setuptools.package-data]
-"*" = ["*.txt", "*.rst", "*.py"] # tests/RUNME.py still not included
+"*" = ["*.txt", "*.rst", "*.py"] # maybe we need to include tests somehow
 "ringity" = ["data/*.csv"]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=3.5.0",
+    "pytest>=8.3.5",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
