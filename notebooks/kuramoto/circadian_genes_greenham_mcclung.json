@@ -1,0 +1,18 @@
+{
+  "morning": [
+    {"symbol": "CCA1", "agi": "AT2G46830"},
+    {"symbol": "LHY",  "agi": "AT1G01060"},
+    {"symbol": "RVE8", "agi": "AT3G09600"},
+    {"symbol": "PRR7", "agi": "AT5G02810"},
+    {"symbol": "PRR9", "agi": "AT2G46790"},
+    {"symbol": "PRR5", "agi": "AT5G24470"}
+  ],
+  "evening": [
+    {"symbol": "TOC1", "agi": "AT5G61380"},
+    {"symbol": "GI",   "agi": "AT1G22770"},
+    {"symbol": "ELF4", "agi": "AT2G40080"},
+    {"symbol": "ELF3", "agi": "AT2G25930"},
+    {"symbol": "LUX",  "agi": "AT3G46640"},
+    {"symbol": "ZTL",  "agi": "AT5G57360"}
+  ]
+}
