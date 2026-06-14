@@ -37,7 +37,7 @@ license-files = ["LICENSE.txt"]
 
 [project.urls]
 Homepage = "https://github.com/ClusterDuck123/ringity"
-Issues = "https://github.com/kiri93/ringity/issues"
+Issues = "https://github.com/ClusterDuck123/ringity/issues"
 
 [project.optional-dependencies]
 giotto-tda = ["giotto-tda"]

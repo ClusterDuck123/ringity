@@ -124,7 +124,7 @@ def potential_to_current_flow_edge(C, edge):
 
 def resistance(G):
     L = laplace(nx.to_scipy_sparse_array(G))
-    Gamm = np.linalg.pinv(L.A, hermitian=True)
+    Gamm = np.linalg.pinv(L.toarray(), hermitian=True)
     diag = np.diag(Gamm)
     return (-2 * Gamm + diag).T + diag
 
