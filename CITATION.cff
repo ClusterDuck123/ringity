@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 title: ringity
-version: 0.4a4
-doi: 10.5281/zenodo.17597211
-date-released: 2025-11-13
+version: 0.5a0
+doi: 10.5281/zenodo.4908926
+date-released: 2026-06-14
 authors:
   - family-names: Youssef
     given-names: Markus K.
@@ -13,8 +13,8 @@ authors:
 preferred-citation:
   type: software
   title: ringity
-  version: 0.4a4
-  doi: 10.5281/zenodo.17597211
+  version: 0.5a0
+  doi: 10.5281/zenodo.4908926
   authors:
     - family-names: Youssef
       given-names: Markus K.
