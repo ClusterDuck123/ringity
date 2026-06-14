@@ -1,0 +1,45 @@
+Figure X | Ring structure is a distinctive but uncommon feature of Reactome
+pathway networks, and is not captured by standard network descriptors.
+
+Each human Reactome pathway was converted into a network as described in the
+Methods (molecules as nodes; species annotated as simple chemicals, SBO:0000247,
+removed; products linked to reactants within each reaction; the largest
+connected component retained), and the persistent-homology ring score S was
+computed for every pathway whose largest component contains at least 100 nodes.
+Reactome's nested and aliased pathway definitions can produce byte-for-byte
+identical networks; these were collapsed by largest-component identity, yielding
+80 unique networks from 90 qualifying pathway definitions.
+
+(a) Distribution of S across the 80 networks. A pronounced global ring (S > 0.6)
+is the exception rather than the rule: most pathway networks have low-to-
+intermediate S, and only 16 of the 80 networks exceed the 0.6 threshold (dark
+bars; dashed line).
+
+(b) The 16 networks with S > 0.6, ranked by S and named. Scores range from S =
+0.61 (Interferon Signaling, the pathway shown in Fig. 1C) to S = 1.00
+(Transcriptional Regulation by MECP2). One entry, labelled "x4", is a single
+network shared by four overlapping Reactome cell-junction pathway definitions —
+Cell-Cell communication, Cell junction organization, Cell-cell junction
+organization and Adherens junctions interactions (S = 0.92, 168 nodes); a fifth
+cell-junction-named pathway, Regulation of Homotypic Cell-Cell Adhesion (164
+nodes), is a structurally distinct network with a near-identical score and is
+listed separately. This redundancy is intrinsic to Reactome's hierarchical
+annotation and explains why several pathway names can carry the same ring score.
+
+(c) Ring score versus network size (number of nodes in the largest connected
+component, logarithmic scale). S is essentially uncorrelated with size (Spearman
+rho = -0.09, p = 0.43): networks with S > 0.6 (red rings). In (c) and (d), point
+colour encodes network density on a shared logarithmic scale; the absence of a
+colour gradient along S reflects the lack of association between density and
+ring score.
+
+(d) Ring score versus clustering coefficient (mean of local clustering).
+Clustering does not track S (Spearman rho = -0.18, p = 0.12): it is uniformly
+low across all pathway networks (median ~0.017, maximum 0.15 — these reaction
+graphs are nearly tree- or chain-like), and the most-clustered networks (for
+example Translation, Signaling by GPCR, and DNA-repair pathways) are among the
+least ring-like. The ring score is likewise independent of network density (rho
+= +0.03, p = 0.82). Within this homogeneous pathway collection the ring signal
+is therefore not explained by size, density or clustering, consistent with
+global ring structure being a distinct topological property rather than a by-
+product of these standard descriptors.

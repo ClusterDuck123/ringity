@@ -26,7 +26,12 @@ dist/
 
 doc/network_fitting/test/
 doc/network_fitting/test_network_model/
-figures/
+
+# doc/figures: track .py analysis scripts, ignore heavy notebooks/outputs.
+# (A file can't be re-included once its parent dir is ignored, so ignore the
+#  directory's *contents* and re-include .py.)
+doc/figures/*
+!doc/figures/*.py
 
 # Images
 *.png
@@ -34,6 +39,9 @@ figures/
 *.jpeg
 *.gif
 *.svg
+
+# Rendered rebuttal figures (regenerable; keep the dir source-only)
+doc/ringscore_distributions/*.pdf
 
 src/ringity/_version.py
 
