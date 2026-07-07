@@ -16,6 +16,9 @@ E-MTAB-*
 doc/data/
 doc/private
 
+# One-time session handoffs (untracked by design)
+doc/handoff/
+
 # Python build artifacts
 build/
 dist/

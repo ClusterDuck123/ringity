@@ -49,13 +49,14 @@ def pwdistance(
                 print(f"`data_structure` was set to {data_structure}")
 
         if data_structure == "point_cloud":
-            D = pwdistance_from_point_cloud(metric, verbose)
+            D = pwdistance_from_point_cloud(data=data, metric=metric, verbose=verbose)
         elif data_structure == "adjacency_matrix":
             D = pwdistance_from_adjacency_matrix(data)
         else:
             raise Exception(f"Data structure `{data_structure} unknown.")
     else:
         raise Exception(f"Data type `{type(data)} unknown.")
+    return D
 
 
 def pwdistance_from_point_cloud(X, metric="euclidean", verbose=False, **kwargs):

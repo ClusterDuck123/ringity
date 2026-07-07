@@ -10,7 +10,7 @@ def ring_score_from_sequence(seq, flavour="geometric", nb_pers=None, exponent=2)
     Caution: there are no checks to test if the sequence is non-negative."""
     if len(seq) == 0:
         return 0
-    if flavour in "geometric":
+    if flavour == "geometric":
         return geometric_ring_score(seq, nb_pers=nb_pers, exponent=exponent)
     elif flavour == "gap":
         return gap_ring_score(seq)

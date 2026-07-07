@@ -65,7 +65,7 @@ def vonmises_circles(
         rel_dist_th=rel_dist_th,
         abs_dist_th=abs_dist_th,
         density_th=density_th,
-        n_neighbors=None,
+        n_neighbors=n_neighbors,
         keep_weights=keep_weights,
         new_weight_name=new_weight_name,
     )
@@ -227,7 +227,7 @@ def distance_to_knn_graph(
 
     if keep_weights:
         A = np.where(mask + mask.T > 0, D, 0)
-        G = nx.from_scipy_sparse_matrix(A, edge_attribute=new_weight_name)
+        G = nx.from_scipy_sparse_array(A, edge_attribute=new_weight_name)
     else:
         A = np.where(mask + mask.T > 0, 1, 0)
         np.fill_diagonal(A, 0)

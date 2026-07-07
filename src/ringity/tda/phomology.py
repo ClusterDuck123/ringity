@@ -29,7 +29,6 @@ else:
 def vietoris_rips_from_point_cloud(
     X,
     metric="euclidean",
-    metric_params={},
     homology_dimensions=(0, 1),
     collapse_edges=False,
     coeff=2,
@@ -40,7 +39,6 @@ def vietoris_rips_from_point_cloud(
 ):
     VR = VietorisRipsPersistence(
         metric=metric,
-        metric_params=metric_params,
         homology_dimensions=homology_dimensions,
         collapse_edges=collapse_edges,
         coeff=coeff,

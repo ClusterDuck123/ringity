@@ -114,7 +114,6 @@ def ring_score_from_point_cloud(
     nb_pers=np.inf,
     persistence="VietorisRipsPersistence",
     metric="euclidean",
-    metric_params={},
     dim=1,
     **kwargs,
 ):
@@ -132,7 +131,6 @@ def ring_score_from_point_cloud(
         X,
         persistence=persistence,
         metric=metric,
-        metric_params=metric_params,
         dim=dim,
         **kwargs,
     )
@@ -148,7 +146,6 @@ def ring_score_from_network(
     nb_pers=np.inf,
     persistence="VietorisRipsPersistence",
     metric="net_flow",
-    metric_params={},
     dim=1,
     use_weights=None,
     **kwargs,
@@ -167,9 +164,8 @@ def ring_score_from_network(
         G,
         persistence=persistence,
         metric=metric,
-        metric_params=metric_params,
         dim=dim,
-        use_weights=None,
+        use_weights=use_weights,
         **kwargs,
     )
     return ring_score_from_pdiagram(
@@ -263,6 +259,8 @@ def pdiagram_from_network(
     G,
     metric="net_flow",
     use_weights=None,
+    persistence="VietorisRipsPersistence",
+    dim=1,
     store_weights=True,
     remove_self_loops=True,
     verbose=False,
@@ -304,8 +302,9 @@ def pdiagram_from_network(
         use_weights=use_weights,
         store_weights=store_weights,
         remove_self_loops=remove_self_loops,
+        **kwargs,
     )
-    return pdiagram_from_distance_matrix(D)
+    return pdiagram_from_distance_matrix(D, persistence=persistence, dim=dim)
 
 
 def pdiagram_from_distance_matrix(

@@ -56,7 +56,6 @@ def pdiagram_from_anndata(
     obs_names=None,
     persistence="VietorisRipsPersistence",
     metric="euclidean",
-    metric_params={},
     homology_dim=1,
     **kwargs,
 ):
@@ -76,7 +75,13 @@ def pdiagram_from_anndata(
     var_names = _parse_var_names(adata, var_names)
     obs_names = _parse_obs_names(adata, obs_names)
     X = _parse_X(adata[obs_names, var_names])
-    pdgm = rng.pdiagram_from_point_cloud(X)
+    pdgm = rng.pdiagram_from_point_cloud(
+        X,
+        dim=homology_dim,
+        metric=metric,
+        persistence=persistence,
+        **kwargs,
+    )
     return pdgm
 
 
