@@ -102,7 +102,7 @@ def linear_ring_score(seq, nb_pers=2):
         return 1
 
     if nb_pers == np.inf:
-        raise Exception(f"Linear ring score for `nb_pers == np.inf` not defined!")
+        raise Exception("Linear ring score for `nb_pers == np.inf` not defined!")
 
     if nb_pers is None:
         nb_pers = 2

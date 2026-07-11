@@ -92,6 +92,9 @@ def plot_nx_old(
 ):
     """Plots a networkx graph.
 
+    .. deprecated::
+        ``plot_nx_old`` is slated for removal; use ``plot_nx`` instead.
+
     Parameters
     ----------
     G : NetworkX Graph
@@ -120,7 +123,7 @@ def plot_nx_old(
         node_colors = [CEMM_COL1] * nx.number_of_nodes(G)
     if edge_colors is None:
         edge_colors = [CEMM_COL2] * nx.number_of_edges(G)
-    nodes = nx.draw_networkx_nodes(
+    nx.draw_networkx_nodes(
         G,
         pos=pos,
         alpha=node_alpha,
@@ -130,9 +133,7 @@ def plot_nx_old(
         linewidths=1,
     )
 
-    edges = nx.draw_networkx_edges(
-        G, pos=pos, alpha=edge_alpha, ax=ax, edge_color=edge_colors
-    )
+    nx.draw_networkx_edges(G, pos=pos, alpha=edge_alpha, ax=ax, edge_color=edge_colors)
     ax.axis("off")
 
 

@@ -1,10 +1,5 @@
-from matplotlib import animation
-
-import matplotlib.patches as patches
-import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-import warnings
 
 """THIS IS LEGACY CODE THAT NEEDS TO BE UPDATED!"""
 

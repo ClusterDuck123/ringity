@@ -1,14 +1,14 @@
 import networkx as nx
 import importlib.util
 
+from ringity.utils.plotting.styling import CEMM_COL1, CEMM_COL2
+
 plotly_spec = importlib.util.find_spec("plotly")
 
 if plotly_spec is None:
     pass  # TODO: Deal with this dependency properly
 else:
     import plotly.graph_objects as go
-
-from ringity.utils.plotting.styling import CEMM_COL1, CEMM_COL2
 
 
 def _get_edge_coord_3d(G, pos):

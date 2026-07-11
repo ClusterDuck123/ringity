@@ -162,7 +162,7 @@ def _check_weight_induction(G, metric, use_weights, verbose):
     # Cases where no further calculation is needed.
     if use_weights is False:
         if verbose:
-            print(f"No weights will be used for calculations.")
+            print("No weights will be used for calculations.")
         return False
     elif nx.get_edge_attributes(G, metric):
         if verbose and use_weights:

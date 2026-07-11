@@ -98,7 +98,7 @@ def annulus(
         rel_dist_th=rel_dist_th,
         abs_dist_th=abs_dist_th,
         density_th=density_th,
-        n_neighbors=None,
+        n_neighbors=n_neighbors,
         keep_weights=keep_weights,
         new_weight_name=new_weight_name,
     )
@@ -227,7 +227,9 @@ def distance_to_knn_graph(
 
     if keep_weights:
         A = np.where(mask + mask.T > 0, D, 0)
-        G = nx.from_scipy_sparse_array(A, edge_attribute=new_weight_name)
+        G = nx.from_scipy_sparse_array(
+            coo.coo_matrix(A), edge_attribute=new_weight_name
+        )
     else:
         A = np.where(mask + mask.T > 0, 1, 0)
         np.fill_diagonal(A, 0)
@@ -257,7 +259,7 @@ def distance_to_sublevel_graph(
 
     if keep_weights:
         A = coo.coo_matrix(np.where(D > d_th, 0, D))
-        G = nx.from_scipy_sparse_matrix(A, edge_attribute=new_weight_name)
+        G = nx.from_scipy_sparse_array(A, edge_attribute=new_weight_name)
     else:
         A = np.where(D > d_th, 0, 1)
         np.fill_diagonal(A, 0)
@@ -298,7 +300,7 @@ def _get_threshold(Dsq, rel_dist_th, abs_dist_th, density_th, er_fc_th):
         ((th_type, th),) = th_types
 
     else:
-        assert er_fc_th != None, "Please provide a threshold!"
+        assert er_fc_th is not None, "Please provide a threshold!"
         th_type = "er_foldchange_th"
         th = er_fc_th
 
@@ -310,7 +312,7 @@ def _get_threshold(Dsq, rel_dist_th, abs_dist_th, density_th, er_fc_th):
         d_th = np.quantile(Dsq, th)
     elif th_type == "er_foldchange_th":
         N = round((1 + np.sqrt(1 + 8 * len(Dsq))) / 2)
-        density = th * np.log(N) / N
+        density = min(th * np.log(N) / N, 1.0)
         d_th = np.quantile(Dsq, density)
     elif th_type == "n_neighbors":
         N = round((1 + np.sqrt(1 + 8 * len(Dsq))) / 2)
