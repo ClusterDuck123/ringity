@@ -1,4 +1,4 @@
-import unittest
+import pytest
 import numpy as np
 import networkx as nx
 
@@ -6,7 +6,7 @@ import ringity._legacy.legacy_centralities as legacy
 import ringity.networks.centralities as cents
 
 
-class TestCurrentFlowCentrality(unittest.TestCase):
+class TestCurrentFlowCentrality:
     def test_network_1(self):
         """Test implementation against reported values from network 1 in
         Newman's paper Fig.3."""
@@ -23,7 +23,7 @@ class TestCurrentFlowCentrality(unittest.TestCase):
         I = legacy.current_flow_betweenness(G)
         sample = set(np.round(I, 3))
 
-        self.assertEqual(sample, set([0.269, 0.333, 0.67]))
+        sample == set([0.269, 0.333, 0.67])
 
     def test_network_2(self):
         """Test implementation against reported values from network 2 in
@@ -45,34 +45,35 @@ class TestCurrentFlowCentrality(unittest.TestCase):
         I = legacy.current_flow_betweenness(G)
         sample = set(np.round(I, 3))
 
-        self.assertEqual(sample, set([0.194, 0.267, 0.316, 0.321, 0.361, 0.417, 0.471]))
+        sample == set([0.194, 0.267, 0.316, 0.321, 0.361, 0.417, 0.471])
 
 
-class TestNetFlowCentrality(unittest.TestCase):
-    def setUp(self):
-        self.G = nx.erdos_renyi_graph(2**5, 2 ** (-1))
+@pytest.fixture
+def er_graph():
+    G = nx.erdos_renyi_graph(2**5, 0.5)
+    return G
 
-    def test_different_current_flow_matrix_calculations(self):
-        A = nx.adjacency_matrix(self.G)
-        C = legacy.prepotential(self.G)
+
+class TestNetFlowCentrality:
+    def test_different_current_flow_matrix_calculations(self, er_graph):
+        G = er_graph
+        A = nx.adjacency_matrix(G)
+        C = legacy.prepotential(G)
         B = legacy.oriented_incidence_matrix(A).toarray()
         F2 = B @ C
         F1 = legacy.current_flow_matrix(A)
         equal = np.allclose(F1, F2)
-        self.assertTrue(equal)
+        assert equal
 
-    def test_different_net_flow_calculations(self):
-        bb1 = cents.current_flow(self.G)
-        bb2 = nx.edge_current_flow_betweenness_centrality(self.G)
+    def test_different_net_flow_calculations(self, er_graph):
+        G = er_graph
+        bb1 = cents.current_flow(G)
+        bb2 = nx.edge_current_flow_betweenness_centrality(G)
 
-        self.assertEqual(len(bb1), len(bb2))
+        assert len(bb1) == len(bb2)
 
         truth_values = [
             np.isclose(value, bb1[(min(edge), max(edge))])
             for edge, value in bb2.items()
         ]
-        self.assertTrue(all(truth_values))
-
-
-if __name__ == "__main__":
-    unittest.main()
+        assert all(truth_values)

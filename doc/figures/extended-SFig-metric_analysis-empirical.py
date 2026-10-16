@@ -172,7 +172,7 @@ print(table.round(3).to_string())
 
 
 # %%
-def _spread_labels(values, min_gap=0.05, top=1.06):
+def _spread_labels(values, min_gap=0.055, top=1.06):
     """Greedy vertical declutter for the right-hand slopegraph labels."""
     order = np.argsort(values)
     pos = np.array(values, dtype=float)
@@ -196,7 +196,7 @@ def make_figure(df):
 
     x = np.arange(len(METRIC_ORDER))
     last = x[-1]
-    fig, ax = plt.subplots(figsize=(11, 8))
+    fig, ax = plt.subplots(figsize=(13, 8))
 
     # highlight the chosen-metric column (label sits low, where no score falls)
     ax.axvspan(last - 0.3, last + 0.3, color=CEMM_4, alpha=0.7, zorder=0)
@@ -206,7 +206,7 @@ def make_figure(df):
         "metric used\nin the paper",
         ha="center",
         va="center",
-        fontsize=12,
+        fontsize=15,
         color=CEMM_DARK,
         fontweight="bold",
         zorder=4,
@@ -247,23 +247,17 @@ def make_figure(df):
             f"{label}  ({yv:.2f})",
             va="center",
             ha="left",
-            fontsize=12,
+            fontsize=16,
             color=NET_COLORS[stem],
             fontweight="bold",
         )
 
     ax.set_xticks(x)
     ax.set_xticklabels([METRIC_LABELS[m] for m in METRIC_ORDER])
-    ax.set_xlim(-0.3, last + 1.7)
+    ax.set_xlim(-0.3, last + 2.2)
     ax.set_ylim(-0.02, 1.09)
-    ax.set_ylabel("ring score $S$")
-    ax.set_xlabel("graph → metric construction")
-    ax.set_title(
-        "Sensitivity of empirical ring scores to the metric construction",
-        fontsize="large",
-        fontweight="bold",
-        loc="left",
-    )
+    ax.set_ylabel("ring score $S$", fontsize=21)
+    ax.tick_params(axis="both", which="major", labelsize=19)
     return fig
 
 

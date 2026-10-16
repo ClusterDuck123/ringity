@@ -1,71 +1,73 @@
-import unittest
+import pytest
 import numpy as np
-import ringity as rng
+import ringity as rty
 import networkx as nx
 
 from scipy.spatial.distance import pdist, squareform
 
 
-class TestPointCloud(unittest.TestCase):
-    def setUp(self):
-        self.X = np.random.uniform(size=[2**5, 3])
-        self.D = squareform(pdist(self.X))
-        self.G = nx.erdos_renyi_graph(2**5, p=0.3)
+@pytest.fixture
+def setup():
+    X = np.random.uniform(size=[2**5, 3])
+    D = squareform(pdist(X))
+    G = nx.erdos_renyi_graph(2**5, p=0.3)
+    return X, D, G
 
-    def test_point_cloud_downstreams(self):
-        pdgm_X_gen = rng.pdiagram(self.X)
-        pdgm_X_spe = rng.pdiagram_from_point_cloud(self.X)
 
-        pdgm_D_gen = rng.pdiagram(self.D)
-        pdgm_D_spe = rng.pdiagram_from_distance_matrix(self.D)
+class TestPointCloud:
+    def test_point_cloud_downstreams(self, setup):
+        X, D, G = setup
+        pdgm_X_gen = rty.pdiagram(X)
+        pdgm_X_spe = rty.pdiagram_from_point_cloud(X)
 
-        self.assertTrue(pdgm_X_gen == pdgm_X_spe)
-        self.assertTrue(pdgm_X_spe == pdgm_D_gen)
-        self.assertTrue(pdgm_D_gen == pdgm_D_spe)
+        pdgm_D_gen = rty.pdiagram(D)
+        pdgm_D_spe = rty.pdiagram_from_distance_matrix(D)
 
-        score_X_gen = rng.ring_score(self.X)
-        score_X_spe = rng.ring_score_from_point_cloud(self.X)
+        assert pdgm_X_gen == pdgm_X_spe
+        assert pdgm_X_spe == pdgm_D_gen
+        assert pdgm_D_gen == pdgm_D_spe
 
-        score_D_gen = rng.ring_score(self.D)
-        score_D_spe = rng.ring_score_from_distance_matrix(self.D)
+        score_X_gen = rty.ring_score(X)
+        score_X_spe = rty.ring_score_from_point_cloud(X)
 
-        score_pdgm_gen = rng.ring_score(pdgm_X_gen)
-        score_pdgm_spe = rng.ring_score_from_pdiagram(pdgm_X_gen)
+        score_D_gen = rty.ring_score(D)
+        score_D_spe = rty.ring_score_from_distance_matrix(D)
 
-        self.assertTrue(score_X_gen == score_X_spe)
-        self.assertTrue(score_X_spe == score_D_gen)
-        self.assertTrue(score_D_gen == score_D_spe)
-        self.assertTrue(score_D_spe == score_pdgm_gen)
-        self.assertTrue(score_pdgm_gen == score_pdgm_spe)
+        score_pdgm_gen = rty.ring_score(pdgm_X_gen)
+        score_pdgm_spe = rty.ring_score_from_pdiagram(pdgm_X_gen)
 
-    def test_network_downstreams(self):
-        pdgm_G_gen = rng.pdiagram(self.G)
-        pdgm_G_spe = rng.pdiagram_from_network(self.G)
-        pdgm_G_net_gen = rng.pdiagram(self.G, metric="net_flow")
-        pdgm_G_net_spe = rng.pdiagram_from_network(self.G, metric="net_flow")
+        assert score_X_gen == score_X_spe
+        assert score_X_spe == score_D_gen
+        assert score_D_gen == score_D_spe
+        assert score_D_spe == score_pdgm_gen
+        assert score_pdgm_gen == score_pdgm_spe
 
-        self.assertTrue(pdgm_G_gen == pdgm_G_spe)
-        self.assertTrue(pdgm_G_spe == pdgm_G_net_gen)
-        self.assertTrue(pdgm_G_net_gen == pdgm_G_net_spe)
+    def test_network_downstreams(self, setup):
+        X, D, G = setup
 
-        score_G_gen = rng.ring_score(self.G)
-        score_G_spe = rng.ring_score_from_network(self.G)
-        score_G_net_gen = rng.ring_score(self.G, metric="net_flow")
-        score_G_net_spe = rng.ring_score_from_network(self.G, metric="net_flow")
+        pdgm_G_gen = rty.pdiagram(G)
+        pdgm_G_spe = rty.pdiagram_from_network(G)
+        pdgm_G_net_gen = rty.pdiagram(G, metric="net_flow")
+        pdgm_G_net_spe = rty.pdiagram_from_network(G, metric="net_flow")
 
-        self.assertTrue(score_G_gen == score_G_spe)
-        self.assertTrue(score_G_spe == score_G_net_gen)
-        self.assertTrue(score_G_net_gen == score_G_net_spe)
+        assert pdgm_G_gen == pdgm_G_spe
+        assert pdgm_G_spe == pdgm_G_net_gen
+        assert pdgm_G_net_gen == pdgm_G_net_spe
+
+        score_G_gen = rty.ring_score(G)
+        score_G_spe = rty.ring_score_from_network(G)
+        score_G_net_gen = rty.ring_score(G, metric="net_flow")
+        score_G_net_spe = rty.ring_score_from_network(G, metric="net_flow")
+
+        assert score_G_gen == score_G_spe
+        assert score_G_spe == score_G_net_gen
+        assert score_G_net_gen == score_G_net_spe
 
     def test_anndata(self):
         # adata = anndata.AnnData(self.X)
-        # pdgm_adata_gen = rng.pdiagram(adata)
-        # pdgm_adata_spe = rng.pdiagram_from_AnnData(adata)
+        # pdgm_adata_gen = rty.pdiagram(adata)
+        # pdgm_adata_spe = rty.pdiagram_from_AnnData(adata)
 
-        # score_adata_gen = rng.ring_score(adata)
-        # score_adata_spe = rng.ring_score_from_AnnData(adata)
+        # score_adata_gen = rty.ring_score(adata)
+        # score_adata_spe = rty.ring_score_from_AnnData(adata)
         pass
-
-
-if __name__ == "__main__":
-    unittest.main()

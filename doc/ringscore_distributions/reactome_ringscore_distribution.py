@@ -7,11 +7,11 @@
 #
 # Concretely, the four-panel figure answers the points raised in review:
 #
-# - **(a)** distribution of `S` across all networks with at least `MIN_NODES`
+# - **(A)** distribution of `S` across all networks with at least `MIN_NODES`
 #   nodes (not just the ringy ones) — a dominant ring is the exception.
-# - **(b)** the networks with `S > 0.6`, named and ranked.
-# - **(c)** `S` vs. network size — the ring signal is not a size artifact.
-# - **(d)** clustering coefficient vs. `S` — clustering does not track `S` here.
+# - **(B)** the networks with `S > 0.6`, named and ranked.
+# - **(C)** `S` vs. network size — the ring signal is not a size artifact.
+# - **(D)** clustering coefficient vs. `S` — clustering does not track `S` here.
 #
 # The analysis reuses the exact Reactome → graph construction from
 # `doc/figures/Fig1+Fig2F-biological_networks.ipynb` (cell "extract ringy
@@ -262,12 +262,12 @@ ringy[["name", "n_pathways", "n_nodes_lcc", "clustering", "ring_score"]]
 #
 # A 2×2 figure:
 #
-# - **(a)** distribution of `S` across all unique networks, with the `S > 0.6` tail
+# - **(A)** distribution of `S` across all unique networks, with the `S > 0.6` tail
 #   highlighted;
-# - **(b)** the networks above threshold, named and ranked (labels carry `×N` when one
+# - **(B)** the networks above threshold, named and ranked (labels carry `×N` when one
 #   network corresponds to several Reactome pathway definitions);
-# - **(c)** `S` vs. network size — weak rank correlation, so not a size artifact;
-# - **(d)** `S` vs. clustering coefficient — `S` on the y-axis as in (c), so the two
+# - **(C)** `S` vs. network size — weak rank correlation, so not a size artifact;
+# - **(D)** `S` vs. clustering coefficient — `S` on the y-axis as in (c), so the two
 #   bottom panels are directly comparable; a flat cloud, i.e. clustering does not track `S`.
 
 
@@ -279,7 +279,7 @@ def _annotate(ax, text, xy=(0.04, 0.96), ha="left", va="top"):
         transform=ax.transAxes,
         ha=ha,
         va=va,
-        fontsize="large",
+        fontsize="x-large",
         bbox=dict(boxstyle="round,pad=0.4", fc=CEMM_4, ec=CEMM_2, lw=1.5),
     )
 
@@ -304,10 +304,11 @@ def make_figure(nets, ringy, max_named=20):
     ax_a.set_xlabel("ring score $S$")
     ax_a.set_ylabel("number of networks")
     ax_a.set_title(
-        "(a)  Distribution across Reactome networks",
+        "A  Distribution across Reactome networks",
         loc="left",
-        fontsize="large",
+        fontsize=19,
         fontweight="bold",
+        pad=16,
     )
     _annotate(
         ax_a,
@@ -337,13 +338,13 @@ def make_figure(nets, ringy, max_named=20):
             f"{s:.2f}",
             va="center",
             ha="left",
-            fontsize=9,
+            fontsize=11,
             color=CEMM_DARK,
             zorder=3,
         )
     ax_b.axvline(RING_THRESHOLD, color=CEMM_DARK, ls="--", lw=2)
     ax_b.set_yticks(y)
-    ax_b.set_yticklabels(labels, fontsize=9)
+    ax_b.set_yticklabels(labels, fontsize=11)
     ax_b.yaxis.tick_right()  # names extend into the outer-right margin, never into (a)
     ax_b.tick_params(axis="y", length=0)
     ax_b.set_ylim(-0.6, len(top) - 0.4)
@@ -351,10 +352,11 @@ def make_figure(nets, ringy, max_named=20):
     ax_b.set_xticks([0.6, 0.7, 0.8, 0.9, 1.0])
     ax_b.set_xlabel("ring score $S$")
     ax_b.set_title(
-        "(b)  Networks with a dominant ring ($S$ > 0.6)",
+        "B  Networks with a dominant ring ($S$ > 0.6)",
         loc="left",
-        fontsize="large",
+        fontsize=19,
         fontweight="bold",
+        pad=16,
     )
 
     # --- (c) S vs. network size --------------------------------------------------
@@ -384,15 +386,21 @@ def make_figure(nets, ringy, max_named=20):
     ax_c.set_xscale("log")
     ax_c.set_xlabel("number of nodes (largest connected component)")
     ax_c.set_ylabel("ring score $S$")
-    ax_c.set_ylim(-0.02, 1.02)
+    ax_c.set_ylim(-0.02, 1.06)
     ax_c.set_title(
-        "(c)  Ring score vs. network size",
+        "C  Ring score vs. network size",
         loc="left",
-        fontsize="large",
+        fontsize=19,
         fontweight="bold",
+        pad=16,
     )
-    ax_c.legend(loc="upper right", fontsize="large", frameon=True)
-    _annotate(ax_c, f"Spearman $\\rho$ = {rho_c:.2f}  (p = {p_c:.2g})")
+    ax_c.legend(loc="lower right", fontsize="x-large", frameon=True)
+    _annotate(
+        ax_c,
+        f"Spearman $\\rho$ = {rho_c:.2f}  (p = {p_c:.2g})",
+        xy=(0.96, 0.96),
+        ha="right",
+    )
 
     # --- (d) S vs. clustering (axes matched to panel c: S on y) ------------------
     rho_d, p_d = spearmanr(nets["clustering"], nets["ring_score"])
@@ -418,23 +426,23 @@ def make_figure(nets, ringy, max_named=20):
         label="$S$ > 0.6",
     )
     ax_d.axhline(RING_THRESHOLD, color=CEMM_DARK, ls="--", lw=2)
-    ax_d.set_ylim(-0.02, 1.02)
+    ax_d.set_ylim(-0.02, 1.06)
     ax_d.set_xlabel("clustering coefficient\n(mean of local clustering)")
     ax_d.set_ylabel("ring score $S$")
     ax_d.set_title(
-        "(d)  Ring score vs. clustering",
+        "D  Ring score vs. clustering",
         loc="left",
-        fontsize="large",
+        fontsize=19,
         fontweight="bold",
+        pad=16,
     )
-    ax_d.legend(loc="upper right", fontsize="large", frameon=True)
-    # ringy points sit top-left here; annotate the empty lower-right
+    ax_d.legend(loc="lower right", fontsize="x-large", frameon=True)
+    # ringy points sit top-left here; annotate the empty upper-right corner
     _annotate(
         ax_d,
         f"Spearman $\\rho$ = {rho_d:.2f}  (p = {p_d:.2g})",
-        xy=(0.96, 0.04),
+        xy=(0.96, 0.96),
         ha="right",
-        va="bottom",
     )
 
     # --- shared density colour scale, centred in the gap between (c) and (d) ------
@@ -454,13 +462,13 @@ def make_figure(nets, ringy, max_named=20):
     cax.yaxis.set_label_position("left")
     cbar.set_ticks([1e-3, 1e-2, 1e-1])
     cbar.set_ticklabels(["0.001", "0.01", "0.1"])
-    cbar.set_label("network density", fontsize="large")
-    cbar.ax.tick_params(labelsize="large")
+    cbar.set_label("network density", fontsize="x-large")
+    cbar.ax.tick_params(labelsize="x-large")
     cbar.outline.set_linewidth(1.0)
 
     fig.suptitle(
         "Ring structure across Reactome pathways",
-        fontsize="xx-large",
+        fontsize=24,
         fontweight="bold",
         y=0.99,
     )
@@ -481,14 +489,14 @@ print(
 # %% [markdown]
 # ### Reading the figure for the rebuttal
 #
-# - Panel (a): a dominant ring (`S > 0.6`) is the *exception*, not the rule — most networks
+# - Panel (A): a dominant ring (`S > 0.6`) is the *exception*, not the rule — most networks
 #   have low/intermediate `S`. This is the requested distribution.
-# - Panel (b): names the above-threshold networks, so the claim is concrete and checkable.
+# - Panel (B): names the above-threshold networks, so the claim is concrete and checkable.
 #   Where one network is labelled `×N`, it is shared by `N` nested/aliased Reactome pathway
 #   definitions (the top `S ≈ 0.92` network corresponds to four cell-junction pathways).
-# - Panel (c): the rank correlation between `S` and size is weak (ρ ≈ −0.1, n.s.), so the
+# - Panel (C): the rank correlation between `S` and size is weak (ρ ≈ −0.1, n.s.), so the
 #   ring signal is not explained by how many nodes a network has.
-# - Panel (d): clustering does **not** track `S` — a flat cloud (ρ ≈ −0.1, n.s.). Clustering
+# - Panel (D): clustering does **not** track `S` — a flat cloud (ρ ≈ −0.1, n.s.). Clustering
 #   is uniformly tiny across all Reactome networks (median ≈ 0.017, max ≈ 0.15; these
 #   reaction graphs are nearly tree-/chain-like), and the *highest*-clustering networks
 #   (Translation, GPCR signalling, DNA-repair) are the *low*-`S`, non-ringy ones. This

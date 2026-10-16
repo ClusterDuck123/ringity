@@ -10,12 +10,12 @@ Reactome's nested and aliased pathway definitions can produce byte-for-byte
 identical networks; these were collapsed by largest-component identity, yielding
 80 unique networks from 90 qualifying pathway definitions.
 
-(a) Distribution of S across the 80 networks. A pronounced global ring (S > 0.6)
+(A) Distribution of S across the 80 networks. A pronounced global ring (S > 0.6)
 is the exception rather than the rule: most pathway networks have low-to-
 intermediate S, and only 16 of the 80 networks exceed the 0.6 threshold (dark
 bars; dashed line).
 
-(b) The 16 networks with S > 0.6, ranked by S and named. Scores range from S =
+(B) The 16 networks with S > 0.6, ranked by S and named. Scores range from S =
 0.61 (Interferon Signaling, the pathway shown in Fig. 1C) to S = 1.00
 (Transcriptional Regulation by MECP2). One entry, labelled "x4", is a single
 network shared by four overlapping Reactome cell-junction pathway definitions —
@@ -26,14 +26,14 @@ nodes), is a structurally distinct network with a near-identical score and is
 listed separately. This redundancy is intrinsic to Reactome's hierarchical
 annotation and explains why several pathway names can carry the same ring score.
 
-(c) Ring score versus network size (number of nodes in the largest connected
+(C) Ring score versus network size (number of nodes in the largest connected
 component, logarithmic scale). S is essentially uncorrelated with size (Spearman
-rho = -0.09, p = 0.43): networks with S > 0.6 (red rings). In (c) and (d), point
+rho = -0.09, p = 0.43): networks with S > 0.6 (red rings). In (C) and (D), point
 colour encodes network density on a shared logarithmic scale; the absence of a
 colour gradient along S reflects the lack of association between density and
 ring score.
 
-(d) Ring score versus clustering coefficient (mean of local clustering).
+(D) Ring score versus clustering coefficient (mean of local clustering).
 Clustering does not track S (Spearman rho = -0.18, p = 0.12): it is uniformly
 low across all pathway networks (median ~0.017, maximum 0.15 — these reaction
 graphs are nearly tree- or chain-like), and the most-clustered networks (for

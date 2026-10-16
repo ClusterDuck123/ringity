@@ -1,4 +1,4 @@
-import unittest
+import pytest
 import numpy as np
 import networkx as nx
 import ringity.networkmodel.distributions as dists
@@ -30,217 +30,301 @@ def pre_local_density_from_similarity(x, theta, beta, r, c):
     return c * (1 - F_S)
 
 
-class TestAnalyticalConsistency(unittest.TestCase):
-    def setUp(self):
-        self.theta1 = np.random.uniform(0, np.pi)
-        self.theta2 = np.random.uniform(np.pi, 2 * np.pi)
+@pytest.fixture
+def setup_analytical():
+    theta1 = np.random.uniform(0, np.pi)
+    theta2 = np.random.uniform(np.pi, 2 * np.pi)
 
-        self.r1 = np.random.uniform(0.0, 0.5)
-        self.r2 = np.random.uniform(0.5, 1.0)
+    r1 = np.random.uniform(0.0, 0.5)
+    r2 = np.random.uniform(0.5, 1.0)
 
-        self.beta = np.random.uniform(0.01, 0.99)
-        self.c = np.random.uniform()
+    beta = np.random.uniform(0.01, 0.99)
+    c = np.random.uniform()
+    params = {
+        "theta1": theta1,
+        "theta2": theta2,
+        "r1": r1,
+        "r2": r2,
+        "beta": beta,
+        "c": c,
+    }
+    return params
 
-    def test_global_density_small_r(self):
-        rho = trafos.global_density(r=self.r1, beta=self.beta, c=self.c)
+
+class TestAnalyticalConsistency:
+
+    def test_global_density_small_r(self, setup_analytical):
+        params = setup_analytical
+        rho = trafos.global_density(r=params["r1"], beta=params["beta"], c=params["c"])
         rho_d, _ = quad(
             lambda x: pre_global_density_from_distance(
-                x=x, beta=self.beta, r=self.r1, c=self.c
+                x=x, beta=params["beta"], r=params["r1"], c=params["c"]
             ),
             0,
             np.pi,
         )
         rho_s, _ = quad(
             lambda x: pre_global_density_from_similarity(
-                x=x, beta=self.beta, r=self.r1, c=self.c
+                x=x, beta=params["beta"], r=params["r1"], c=params["c"]
             ),
             0,
             1,
         )
 
-        self.assertAlmostEqual(rho, rho_d, places=5)
-        self.assertAlmostEqual(rho, rho_s, places=5)
+        rho == pytest.approx(rho_d, abs=1e-5)
+        rho == pytest.approx(rho_s, abs=5)
 
-    def test_global_density_big_r(self):
-        rho = trafos.global_density(r=self.r2, beta=self.beta, c=self.c)
+    def test_global_density_big_r(self, setup_analytical):
+        params = setup_analytical
+        rho = trafos.global_density(r=params["r2"], beta=params["beta"], c=params["c"])
         rho_d, _ = quad(
             lambda x: pre_global_density_from_distance(
-                x=x, beta=self.beta, r=self.r2, c=self.c
+                x=x, beta=params["beta"], r=params["r2"], c=params["c"]
             ),
             0,
             np.pi,
         )
         rho_s, _ = quad(
             lambda x: pre_global_density_from_similarity(
-                x=x, beta=self.beta, r=self.r2, c=self.c
+                x=x, beta=params["beta"], r=params["r2"], c=params["c"]
             ),
             0,
             1,
         )
 
         # closed-form and numerical-quadrature densities agree to ~1e-4 in the big-r regime
-        self.assertAlmostEqual(rho, rho_d, places=3)
-        self.assertAlmostEqual(rho, rho_s, places=3)
+        rho == pytest.approx(rho_d, abs=1e-3)
+        rho == pytest.approx(rho_s, abs=1e-3)
 
-    def test_local_density_small_r_small_theta(self):
+    def test_local_density_small_r_small_theta(self, setup_analytical):
+        params = setup_analytical
         rho = trafos.local_density(
-            r=self.r1, theta=self.theta1, beta=self.beta, c=self.c
+            r=params["r1"], theta=params["theta1"], beta=params["beta"], c=params["c"]
         )
         rho_d, _ = quad(
             lambda x: pre_local_density_from_distance(
-                x, theta=self.theta1, beta=self.beta, r=self.r1, c=self.c
+                x,
+                theta=params["theta1"],
+                beta=params["beta"],
+                r=params["r1"],
+                c=params["c"],
             ),
             0,
             np.pi,
         )
         rho_s, _ = quad(
             lambda x: pre_local_density_from_similarity(
-                x, theta=self.theta1, beta=self.beta, r=self.r1, c=self.c
+                x,
+                theta=params["theta1"],
+                beta=params["beta"],
+                r=params["r1"],
+                c=params["c"],
             ),
             0,
             1,
         )
 
-        self.assertAlmostEqual(rho, rho_d, places=3)
-        self.assertAlmostEqual(rho, rho_s, places=3)
+        rho == pytest.approx(rho_d, abs=1e-3)
+        rho == pytest.approx(rho_s, abs=1e-3)
 
-    def test_local_density_small_r_big_theta(self):
+    def test_local_density_small_r_big_theta(self, setup_analytical):
+        params = setup_analytical
         rho = trafos.local_density(
-            r=self.r1, theta=self.theta2, beta=self.beta, c=self.c
+            r=params["r1"], theta=params["theta2"], beta=params["beta"], c=params["c"]
         )
         rho_d, _ = quad(
             lambda x: pre_local_density_from_distance(
-                x, theta=self.theta2, beta=self.beta, r=self.r1, c=self.c
+                x,
+                theta=params["theta2"],
+                beta=params["beta"],
+                r=params["r1"],
+                c=params["c"],
             ),
             0,
             np.pi,
         )
         rho_s, _ = quad(
             lambda x: pre_local_density_from_similarity(
-                x, theta=self.theta2, beta=self.beta, r=self.r1, c=self.c
+                x,
+                theta=params["theta2"],
+                beta=params["beta"],
+                r=params["r1"],
+                c=params["c"],
             ),
             0,
             1,
         )
 
-        self.assertAlmostEqual(rho, rho_d, places=4)
-        self.assertAlmostEqual(rho, rho_s, places=4)
+        rho == pytest.approx(rho_d, abs=1e-4)
+        rho == pytest.approx(rho_s, abs=1e-4)
 
-    def test_local_density_big_r_small_theta(self):
+    def test_local_density_big_r_small_theta(self, setup_analytical):
+        params = setup_analytical
         rho = trafos.local_density(
-            r=self.r2, theta=self.theta1, beta=self.beta, c=self.c
+            r=params["r2"], theta=params["theta1"], beta=params["beta"], c=params["c"]
         )
         rho_d, _ = quad(
             lambda x: pre_local_density_from_distance(
-                x, theta=self.theta1, beta=self.beta, r=self.r2, c=self.c
+                x,
+                theta=params["theta1"],
+                beta=params["beta"],
+                r=params["r2"],
+                c=params["c"],
             ),
             0,
             np.pi,
         )
         rho_s, _ = quad(
             lambda x: pre_local_density_from_similarity(
-                x, theta=self.theta1, beta=self.beta, r=self.r2, c=self.c
+                x,
+                theta=params["theta1"],
+                beta=params["beta"],
+                r=params["r2"],
+                c=params["c"],
             ),
             0,
             1,
         )
 
-        self.assertAlmostEqual(rho, rho_d, places=3)
-        self.assertAlmostEqual(rho, rho_s, places=3)
+        rho == pytest.approx(rho_d, abs=1e-3)
+        rho == pytest.approx(rho_s, abs=1e-3)
 
-    def test_local_density_big_r_big_theta(self):
+    def test_local_density_big_r_big_theta(self, setup_analytical):
+        params = setup_analytical
         rho = trafos.local_density(
-            r=self.r2, theta=self.theta2, beta=self.beta, c=self.c
+            r=params["r2"], theta=params["theta2"], beta=params["beta"], c=params["c"]
         )
         rho_d, _ = quad(
             lambda x: pre_local_density_from_distance(
-                x, theta=self.theta2, beta=self.beta, r=self.r2, c=self.c
+                x,
+                theta=params["theta2"],
+                beta=params["beta"],
+                r=params["r2"],
+                c=params["c"],
             ),
             0,
             np.pi,
         )
         rho_s, _ = quad(
             lambda x: pre_local_density_from_similarity(
-                x, theta=self.theta2, beta=self.beta, r=self.r2, c=self.c
+                x,
+                theta=params["theta2"],
+                beta=params["beta"],
+                r=params["r2"],
+                c=params["c"],
             ),
             0,
             1,
         )
 
-        self.assertAlmostEqual(rho, rho_d, places=3)
-        self.assertAlmostEqual(rho, rho_s, places=3)
+        rho == pytest.approx(rho_d, abs=1e-3)
+        rho == pytest.approx(rho_s, abs=1e-3)
 
-    def test_second_moment_small_r(self):
-        mu2 = trafos.second_moment_density(r=self.r1, beta=self.beta, c=self.c)
+    def test_second_moment_small_r(self, setup_analytical):
+        params = setup_analytical
+        mu2 = trafos.second_moment_density(
+            r=params["r1"], beta=params["beta"], c=params["c"]
+        )
         mu2_rho, _ = quad(
-            lambda x: trafos.local_density(x, r=self.r1, beta=self.beta, c=self.c) ** 2
-            * dists.pdf_delay(x, beta=self.beta),
+            lambda x: trafos.local_density(
+                x, r=params["r1"], beta=params["beta"], c=params["c"]
+            )
+            ** 2
+            * dists.pdf_delay(x, beta=params["beta"]),
             0,
             2 * np.pi,
         )
 
-        self.assertAlmostEqual(mu2, mu2_rho, places=4)
+        mu2 == pytest.approx(mu2_rho, abs=1e-4)
 
-    def test_second_moment_big_r(self):
-        mu2 = trafos.second_moment_density(r=self.r2, beta=self.beta, c=self.c)
+    def test_second_moment_big_r(self, setup_analytical):
+        params = setup_analytical
+        mu2 = trafos.second_moment_density(
+            r=params["r2"], beta=params["beta"], c=params["c"]
+        )
         mu2_rho, _ = quad(
-            lambda x: trafos.local_density(x, r=self.r2, beta=self.beta, c=self.c) ** 2
-            * dists.pdf_delay(x, beta=self.beta),
+            lambda x: trafos.local_density(
+                x, r=params["r2"], beta=params["beta"], c=params["c"]
+            )
+            ** 2
+            * dists.pdf_delay(x, beta=params["beta"]),
             0,
             2 * np.pi,
         )
 
-        self.assertAlmostEqual(mu2, mu2_rho, places=4)
+        mu2 == pytest.approx(mu2_rho, abs=1e-4)
 
 
-class TestDegreeDistributionEmpiricaly(unittest.TestCase):
-    def setUp(self):
-        n_ensemble = 2**6
-        self.N = 2**7
+@pytest.fixture
+def setup_empirically():
+    n_ensemble = 2**6
+    N = 2**7
 
-        self.beta = np.random.uniform()
-        self.r = np.random.uniform()
-        self.c = np.random.uniform()
+    beta = np.random.uniform()
+    r = np.random.uniform()
+    c = np.random.uniform()
 
-        self.thetas_arr = np.empty((n_ensemble, self.N))
-        self.degdist_arr = np.empty((n_ensemble, self.N))
+    params = {
+        "N": N,
+        "beta": beta,
+        "r": r,
+        "c": c,
+    }
 
-        for i in range(n_ensemble):
-            thetas = dists.delaydist.rvs(size=self.N, beta=self.beta)
+    thetas_arr = np.empty((n_ensemble, N))
+    degdist_arr = np.empty((n_ensemble, N))
 
-            D = trafos.pw_angular_distance(thetas)
-            P = trafos.interaction_probability(D, r=self.r, c=self.c)
+    for i in range(n_ensemble):
+        thetas = dists.delaydist.rvs(size=N, beta=beta)
 
-            R = np.random.uniform(size=self.N * (self.N - 1) // 2)
-            A = squareform(np.where(P > R, 1, 0))
+        D = trafos.pw_angular_distance(thetas)
+        P = trafos.interaction_probability(D, r=r, c=c)
 
-            G = nx.from_numpy_array(A)
+        R = np.random.uniform(size=N * (N - 1) // 2)
+        A = squareform(np.where(P > R, 1, 0))
 
-            self.thetas_arr[i] = thetas
-            self.degdist_arr[i] = np.array([d for n, d in G.degree()])
+        G = nx.from_numpy_array(A)
 
-    def test_expectation(self):
-        mu_obs = np.mean(self.degdist_arr)
-        mu_exp = (self.N - 1) * trafos.global_density(
-            r=self.r, beta=self.beta, c=self.c
+        thetas_arr[i] = thetas
+        degdist_arr[i] = np.array([d for n, d in G.degree()])
+
+    return params, thetas_arr, degdist_arr
+
+
+class TestDegreeDistributionEmpiricaly:
+
+    def test_expectation(self, setup_empirically):
+        params, thetas_arr, degdist_arr = setup_empirically
+
+        mu_obs = np.mean(degdist_arr)
+        mu_exp = (params["N"] - 1) * trafos.global_density(
+            r=params["r"], beta=params["beta"], c=params["c"]
         )
 
         # Additional way to proof test the local density function
-        mu_obs2 = (self.N - 1) * np.mean(
-            trafos.local_density(self.thetas_arr, r=self.r, c=self.c, beta=self.beta)
+        mu_obs2 = (params["N"] - 1) * np.mean(
+            trafos.local_density(
+                thetas_arr, r=params["r"], c=params["c"], beta=params["beta"]
+            )
         )
 
-        self.assertAlmostEqual(mu_exp / mu_obs, 1, delta=0.025)
-        self.assertAlmostEqual(mu_exp / mu_obs2, 1, delta=0.025)
+        mu_exp / mu_obs == pytest.approx(1, abs=0.025)
+        mu_exp / mu_obs2 == pytest.approx(1, abs=0.025)
 
-    def test_variance(self):
-        var_obs = np.var(self.degdist_arr)
+    def test_variance(self, setup_empirically):
+        params, thetas_arr, degdist_arr = setup_empirically
 
-        mu1 = trafos.global_density(r=self.r, beta=self.beta, c=self.c)
-        mu2 = trafos.second_moment_density(r=self.r, beta=self.beta, c=self.c)
-        var_exp = (self.N - 1) * ((self.N - 2) * mu2 - mu1 * ((self.N - 1) * mu1 - 1))
+        var_obs = np.var(degdist_arr)
 
-        self.assertAlmostEqual(var_obs / var_exp, 1, delta=0.1)
+        mu1 = trafos.global_density(r=params["r"], beta=params["beta"], c=params["c"])
+        mu2 = trafos.second_moment_density(
+            r=params["r"], beta=params["beta"], c=params["c"]
+        )
+        var_exp = (params["N"] - 1) * (
+            (params["N"] - 2) * mu2 - mu1 * ((params["N"] - 1) * mu1 - 1)
+        )
+
+        var_obs / var_exp == pytest.approx(1, abs=0.1)
 
     # def test_degree_distribution(self):
     #     degdist_exp = dists.local_density(
@@ -250,7 +334,3 @@ class TestDegreeDistributionEmpiricaly(unittest.TestCase):
     #     mean_error = np.mean(degdist_exp - degdist_obs)
 
     #     self.assertAlmostEqual(mean_error, 0, delta=0.01)
-
-
-if __name__ == "__main__":
-    unittest.main()
