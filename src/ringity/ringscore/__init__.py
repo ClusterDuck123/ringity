@@ -18,7 +18,6 @@ from ringity.ringscore.data2metric import (
     pwdistance_from_adjacency_matrix,
 )
 
-
 # MODULES
 import ringity.ringscore.statistics as statistics
 import ringity.utils.singlecell.singlecell as singlecell

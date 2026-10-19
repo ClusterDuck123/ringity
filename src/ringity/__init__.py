@@ -1,7 +1,6 @@
 from importlib import metadata as _md
 from typing import TYPE_CHECKING
 
-
 # FUNCTIONS
 from .ringscore import (
     pdiagram,

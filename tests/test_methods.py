@@ -1,5 +1,4 @@
 import os
-import ringity.tda.pdiagram as pdgm
 import pytest
 
 from pathlib import Path
@@ -20,9 +19,9 @@ FNAME_PDGM = DIRNAME_TMP / "random_dgm.txt"
 class TestReadAndWrite:
     def test_save_and_load(self):
         pdgm1 = random_pdgm(2**5)
-        pdgm.readwrite.write_pdiagram(pdgm1, FNAME_PDGM)
+        write_pdiagram(pdgm1, FNAME_PDGM)
 
-        pdgm2 = pdgm.readwrite.read_pdiagram(FNAME_PDGM)
+        pdgm2 = read_pdiagram(FNAME_PDGM)
         os.remove(FNAME_PDGM)
 
         assert pdgm1 == pdgm2
