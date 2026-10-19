@@ -21,6 +21,10 @@ ALL_RING_SCORES = {
 
 INF_RING_SCORES = {geometric_ring_score, amplitude_ring_score, entropy_ring_score}
 
+# `pytest.approx` defaults to a relative tolerance, which collapses to 1e-12 when
+# comparing against 0. Scores are bounded in [0, 1], so compare them absolutely.
+ABS_TOL = 1e-8
+
 
 def _generate_message(seq, ring_score, rand_nb_pers, rand_base):
     """Informative error message."""
@@ -69,7 +73,7 @@ class TestFiniteEdgeCases:
             if "nb_pers" in inspect.signature(ring_score).parameters:
                 kwargs["nb_pers"] = rand_nb_pers
             msg = _generate_message(seq, ring_score, rand_nb_pers, rand_base)
-            assert ring_score(seq, **kwargs) == pytest.approx(0.0), msg
+            assert ring_score(seq, **kwargs) == pytest.approx(0.0, abs=ABS_TOL), msg
 
     def test_noiseless_seq(self, rand_p0, rand_base, rand_nb_pers):
         seq = [rand_p0]
@@ -80,7 +84,7 @@ class TestFiniteEdgeCases:
             if "nb_pers" in inspect.signature(ring_score).parameters:
                 kwargs["nb_pers"] = rand_nb_pers
             msg = _generate_message(seq, ring_score, rand_nb_pers, rand_base)
-            assert ring_score(seq, **kwargs) == pytest.approx(1.0), msg
+            assert ring_score(seq, **kwargs) == pytest.approx(1.0, abs=ABS_TOL), msg
 
     def test_max_score_of_one(self, rand_p0, rand_zero_pads, rand_base, rand_nb_pers):
         seq = [rand_p0] + [0] * rand_zero_pads
@@ -91,7 +95,7 @@ class TestFiniteEdgeCases:
             if "nb_pers" in inspect.signature(ring_score).parameters:
                 kwargs["nb_pers"] = rand_nb_pers
             msg = _generate_message(seq, ring_score, rand_nb_pers, rand_base)
-            assert ring_score(seq, **kwargs) == pytest.approx(1.0), msg
+            assert ring_score(seq, **kwargs) == pytest.approx(1.0, abs=ABS_TOL), msg
 
     def test_min_score_of_zero(self, rand_p0, rand_nb_pers, rand_base):
         seq = [rand_p0] * (rand_nb_pers + 1)
@@ -102,7 +106,7 @@ class TestFiniteEdgeCases:
             if "nb_pers" in inspect.signature(ring_score).parameters:
                 kwargs["nb_pers"] = rand_nb_pers
             msg = _generate_message(seq, ring_score, rand_nb_pers, rand_base)
-            assert ring_score(seq, **kwargs) == pytest.approx(0.0), msg
+            assert ring_score(seq, **kwargs) == pytest.approx(0.0, abs=ABS_TOL), msg
 
     def test_finiteness(self, rand_seq, rand_nb_pers, rand_base):
         for ring_score in ALL_RING_SCORES - {gap_ring_score}:
@@ -131,7 +135,7 @@ class TestInfiniteCases:
             if "nb_pers" in inspect.signature(ring_score).parameters:
                 kwargs["nb_pers"] = np.inf
             msg = _generate_message(seq, ring_score, np.inf, rand_base)
-            assert ring_score(seq, **kwargs) == pytest.approx(0.0), msg
+            assert ring_score(seq, **kwargs) == pytest.approx(0.0, abs=ABS_TOL), msg
 
     def test_delta_seq(self, rand_p0, rand_base):
         seq = [rand_p0]
@@ -142,7 +146,7 @@ class TestInfiniteCases:
             if "nb_pers" in inspect.signature(ring_score).parameters:
                 kwargs["nb_pers"] = np.inf
             msg = _generate_message(seq, ring_score, np.inf, rand_base)
-            assert ring_score(seq, **kwargs) == pytest.approx(1.0), msg
+            assert ring_score(seq, **kwargs) == pytest.approx(1.0, abs=ABS_TOL), msg
 
     def test_max_score_of_one(self, rand_p0, rand_zero_pads, rand_base):
         seq = [rand_p0] + [0] * rand_zero_pads
@@ -153,7 +157,7 @@ class TestInfiniteCases:
             if "nb_pers" in inspect.signature(ring_score).parameters:
                 kwargs["nb_pers"] = np.inf
             msg = _generate_message(seq, ring_score, np.inf, rand_base)
-            assert ring_score(seq, **kwargs) == pytest.approx(1.0), msg
+            assert ring_score(seq, **kwargs) == pytest.approx(1.0, abs=ABS_TOL), msg
 
     def test_min_score_of_zero(self, rand_base, rand_p0):
         delta = 1e-4
@@ -221,14 +225,14 @@ class TestTwoPersistenceIdentities:
     def test_gap_identities(self, p0_list, p1_list, gap_scores):
         test_scores1 = [1 - p1 / p0 for (p0, p1) in zip(p0_list, p1_list)]
 
-        assert assert_allclose(gap_scores, test_scores1) is None
+        assert_allclose(gap_scores, test_scores1)
 
     def test_amp_identities(self, p0_list, p1_list, gap_scores, amp_scores):
         test_scores1 = [(p0 - p1) / (p0 + p1) for (p0, p1) in zip(p0_list, p1_list)]
         test_scores2 = [gap / (2 - gap) for gap in gap_scores]
 
-        assert assert_allclose(amp_scores, test_scores1) is None
-        assert assert_allclose(amp_scores, test_scores2) is None
+        assert_allclose(amp_scores, test_scores1)
+        assert_allclose(amp_scores, test_scores2)
 
     def test_ent_identities(self, p0_list, p1_list, amp_scores, ent_scores):
         def p1_over_p0_identity(p):
@@ -246,5 +250,5 @@ class TestTwoPersistenceIdentities:
         ]
         test_scores2 = [amp_identity(amp) for amp in amp_scores]
 
-        assert assert_allclose(ent_scores, test_scores1) is None
-        assert assert_allclose(ent_scores, test_scores2) is None
+        assert_allclose(ent_scores, test_scores1)
+        assert_allclose(ent_scores, test_scores2)

@@ -22,7 +22,7 @@ authors = [
     { name = "Joel Hancock", email = "joel@lbi-netmed.com" },
 ]
 description = "Calculates ring scores for various data structures"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 readme = { file = "README.rst", content-type = "text/x-rst" }
 classifiers = [
     "Programming Language :: Python :: 3",
