@@ -1,14 +1,31 @@
 cff-version: 1.2.0
+message: "If you use ringity in your work, please cite (any of) the metadata below."
+type: software
 title: ringity
+abstract: >-
+  ringity is a Python package for quantifying ring structure in data via
+  persistent homology. It computes ring scores for networks and point clouds.
 version: 0.5a1
 doi: 10.5281/zenodo.4908926
-date-released: 2026-06-14
+date-released: 2026-10-19
+license: MIT
+repository-code: https://github.com/ClusterDuck123/ringity
+url: https://github.com/ClusterDuck123/ringity
+keywords:
+  - topological data analysis
+  - persistent homology
+  - ring score
+  - network analysis
+  - point clouds
+  - single-cell
 authors:
   - family-names: Youssef
     given-names: Markus K.
     orcid: https://orcid.org/0000-0002-5754-1938
+    affiliation: École Polytechnique Fédérale de Lausanne (EPFL)
   - family-names: Hancock
     given-names: Joel
+    affiliation: Ludwig Boltzmann Institute for Network Medicine at the University of Vienna
 
 preferred-citation:
   type: software
@@ -18,3 +35,55 @@ preferred-citation:
   authors:
     - family-names: Youssef
       given-names: Markus K.
+      orcid: https://orcid.org/0000-0002-5754-1938
+      affiliation: École Polytechnique Fédérale de Lausanne (EPFL)
+    - family-names: Hancock
+      given-names: Joel
+      affiliation: Ludwig Boltzmann Institute for Network Medicine at the University of Vienna
+
+references:
+  - type: thesis
+    title: "On the Non-Existence of Model Structures and the Existence of Ring Scores: Two Studies in Combinatorial Topology"
+    authors:
+      - family-names: Youssef
+        given-names: Markus K.
+        orcid: https://orcid.org/0000-0002-5754-1938
+    year: 2026
+    thesis-type: PhD thesis
+    institution:
+      name: École Polytechnique Fédérale de Lausanne (EPFL)
+      city: Lausanne
+      country: CH
+    number: "12216"
+    doi: 10.5075/epfl-thesis-12216
+    url: https://infoscience.epfl.ch/handle/20.500.14299/266717
+    notes: General theory of ring scores (Part II).
+  - type: article
+    title: Topology identifies concurrent cyclic processes in single-cell transcriptomics and androgen receptor function
+    authors:
+      - family-names: Maggs
+        given-names: Kelly
+      - family-names: Youssef
+        given-names: Markus K.
+        orcid: https://orcid.org/0000-0002-5754-1938
+      - family-names: Pulver
+        given-names: Cyril
+      - family-names: Isma
+        given-names: Jovan
+      - family-names: Nguyên
+        given-names: Tâm J.
+      - family-names: Arzt
+        given-names: Matthias
+      - family-names: Karthaus
+        given-names: Wouter
+      - family-names: Harrington
+        given-names: Heather A.
+      - family-names: Hess
+        given-names: Kathryn
+      - family-names: Dotto
+        given-names: G. Paolo
+    year: 2025
+    journal: bioRxiv
+    doi: 10.1101/2025.01.09.632214
+    url: https://doi.org/10.1101/2025.01.09.632214
+    notes: Preprint. Ring scores for point clouds.

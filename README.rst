@@ -3,7 +3,7 @@
 .. |Python| image:: https://img.shields.io/pypi/pyversions/ringity.svg
     :target: https://pypi.org/project/ringity/
 .. |License| image:: https://img.shields.io/pypi/l/ringity.svg
-    :target: https://github.com/ClusterDuck123/ringity/blob/main/LICENSE.txt
+    :target: https://github.com/ClusterDuck123/ringity/blob/master/LICENSE.txt
 .. |DOI| image:: https://zenodo.org/badge/196970975.svg
     :target: https://doi.org/10.5281/zenodo.4908926
 .. |Version| image:: https://img.shields.io/github/v/tag/ClusterDuck123/ringity?style=social
@@ -15,6 +15,7 @@ ringity
 |DOI| |License| |Version|
 
 ringity is a Python package to analyze various data structures with respect to their ring structure.
+The general theory of ring scores is developed in [1].
 
 - **Source:** https://github.com/ClusterDuck123/ringity
 - **Issues:** https://github.com/ClusterDuck123/ringity/issues
@@ -26,7 +27,7 @@ ringity is a Python package to analyze various data structures with respect to t
 Ring Score of Networks
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Calculate ring score as described in [1]:
+Calculate the ring score of a network:
 
 .. code-block:: python
 
@@ -37,12 +38,13 @@ Calculate ring score as described in [1]:
     dgm = rng.pdiagram(G)   # constructs a persistence diagram from G
     dgm.ring_score()        # -> 1
 
-[1]: Paper not available yet.
+A publication describing how ringity computes ring scores of networks is coming
+soon! (see `Upcoming publications`_ below).
 
 Ring Score of Point Clouds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Calculate ring score as described in [2]:
+Calculate the ring score of a point cloud as described in [2]:
 
 .. code-block:: python
 
@@ -52,7 +54,32 @@ Calculate ring score as described in [2]:
     X = np.array((np.cos(t),np.sin(t))).T
     rng.ring_score(X)     # -> 1
 
-[2]: Paper not available yet.
+📖 References
+--------------
+
+[1] Youssef, M. K. (2026).
+*On the Non-Existence of Model Structures and the Existence of Ring Scores:
+Two Studies in Combinatorial Topology.*
+PhD thesis, EPFL, Lausanne (thesis no. 12216).
+DOI: `10.5075/epfl-thesis-12216 <https://doi.org/10.5075/epfl-thesis-12216>`_.
+Part II develops the general theory of ring scores.
+
+[2] Maggs, K., Youssef, M. K., Pulver, C., Isma, J., Nguyên, T. J., Arzt, M.,
+Karthaus, W., Harrington, H. A., Hess, K., Dotto, G. P. (2025).
+*Topology identifies concurrent cyclic processes in single-cell transcriptomics
+and androgen receptor function.*
+bioRxiv preprint.
+DOI: `10.1101/2025.01.09.632214 <https://doi.org/10.1101/2025.01.09.632214>`_.
+
+Upcoming publications
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Proper publications are in preparation for each of the following and will be
+added here as they become available:
+
+- the general theory of ring scores,
+- ring scores for networks,
+- ring scores for point clouds.
 
 📦 Install
 -----------
@@ -86,4 +113,9 @@ MIT — see `LICENSE <./LICENSE.txt>`_.
 📚 How to cite
 ---------------
 
-DOI: `10.5281/zenodo.4908926 <https://doi.org/10.5281/zenodo.4908926>`_
+To cite the software, use the Zenodo DOI:
+`10.5281/zenodo.4908926 <https://doi.org/10.5281/zenodo.4908926>`_
+
+Until the dedicated publications listed above are available, please cite the
+PhD thesis [1] for the theory of ring scores and the bioRxiv preprint [2] for
+ring scores of point clouds.
